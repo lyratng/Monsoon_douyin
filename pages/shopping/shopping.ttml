@@ -1,0 +1,200 @@
+<!--pages/shopping/shopping.ttml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">购物建议</text>
+    <text class="subtitle">基于您的个人风格，智能分析商品是否适合</text>
+  </view>
+
+  <!-- 用户风格信息 -->
+  <view class="user-style-card" tt:if="{{userReport}}">
+    <view class="style-header">
+      <text class="style-title">您的个人风格</text>
+      <text class="style-type">{{userReport.mainColorTone.type}}</text>
+    </view>
+    <view class="style-details">
+      <text class="style-desc">{{userReport.mainColorTone.description}}</text>
+      <view class="style-colors">
+        <text class="color-label">推荐色系：</text>
+        <view class="color-swatches">
+          <view 
+            class="color-swatch" 
+            tt:for="{{userReport.colorPalette.mainColors}}" 
+            tt:key="index"
+            style="background-color: {{item}}"
+          ></view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 上传步骤 -->
+  <view class="upload-section" tt:if="{{currentStep === 'upload'}}">
+    <!-- 上传说明 -->
+    <view class="upload-intro">
+      <text class="intro-title">AI智能分析</text>
+      <text class="intro-desc">上传商品图片，AI将自动识别商品类型、颜色、风格和材质，然后与您的个人风格进行匹配分析</text>
+    </view>
+
+    <!-- 上传按钮 -->
+    <view class="upload-area">
+      <button class="upload-btn" bindtap="uploadItemImage">
+        <text class="upload-icon">📷</text>
+        <text class="upload-text">上传商品图片</text>
+        <text class="upload-hint">AI将自动分析商品特征</text>
+      </button>
+      
+      <!-- 调试按钮 -->
+      <button class="debug-btn" bindtap="testAI" style="margin-top: 20rpx; background: #FF6B6B; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
+        🧪 测试AI调用
+      </button>
+      
+      <button class="debug-btn" bindtap="testNetwork" style="margin-top: 10rpx; background: #4CAF50; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
+        🌐 测试网络连接
+      </button>
+    </view>
+  </view>
+
+  <!-- 分析中步骤 -->
+  <view class="analyzing-section" tt:if="{{currentStep === 'analyzing'}}">
+    <view class="analyzing-content">
+      <view class="loading-spinner"></view>
+      <text class="analyzing-title">正在分析商品...</text>
+      <text class="analyzing-desc">正在对比您的个人风格与商品特征</text>
+      
+      <!-- 商品信息 -->
+      <view class="item-preview" tt:if="{{uploadedItem}}">
+        <image class="item-image" src="{{uploadedItem.imageUrl}}" mode="aspectFill" binderror="onImageError" />
+        <view class="item-info">
+          <text class="item-name">{{uploadedItem.name}}</text>
+          <view class="item-colors">
+            <view 
+              class="item-color" 
+              tt:for="{{uploadedItem.colors}}" 
+              tt:key="index"
+              style="background-color: {{item}}"
+            ></view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 结果步骤 -->
+  <view class="result-section" tt:if="{{currentStep === 'result'}}">
+    <!-- 商品信息 -->
+    <view class="item-card" tt:if="{{uploadedItem}}">
+      <image class="item-image" src="{{uploadedItem.imageUrl}}" mode="aspectFill" binderror="onImageError" />
+      <view class="item-details">
+        <text class="item-name">{{uploadedItem.name}}</text>
+        <text class="item-type">{{uploadedItem.type}}</text>
+      </view>
+    </view>
+
+    <!-- 分析结果 -->
+    <view class="analysis-result" tt:if="{{analysisResult}}">
+      <!-- 总体评分 -->
+      <view class="overall-rating">
+        <view class="rating-header">
+          <text class="rating-title">推荐指数</text>
+          <text class="rating-score">{{analysisResult.overallRating}}</text>
+        </view>
+        <view class="rating-bar">
+          <view class="rating-fill" style="width: {{analysisResult.score * 100}}%"></view>
+        </view>
+        <text class="rating-percent">{{(analysisResult.score * 100).toFixed(0)}}%</text>
+      </view>
+
+      <!-- 推荐建议 -->
+      <view class="recommendation-card">
+        <text class="recommendation-title">💡 推荐建议</text>
+        <text class="recommendation-text">{{analysisResult.recommendation}}</text>
+      </view>
+
+      <!-- 详细分析 -->
+      <view class="detailed-analysis">
+        <text class="analysis-title">📊 详细分析</text>
+        
+        <!-- 颜色匹配 -->
+        <view class="analysis-item">
+          <view class="analysis-header">
+            <text class="analysis-label">颜色匹配</text>
+            <text class="analysis-score">{{(analysisResult.colorMatch * 100).toFixed(0)}}%</text>
+          </view>
+          <view class="analysis-bar">
+            <view class="analysis-fill" style="width: {{analysisResult.colorMatch * 100}}%"></view>
+          </view>
+        </view>
+
+        <!-- 风格匹配 -->
+        <view class="analysis-item">
+          <view class="analysis-header">
+            <text class="analysis-label">风格匹配</text>
+            <text class="analysis-score">{{(analysisResult.styleMatch * 100).toFixed(0)}}%</text>
+          </view>
+          <view class="analysis-bar">
+            <view class="analysis-fill" style="width: {{analysisResult.styleMatch * 100}}%"></view>
+          </view>
+        </view>
+
+        <!-- 材质匹配 -->
+        <view class="analysis-item">
+          <view class="analysis-header">
+            <text class="analysis-label">材质匹配</text>
+            <text class="analysis-score">{{(analysisResult.materialMatch * 100).toFixed(0)}}%</text>
+          </view>
+          <view class="analysis-bar">
+            <view class="analysis-fill" style="width: {{analysisResult.materialMatch * 100}}%"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 具体原因 -->
+      <view class="reasons-card">
+        <text class="reasons-title">🔍 分析原因</text>
+        <view class="reasons-list">
+          <text 
+            class="reason-item" 
+            tt:for="{{analysisResult.reasons}}" 
+            tt:key="index"
+          >{{item}}</text>
+        </view>
+      </view>
+
+      <!-- 改进建议 -->
+      <view class="suggestions-card">
+        <text class="suggestions-title">💡 改进建议</text>
+        <view class="suggestions-list">
+          <text 
+            class="suggestion-item" 
+            tt:for="{{analysisResult.suggestions}}" 
+            tt:key="index"
+          >{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="bottom-actions">
+    <button class="btn btn-secondary" bindtap="goHome">
+      返回首页
+    </button>
+    
+    <button 
+      class="btn btn-primary" 
+      bindtap="reanalyze"
+      tt:if="{{currentStep === 'result'}}"
+    >
+      重新分析
+    </button>
+    
+    <button 
+      class="btn btn-primary" 
+      bindtap="viewHistory"
+      tt:if="{{currentStep === 'result'}}"
+    >
+      查看历史
+    </button>
+  </view>
+</view>

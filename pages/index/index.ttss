@@ -1,0 +1,231 @@
+/* pages/index/index.ttss - 主页样式 */
+
+.container {
+  min-height: 100vh;
+  padding: 40rpx 30rpx;
+  background: var(--primary-bg);
+}
+
+/* 装饰元素 */
+.header-decoration,
+.footer-decoration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40rpx 0;
+}
+
+.decoration-line {
+  height: 2rpx;
+  width: 80rpx;
+  background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+}
+
+.decoration-dot {
+  width: 8rpx;
+  height: 8rpx;
+  background: var(--accent-color);
+  border-radius: 50%;
+  margin: 0 20rpx;
+}
+
+/* 主标题 */
+.main-title {
+  text-align: center;
+  margin: 60rpx 0 40rpx;
+}
+
+.main-title .title {
+  font-size: 56rpx;
+  font-weight: 600;
+  color: var(--primary-text);
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.main-title .subtitle {
+  font-size: 32rpx;
+  color: var(--secondary-text);
+  display: block;
+}
+
+/* 欢迎文案 */
+.welcome-text {
+  text-align: center;
+  margin: 40rpx 0 60rpx;
+  padding: 0 20rpx;
+}
+
+.welcome-text .text {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: var(--secondary-text);
+}
+
+/* 主要功能按钮 */
+.main-actions {
+  margin-bottom: 60rpx;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  padding: 40rpx 30rpx;
+  margin-bottom: 30rpx;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.action-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-icon {
+  font-size: 48rpx;
+  margin-right: 30rpx;
+  width: 60rpx;
+  text-align: center;
+}
+
+.action-content {
+  flex: 1;
+}
+
+.action-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.action-desc {
+  font-size: 26rpx;
+  color: var(--secondary-text);
+  display: block;
+  line-height: 1.4;
+}
+
+.coming-soon {
+  font-size: 22rpx;
+  color: var(--accent-color);
+  background: rgba(212, 165, 116, 0.1);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  display: inline-block;
+  margin-top: 8rpx;
+}
+
+.action-arrow {
+  font-size: 32rpx;
+  color: var(--secondary-text);
+  margin-left: 20rpx;
+}
+
+/* 历史报告入口 */
+.history-section {
+  margin-bottom: 60rpx;
+}
+
+.history-card {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  background: rgba(212, 165, 116, 0.05);
+  border: 1px solid rgba(212, 165, 116, 0.2);
+}
+
+.history-icon {
+  font-size: 40rpx;
+  margin-right: 25rpx;
+  width: 50rpx;
+  text-align: center;
+}
+
+.history-content {
+  flex: 1;
+}
+
+.history-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  display: block;
+  margin-bottom: 6rpx;
+}
+
+.history-desc {
+  font-size: 24rpx;
+  color: var(--secondary-text);
+  display: block;
+}
+
+.history-arrow {
+  font-size: 28rpx;
+  color: var(--accent-color);
+  margin-left: 15rpx;
+}
+
+/* 测试按钮 */
+.test-section {
+  text-align: center;
+  margin-top: 40rpx;
+}
+
+.test-btn {
+  background: transparent;
+  color: var(--primary-text);
+  border: 2rpx solid var(--accent-color);
+  padding: 20rpx 60rpx;
+  font-size: 28rpx;
+  border-radius: var(--radius);
+}
+
+.test-btn:active {
+  background: var(--accent-color);
+  color: white;
+}
+
+/* 分享按钮 */
+.share-section {
+  text-align: center;
+  margin-top: 40rpx;
+}
+
+.share-btn {
+  background: transparent;
+  color: var(--primary-text);
+  border: 2rpx solid var(--border-color);
+  padding: 20rpx 60rpx;
+  font-size: 28rpx;
+  border-radius: var(--radius);
+}
+
+.share-btn:active {
+  background: var(--border-color);
+  color: var(--primary-text);
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .container {
+    padding: 30rpx 20rpx;
+  }
+  
+  .main-title .title {
+    font-size: 48rpx;
+  }
+  
+  .action-card {
+    padding: 30rpx 25rpx;
+  }
+  
+  .action-title {
+    font-size: 32rpx;
+  }
+}

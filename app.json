@@ -1,0 +1,37 @@
+{
+  "usePrivacyCheck": true,
+  "pages": [
+    "pages/index/index",
+    "pages/guide/guide",
+    "pages/questionnaire/questionnaire",
+    "pages/photo-upload/photo-upload",
+    "pages/generating/generating",
+    "pages/report/report",
+    "pages/history/history",
+    "pages/shopping/shopping",
+    "pages/test/test"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#F5F5DC",
+    "navigationBarTitleText": "季风 Monsoon",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F5DC"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "你的位置信息将用于小程序位置接口的效果展示"
+    }
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "downloadFile": 10000
+  },
+  "debug": false,
+  "requiredPrivateInfos": [
+    "chooseImage",
+    "chooseMedia"
+  ],
+  "plugins": {},
+  "preloadRule": {}
+}

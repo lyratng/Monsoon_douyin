@@ -1,0 +1,160 @@
+/* app.ttss - 季风 Monsoon 全局样式 */
+
+page {
+  --primary-bg: #F5F5DC;
+  --primary-text: #333333;
+  --secondary-text: #666666;
+  --accent-color: #D4A574;
+  --border-color: #E0E0E0;
+  --card-bg: #FFFFFF;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --radius: 12px;
+  
+  background-color: var(--primary-bg);
+  color: var(--primary-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  line-height: 1.6;
+}
+
+.container {
+  min-height: 100vh;
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+.btn {
+  display: inline-block;
+  padding: 20rpx 40rpx;
+  border-radius: var(--radius);
+  border: none;
+  font-size: 32rpx;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: var(--accent-color);
+  color: white;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-text);
+  border: 2rpx solid var(--border-color);
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: var(--primary-text);
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  margin-bottom: 16rpx;
+}
+
+.text {
+  font-size: 28rpx;
+  color: var(--secondary-text);
+  line-height: 1.6;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.color-swatch {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  border: 3rpx solid white;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  margin: 10rpx;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid var(--border-color);
+  border-top: 4rpx solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 40rpx;
+  margin: 40rpx;
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.hidden {
+  display: none !important;
+}

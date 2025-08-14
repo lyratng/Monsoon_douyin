@@ -1,0 +1,111 @@
+<!--pages/photo-upload/photo-upload.ttml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">上传照片</text>
+    <text class="subtitle">请上传以下照片，帮助我们进行更精准的分析</text>
+  </view>
+
+  <!-- 进度提示 -->
+  <view class="progress-section">
+    <view class="progress-info">
+      <text class="progress-text">已上传 {{uploadedCount}} 张照片</text>
+      <text class="required-text">必填：3张，可选：2张</text>
+    </view>
+    <view class="progress-bar">
+      <view class="progress-fill" style="width: {{(uploadedCount / 5) * 100}}%"></view>
+    </view>
+  </view>
+
+  <!-- 照片列表 -->
+  <view class="photo-list">
+    <view 
+      class="photo-item card {{item.uploaded ? 'uploaded' : ''}} {{item.required ? 'required' : 'optional'}}"
+      tt:for="{{photoTypes}}"
+      tt:key="id"
+    >
+      <!-- 照片类型信息 -->
+      <view class="photo-info">
+        <view class="photo-icon">
+          <text class="icon-text">{{item.icon}}</text>
+        </view>
+        <view class="photo-details">
+          <view class="photo-header">
+            <text class="photo-name">{{item.name}}</text>
+            <view class="photo-badge {{item.required ? 'required' : 'optional'}}">
+              {{item.required ? '必填' : '可选'}}
+            </view>
+          </view>
+          <text class="photo-description">{{item.description}}</text>
+        </view>
+      </view>
+
+      <!-- 照片内容区域 -->
+      <view class="photo-content">
+        <!-- 未上传状态 -->
+        <view class="upload-area" tt:if="{{!item.uploaded}}" bindtap="selectPhoto" data-type="{{item.id}}">
+          <view class="upload-placeholder">
+            <text class="upload-icon">📷</text>
+            <text class="upload-text">点击上传</text>
+          </view>
+          <view class="upload-loading" tt:if="{{currentUploading === item.id}}">
+            <view class="loading-spinner"></view>
+            <text class="loading-text">上传中...</text>
+          </view>
+        </view>
+
+        <!-- 已上传状态 -->
+        <view class="photo-preview" tt:if="{{item.uploaded}}">
+          <image 
+            class="preview-image" 
+            src="{{item.imageUrl}}" 
+            mode="aspectFill"
+            bindtap="previewPhoto"
+            data-type="{{item.id}}"
+          />
+          <view class="photo-actions">
+            <button class="action-btn preview-btn" bindtap="previewPhoto" data-type="{{item.id}}">
+              预览
+            </button>
+            <button class="action-btn delete-btn" bindtap="deletePhoto" data-type="{{item.id}}">
+              删除
+            </button>
+          </view>
+        </view>
+      </view>
+
+      <!-- 拍摄指南按钮 -->
+      <view class="guide-btn" bindtap="showGuide" data-type="{{item.id}}">
+        <text class="guide-text">📖 拍摄指南</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作区 -->
+  <view class="bottom-actions">
+    <button class="btn btn-secondary back-btn" bindtap="goBack">
+      返回
+    </button>
+    <button class="btn btn-test quick-test-btn" bindtap="quickTest">
+      🧪 快速测试
+    </button>
+    <button 
+      class="btn btn-primary continue-btn {{canContinue() ? '' : 'disabled'}}" 
+      bindtap="startAnalysis"
+    >
+      开始分析 ({{uploadedCount}}/{{requiredCount}})
+    </button>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="tips-section">
+    <text class="tips-title">📝 拍摄提示</text>
+    <view class="tips-content">
+      <text class="tip-item">• 请在自然光线下拍摄，避免强光直射</text>
+      <text class="tip-item">• 不要使用滤镜或美颜功能</text>
+      <text class="tip-item">• 确保照片清晰，避免模糊</text>
+      <text class="tip-item">• 必填照片：手腕、脖子、正脸</text>
+      <text class="tip-item">• 可选照片：半身、全身</text>
+    </view>
+  </view>
+</view> 

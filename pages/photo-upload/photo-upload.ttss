@@ -1,0 +1,358 @@
+/* pages/photo-upload/photo-upload.ttss - 照片上传页样式 */
+
+.container {
+  min-height: 100vh;
+  background: var(--primary-bg);
+  padding: 30rpx;
+}
+
+/* 页面标题 */
+.header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.header .title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: var(--primary-text);
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.header .subtitle {
+  font-size: 28rpx;
+  color: var(--secondary-text);
+  display: block;
+}
+
+/* 进度区域 */
+.progress-section {
+  margin-bottom: 40rpx;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+}
+
+.progress-text {
+  font-size: 28rpx;
+  color: var(--primary-text);
+  font-weight: 500;
+}
+
+.required-text {
+  font-size: 24rpx;
+  color: var(--secondary-text);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8rpx;
+  background: var(--border-color);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-color);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+/* 照片列表 */
+.photo-list {
+  margin-bottom: 40rpx;
+}
+
+.photo-item {
+  margin-bottom: 30rpx;
+  padding: 30rpx;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.photo-item.required {
+  border-left: 4rpx solid #FF6B6B;
+}
+
+.photo-item.optional {
+  border-left: 4rpx solid var(--accent-color);
+}
+
+.photo-item.uploaded {
+  border-color: var(--accent-color);
+  background: rgba(212, 165, 116, 0.02);
+}
+
+/* 照片信息 */
+.photo-info {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 25rpx;
+}
+
+.photo-icon {
+  margin-right: 20rpx;
+  width: 50rpx;
+  text-align: center;
+}
+
+.icon-text {
+  font-size: 40rpx;
+}
+
+.photo-details {
+  flex: 1;
+}
+
+.photo-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.photo-name {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  margin-right: 15rpx;
+}
+
+.photo-badge {
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.photo-badge.required {
+  background: rgba(255, 107, 107, 0.1);
+  color: #FF6B6B;
+}
+
+.photo-badge.optional {
+  background: rgba(212, 165, 116, 0.1);
+  color: var(--accent-color);
+}
+
+.photo-description {
+  font-size: 26rpx;
+  color: var(--secondary-text);
+  line-height: 1.4;
+}
+
+/* 照片内容区域 */
+.photo-content {
+  margin-bottom: 20rpx;
+}
+
+/* 上传区域 */
+.upload-area {
+  height: 200rpx;
+  border: 2rpx dashed var(--border-color);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-area:active {
+  border-color: var(--accent-color);
+  background: rgba(212, 165, 116, 0.05);
+}
+
+.upload-placeholder {
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 48rpx;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.upload-text {
+  font-size: 26rpx;
+  color: var(--secondary-text);
+}
+
+.upload-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid var(--border-color);
+  border-top: 3rpx solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10rpx;
+}
+
+.loading-text {
+  font-size: 24rpx;
+  color: var(--secondary-text);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 照片预览 */
+.photo-preview {
+  position: relative;
+}
+
+.preview-image {
+  width: 100%;
+  height: 200rpx;
+  border-radius: var(--radius);
+  background: #f5f5f5;
+}
+
+.photo-actions {
+  display: flex;
+  gap: 15rpx;
+  margin-top: 15rpx;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 12rpx 20rpx;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  cursor: pointer;
+}
+
+.preview-btn {
+  background: var(--accent-color);
+  color: white;
+}
+
+.delete-btn {
+  background: #FF6B6B;
+  color: white;
+}
+
+/* 拍摄指南按钮 */
+.guide-btn {
+  text-align: center;
+  padding: 15rpx;
+  background: rgba(212, 165, 116, 0.1);
+  border-radius: 8rpx;
+  cursor: pointer;
+}
+
+.guide-text {
+  font-size: 24rpx;
+  color: var(--accent-color);
+}
+
+/* 底部操作区 */
+.bottom-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.back-btn {
+  flex: 1;
+  padding: 25rpx;
+  font-size: 28rpx;
+}
+
+.continue-btn {
+  flex: 2;
+  padding: 25rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+.continue-btn.disabled {
+  background: var(--border-color);
+  color: var(--secondary-text);
+  cursor: not-allowed;
+}
+
+.quick-test-btn {
+  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+  color: white;
+  border: none;
+  font-size: 28rpx;
+  padding: 20rpx 30rpx;
+  border-radius: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+}
+
+.quick-test-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(255, 107, 107, 0.4);
+}
+
+/* 提示信息 */
+.tips-section {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 25rpx;
+  border: 1px solid var(--border-color);
+}
+
+.tips-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  display: block;
+  margin-bottom: 15rpx;
+}
+
+.tips-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.tip-item {
+  font-size: 24rpx;
+  color: var(--secondary-text);
+  line-height: 1.4;
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .container {
+    padding: 20rpx;
+  }
+  
+  .header .title {
+    font-size: 40rpx;
+  }
+  
+  .photo-item {
+    padding: 25rpx;
+  }
+  
+  .photo-name {
+    font-size: 28rpx;
+  }
+  
+  .upload-area {
+    height: 180rpx;
+  }
+} 

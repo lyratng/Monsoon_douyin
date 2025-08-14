@@ -1,0 +1,117 @@
+<!--pages/guide/guide.ttml-->
+<view class="container">
+  <!-- 状态栏和导航 -->
+  <view class="header">
+    <view class="nav-left" bindtap="goHome">
+      <text class="nav-icon">‹</text>
+    </view>
+    <view class="nav-right">
+      <text class="nav-icon">⋯</text>
+      <text class="nav-icon">◎</text>
+    </view>
+  </view>
+
+  <!-- 页面内容 -->
+  <swiper class="guide-swiper" current="{{currentPage}}" bindchange="onSwiperChange">
+    
+    <!-- 页面1：色彩魔法探索 -->
+    <swiper-item class="guide-page">
+      <view class="page-content page-1">
+        <view class="background-overlay"></view>
+        
+        <!-- 主要内容 -->
+        <view class="main-content">
+          <view class="title">{{pages[0].title}}</view>
+          <view class="content-text">{{pages[0].content}}</view>
+          
+          <!-- 三个特征图标 -->
+          <view class="features">
+            <view class="feature-item" tt:for="{{pages[0].features}}" tt:key="title">
+              <view class="feature-icon">{{item.icon}}</view>
+              <view class="feature-title">{{item.title}}</view>
+              <view class="feature-subtitle">{{item.subtitle}}</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+
+    <!-- 页面2：季节色彩展示 -->
+    <swiper-item class="guide-page">
+      <view class="page-content page-2">
+        <view class="background-overlay"></view>
+        
+        <!-- 主要内容 -->
+        <view class="main-content">
+          <view class="content-text">{{pages[1].content}}</view>
+          
+          <!-- 季节色彩卡片 -->
+          <scroll-view class="seasons-scroll" scroll-x="true">
+            <view class="seasons-container">
+              <view class="season-card" tt:for="{{pages[1].seasons}}" tt:key="name">
+                <view class="season-illustration">
+                  <view class="season-character">{{item.name[0]}}</view>
+                </view>
+                <view class="season-name">{{item.name}}</view>
+                <view class="season-colors">
+                  <view 
+                    class="color-swatch" 
+                    tt:for="{{item.colors}}" 
+                    tt:for-item="color" 
+                    tt:key="*this"
+                    style="background-color: {{color}}"
+                  ></view>
+                </view>
+              </view>
+            </view>
+          </scroll-view>
+        </view>
+      </view>
+    </swiper-item>
+
+    <!-- 页面3：季风同行 -->
+    <swiper-item class="guide-page">
+      <view class="page-content page-3">
+        <view class="background-overlay"></view>
+        
+        <!-- 主要内容 -->
+        <view class="main-content">
+          <view class="content-text">{{pages[2].content}}</view>
+          
+          <!-- 登录按钮 -->
+          <view class="login-section">
+            <button class="login-btn" bindtap="goToQuestionnaire">
+              <text class="wechat-icon">💬</text>
+              <text class="login-text">开始探索</text>
+            </button>
+            
+            <view class="agreement">
+              <text class="agreement-icon">○</text>
+              <text class="agreement-text">我已阅读并同意《用户协议》和《隐私政策》</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+
+  </swiper>
+
+  <!-- 底部指示器 -->
+  <view class="indicator">
+    <view 
+      class="indicator-dot {{currentPage === index ? 'active' : ''}}" 
+      tt:for="{{totalPages}}" 
+      tt:key="*this"
+      data-index="{{index}}"
+      bindtap="goToPage"
+    ></view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="actions">
+    <button class="skip-btn" bindtap="skipGuide">跳过</button>
+    <button class="next-btn" bindtap="nextPage">
+      {{currentPage === totalPages - 1 ? '开始' : '下一步'}}
+    </button>
+  </view>
+</view> 

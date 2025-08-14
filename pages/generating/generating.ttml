@@ -1,0 +1,65 @@
+<!--pages/generating/generating.ttml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">正在生成您的风格报告</text>
+    <text class="subtitle">请稍候，AI正在为您分析...</text>
+  </view>
+
+  <!-- 进度显示 -->
+  <view class="progress-section">
+    <view class="progress-circle">
+      <view class="progress-ring">
+        <view class="progress-fill" style="transform: rotate({{progress * 3.6}}deg)"></view>
+      </view>
+      <view class="progress-text">{{progress}}%</view>
+    </view>
+  </view>
+
+  <!-- 步骤列表 -->
+  <view class="steps-section">
+    <view 
+      class="step-item {{index <= currentStep ? 'active' : ''}} {{index < currentStep ? 'completed' : ''}}"
+      tt:for="{{steps}}"
+      tt:key="index"
+    >
+      <view class="step-icon">
+        <text class="icon-text">{{item.icon}}</text>
+        <view class="step-status">
+          <text tt:if="{{index < currentStep}}" class="status-icon">✓</text>
+          <text tt:elif="{{index === currentStep}}" class="status-icon loading">⟳</text>
+          <text tt:else class="status-icon">○</text>
+        </view>
+      </view>
+      <view class="step-content">
+        <text class="step-name">{{item.name}}</text>
+        <text class="step-description">{{item.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错误提示 -->
+  <view class="error-section" tt:if="{{showError}}">
+    <view class="error-card card">
+      <view class="error-icon">⚠️</view>
+      <text class="error-title">生成失败</text>
+      <text class="error-message">{{errorMessage}}</text>
+      <view class="error-actions">
+        <button class="btn btn-secondary" bindtap="goBack">返回</button>
+        <button class="btn btn-primary" bindtap="retry">重试</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 调试按钮 -->
+  <view class="debug-section">
+    <button class="btn btn-secondary debug-btn" bindtap="debugData">
+      🐛 调试数据
+    </button>
+  </view>
+
+  <!-- 底部装饰 -->
+  <view class="footer-decoration">
+    <text class="decoration-text">✨ 季风 Monsoon ✨</text>
+  </view>
+</view> 

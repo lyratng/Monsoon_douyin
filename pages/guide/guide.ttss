@@ -1,0 +1,378 @@
+/* pages/guide/guide.ttss - 引导页样式 */
+
+.container {
+  height: 100vh;
+  background: #FDF8E7;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 头部导航 */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 60rpx 40rpx 20rpx;
+}
+
+.nav-left, .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.nav-icon {
+  font-size: 40rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 引导页轮播 */
+.guide-swiper {
+  height: 100vh;
+  width: 100%;
+}
+
+.guide-page {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+}
+
+.page-content {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 120rpx 40rpx 200rpx;
+  box-sizing: border-box;
+}
+
+/* 背景叠加层 - 页面1：印象派风格 */
+.page-1 .background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 30% 20%, rgba(255, 215, 0, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(135, 206, 235, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 20% 60%, rgba(144, 238, 144, 0.3) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(253, 248, 231, 0.9), rgba(253, 248, 231, 0.7));
+  z-index: 1;
+}
+
+/* 背景叠加层 - 页面2：季节色彩风格 */
+.page-2 .background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 25% 25%, rgba(255, 182, 193, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(230, 230, 250, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(176, 196, 222, 0.3) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(253, 248, 231, 0.8), rgba(253, 248, 231, 0.6));
+  z-index: 1;
+}
+
+/* 背景叠加层 - 页面3：温馨风格 */
+.page-3 .background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, rgba(144, 238, 144, 0.2) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(253, 248, 231, 0.85), rgba(253, 248, 231, 0.65));
+  z-index: 1;
+}
+
+.main-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 600rpx;
+}
+
+/* 标题样式 */
+.title {
+  font-size: 48rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 40rpx;
+  line-height: 1.4;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei";
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 内容文字 */
+.content-text {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 60rpx;
+  font-family: "PingFang SC", "Helvetica Neue", "Arial";
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 页面1：特征图标 */
+.features {
+  display: flex;
+  justify-content: space-around;
+  gap: 40rpx;
+  margin-top: 60rpx;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 30rpx 20rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+}
+
+.feature-icon {
+  font-size: 60rpx;
+  margin-bottom: 20rpx;
+}
+
+.feature-title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.feature-subtitle {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 页面2：季节色彩卡片 */
+.seasons-scroll {
+  width: 100%;
+  margin-top: 40rpx;
+}
+
+.seasons-container {
+  display: flex;
+  gap: 30rpx;
+  padding: 20rpx 0;
+}
+
+.season-card {
+  min-width: 200rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20rpx;
+  padding: 30rpx 20rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+}
+
+.season-illustration {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+}
+
+.season-character {
+  font-size: 36rpx;
+  color: white;
+  font-weight: bold;
+}
+
+.season-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.season-colors {
+  display: flex;
+  gap: 8rpx;
+}
+
+.color-swatch {
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 6rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 页面3：登录区域 */
+.login-section {
+  margin-top: 60rpx;
+  width: 100%;
+  max-width: 500rpx;
+}
+
+.login-btn {
+  width: 100%;
+  height: 100rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+}
+
+.wechat-icon {
+  font-size: 32rpx;
+}
+
+.login-text {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.agreement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.agreement-icon {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 底部指示器 */
+.indicator {
+  position: absolute;
+  bottom: 180rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20rpx;
+  z-index: 10;
+}
+
+.indicator-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+}
+
+.indicator-dot.active {
+  background: #333;
+  transform: scale(1.2);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 操作按钮 */
+.actions {
+  position: absolute;
+  bottom: 60rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40rpx;
+  z-index: 10;
+}
+
+.skip-btn {
+  background: transparent;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  color: #666;
+  font-size: 28rpx;
+  padding: 20rpx 40rpx;
+  border-radius: 30rpx;
+  backdrop-filter: blur(10rpx);
+  transition: all 0.3s ease;
+}
+
+.skip-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(0.98);
+}
+
+.next-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  color: #333;
+  font-size: 28rpx;
+  font-weight: 500;
+  padding: 20rpx 40rpx;
+  border-radius: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.next-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .features {
+    gap: 20rpx;
+  }
+  
+  .season-card {
+    min-width: 160rpx;
+    padding: 20rpx 15rpx;
+  }
+  
+  .color-swatch {
+    width: 25rpx;
+    height: 25rpx;
+  }
+} 

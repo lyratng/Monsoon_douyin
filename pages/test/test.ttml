@@ -1,0 +1,105 @@
+<!--pages/test/test.ttml-->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">API 功能测试</text>
+    <text class="subtitle">测试豆包API的各项功能</text>
+  </view>
+
+  <!-- 测试按钮区域 -->
+  <view class="test-buttons">
+    <view class="test-section">
+      <text class="section-title">基础功能测试</text>
+      
+      <button class="btn btn-primary test-btn" bindtap="testTextAPI">
+        🧠 测试文本生成API
+      </button>
+      
+      <button class="btn btn-primary test-btn" bindtap="testVisionAPI">
+        👁️ 测试图像分析API
+      </button>
+      
+      <button class="btn btn-primary test-btn" bindtap="testStyleAnalysisAPI">
+        🎨 测试风格分析API
+      </button>
+      
+      <button class="btn btn-secondary test-btn" bindtap="testSimpleAPI">
+        🌐 测试简单API
+      </button>
+      
+      <button class="btn btn-secondary test-btn" bindtap="testDoubaoSimple">
+        🤖 测试豆包API简化版
+      </button>
+    </view>
+
+    <view class="test-section">
+      <text class="section-title">操作</text>
+      
+      <button class="btn btn-secondary test-btn" bindtap="clearResults">
+        🗑️ 清除测试结果
+      </button>
+      
+      <button class="btn btn-secondary test-btn" bindtap="goBack">
+        ← 返回主页
+      </button>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading-section" tt:if="{{isLoading}}">
+    <view class="loading">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">{{currentTest}}</text>
+    </view>
+  </view>
+
+  <!-- 测试结果区域 -->
+  <view class="results-section" tt:if="{{testResults.length > 0}}">
+    <text class="section-title">测试结果</text>
+    
+    <view class="result-list">
+      <view class="result-item card" tt:for="{{testResults}}" tt:key="index">
+        <!-- 测试名称和状态 -->
+        <view class="result-header">
+          <text class="result-name">{{item.name}}</text>
+          <view class="result-status {{item.success ? 'success' : 'error'}}">
+            {{item.success ? '✅ 成功' : '❌ 失败'}}
+          </view>
+        </view>
+        
+        <!-- 时间戳 -->
+        <text class="result-time">{{item.timestamp}}</text>
+        
+        <!-- 成功结果 -->
+        <view class="result-content" tt:if="{{item.success}}">
+          <text class="result-label">提示词:</text>
+          <text class="result-text">{{item.prompt}}</text>
+          
+          <text class="result-label">响应:</text>
+          <view class="result-response">
+            <text class="result-text">{{item.response}}</text>
+            <button class="copy-btn" bindtap="copyResult" data-index="{{index}}">
+              复制
+            </button>
+          </view>
+        </view>
+        
+        <!-- 错误结果 -->
+        <view class="result-content" tt:if="{{!item.success}}">
+          <text class="result-label">错误信息:</text>
+          <text class="result-error">{{item.error}}</text>
+          
+          <view tt:if="{{item.rawResponse}}">
+            <text class="result-label">原始响应:</text>
+            <text class="result-text">{{item.rawResponse}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" tt:if="{{testResults.length === 0 && !isLoading}}">
+    <text class="empty-text">点击上方按钮开始测试API功能</text>
+  </view>
+</view> 

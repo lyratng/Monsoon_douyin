@@ -1,0 +1,282 @@
+/* pages/questionnaire/questionnaire.ttss - 问卷页样式 */
+
+.container {
+  min-height: 100vh;
+  background: var(--primary-bg);
+  padding: 0;
+}
+
+/* 加载状态 */
+.loading-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid var(--border-color);
+  border-top: 4rpx solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 30rpx;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: var(--secondary-text);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 问卷容器 */
+.questionnaire-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 进度条区域 */
+.progress-section {
+  padding: 30rpx;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8rpx;
+  background: var(--border-color);
+  border-radius: 4rpx;
+  overflow: hidden;
+  margin-bottom: 15rpx;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-color);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 24rpx;
+  color: var(--secondary-text);
+  text-align: center;
+  display: block;
+}
+
+/* 问题区域 */
+.question-section {
+  flex: 1;
+  padding: 30rpx;
+}
+
+.question-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 40rpx 30rpx;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+}
+
+/* 问题标题 */
+.question-title {
+  margin-bottom: 30rpx;
+}
+
+.title-text {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: var(--primary-text);
+  line-height: 1.4;
+  display: block;
+}
+
+/* 问题提示 */
+.question-hint {
+  margin-bottom: 30rpx;
+  padding: 15rpx 20rpx;
+  background: rgba(212, 165, 116, 0.1);
+  border-radius: 8rpx;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: var(--accent-color);
+}
+
+/* 选项区域 */
+.options-section {
+  margin-top: 30rpx;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  padding: 25rpx 20rpx;
+  margin-bottom: 20rpx;
+  background: white;
+  border: 2rpx solid var(--border-color);
+  border-radius: var(--radius);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.option-item:active {
+  transform: scale(0.98);
+}
+
+.option-item.selected {
+  border-color: var(--accent-color);
+  background: rgba(212, 165, 116, 0.05);
+}
+
+/* 选项图标 */
+.option-icon {
+  margin-right: 20rpx;
+  width: 40rpx;
+  text-align: center;
+}
+
+.icon-text {
+  font-size: 32rpx;
+}
+
+/* 颜色选项 */
+.color-option {
+  margin-right: 20rpx;
+}
+
+.color-swatch {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  border: 2rpx solid white;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 选项内容 */
+.option-content {
+  flex: 1;
+}
+
+.option-text {
+  font-size: 28rpx;
+  color: var(--primary-text);
+  line-height: 1.4;
+}
+
+/* 选择状态 */
+.option-status {
+  margin-left: 20rpx;
+}
+
+.status-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: transparent;
+  transition: all 0.3s ease;
+}
+
+.status-icon.selected {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: white;
+}
+
+/* 底部操作区 */
+.bottom-actions {
+  padding: 30rpx;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.prev-btn {
+  flex: 1;
+  padding: 25rpx;
+  font-size: 28rpx;
+}
+
+.skip-btn {
+  flex: 1;
+  padding: 25rpx;
+  font-size: 28rpx;
+}
+
+.next-btn {
+  flex: 2;
+  padding: 25rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+}
+
+/* 错误状态 */
+.error-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx;
+}
+
+.error-text {
+  font-size: 28rpx;
+  color: var(--secondary-text);
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.retry-btn {
+  padding: 25rpx 50rpx;
+  font-size: 28rpx;
+}
+
+/* 响应式调整 */
+@media (max-width: 750rpx) {
+  .question-section {
+    padding: 20rpx;
+  }
+  
+  .question-card {
+    padding: 30rpx 25rpx;
+  }
+  
+  .title-text {
+    font-size: 32rpx;
+  }
+  
+  .option-item {
+    padding: 20rpx 15rpx;
+  }
+  
+  .option-text {
+    font-size: 26rpx;
+  }
+  
+  .bottom-actions {
+    padding: 20rpx;
+  }
+} 

@@ -1,0 +1,54 @@
+<view class="container">
+  <view class="header">
+    <text class="title">历史报告</text>
+    <text class="subtitle">查看您的个人风格分析记录</text>
+  </view>
+
+  <view class="content">
+    <!-- 加载状态 -->
+    <view class="loading" tt:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" tt:if="{{!loading && historyReports.length === 0}}">
+      <view class="empty-icon">📋</view>
+      <text class="empty-title">暂无历史报告</text>
+      <text class="empty-desc">完成一次风格分析后，报告将在这里显示</text>
+      <button class="btn-primary" bindtap="goHome">开始分析</button>
+    </view>
+
+    <!-- 报告列表 -->
+    <view class="report-list" tt:if="{{!loading && historyReports.length > 0}}">
+      <view class="list-header">
+        <text class="count">共 {{historyReports.length}} 份报告</text>
+        <button class="btn-clear" bindtap="clearAllReports">清空</button>
+      </view>
+      
+      <view class="report-item" tt:for="{{historyReports}}" tt:key="index">
+        <view class="report-info" bindtap="viewReport" data-index="{{index}}">
+          <view class="report-main">
+            <view class="report-title">
+              <text class="date">{{item.date}}</text>
+              <text class="time">{{item.time}}</text>
+            </view>
+            <view class="report-summary">
+              <text class="color-tone">{{item.mainColorTone.type}}</text>
+              <text class="style">{{item.suitableStyle.primaryStyle}}</text>
+            </view>
+          </view>
+          <view class="report-actions">
+            <button class="btn-view" bindtap="viewReport" data-index="{{index}}">查看</button>
+            <button class="btn-delete" bindtap="deleteReport" data-index="{{index}}">删除</button>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部导航 -->
+  <view class="footer">
+    <button class="btn-home" bindtap="goHome">返回首页</button>
+  </view>
+</view>

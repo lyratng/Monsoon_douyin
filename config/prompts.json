@@ -1,0 +1,53 @@
+{
+  "systemRole": "你是'季风 Monsoon'的个人风格分析师，一款基于大模型能力的抖音小程序。你的口吻要轻柔、亲切、陪伴式，像一位温柔的朋友在引导用户探索自己的个人风格。你擅长通过心理学问卷和照片分析，为用户提供个性化的色彩分析和风格建议。",
+  
+  "styleAnalysis": {
+    "mainPrompt": "基于用户的问卷回答和上传的照片，请进行全面的个人风格分析。\n\n问卷信息：{questionnaire}\n\n照片信息：{images}\n\n请严格按照以下JSON格式输出分析结果，不要包含任何其他文本：",
+    
+    "imageAnalysisPrompt": "请分析以下照片中的肤色特征：\n1. 肤色色调（暖色/冷色/中性）\n2. 肤色明度（明亮/中等/暗沉）\n3. 肤色饱和度（高/中/低）\n4. 静脉颜色（绿色/蓝色/混合）\n5. 面部特征（自然/温暖/冷峻等）\n\n照片：{imageUrl}",
+    
+    "questionnaireAnalysisPrompt": "请分析以下问卷回答，计算各维度得分：\n\n{questionnaireAnswers}\n\n维度权重：\n- 风格偏好：30%\n- 场合适应性：20%\n- 功能导向：15%\n- 色彩偏好：15%\n- 其他维度：各10%\n\n请输出各维度的量化得分。"
+  },
+  
+  "colorAnalysis": {
+    "seasonalColorPrompt": "基于肤色分析结果，确定用户的季节色彩类型：\n\n肤色特征：{skinFeatures}\n\n请判断用户属于：\n- 春季型（明亮温暖）\n- 夏季型（柔和冷色）\n- 秋季型（温暖深沉）\n- 冬季型（鲜明冷色）\n\n并推荐相应的主色调和色板。",
+    
+    "colorPalettePrompt": "为用户推荐个性化的色板：\n\n季节类型：{seasonType}\n主色调：{mainTone}\n\n请推荐：\n1. 4个主色（包含名称、HEX值、使用建议）\n2. 6个扩展色（包含名称、HEX值）\n3. 避免的颜色和原因"
+  },
+  
+  "styleRecommendation": {
+    "stylePrompt": "基于用户特征推荐个人风格：\n\n用户画像：{userProfile}\n色彩分析：{colorAnalysis}\n\n请推荐：\n1. 主风格类型\n2. 次要风格类型\n3. 风格关键词（4个）\n4. 典型场景（4个）\n5. 推荐单品（上装、下装、配饰、鞋履各3个）",
+    
+    "materialPrompt": "推荐适合的材质：\n\n用户风格：{styleType}\n色彩类型：{colorType}\n\n请推荐：\n1. 主要材质（3个）\n2. 次要材质（3个）\n3. 避免的材质（2个）\n4. 每种材质的详细说明"
+  },
+  
+  "avoidanceItems": {
+    "prompt": "基于用户特征，列出需要避免的穿搭元素：\n\n用户特征：{userFeatures}\n\n请列出：\n1. 冷色调（具体颜色+原因）\n2. 高饱和度（具体颜色+原因）\n3. 高对比度（具体搭配+原因）"
+  },
+  
+  "popupContent": {
+    "colorPalettePopup": "为推荐色板弹窗生成详细内容：\n\n色板：{colorPalette}\n\n请生成：\n1. 弹窗标题和描述\n2. 10个颜色的详细列表（名称、HEX、使用场景）\n3. 使用建议",
+    
+    "stylePopup": "为适合风格弹窗生成详细内容：\n\n风格分析：{styleAnalysis}\n\n请生成：\n1. 弹窗标题和描述\n2. 风格分析文本\n3. 风格元素（3个）\n4. 具体搭配建议",
+    
+    "materialPopup": "为推荐材质弹窗生成详细内容：\n\n材质推荐：{materialRecommendation}\n\n请生成：\n1. 弹窗标题和描述\n2. 材质分析文本\n3. 详细推荐列表\n4. 护理建议"
+  },
+  
+  "refinePrompt": "用户希望进一步调整风格建议：\n\n原始分析：{originalAnalysis}\n\n用户反馈：{userFeedback}\n\n请基于用户反馈调整分析结果，保持JSON格式不变，只更新相关字段。",
+  
+  "constraints": {
+    "outputFormat": "严格输出JSON格式，不要包含任何其他文本或说明",
+    "language": "所有输出必须使用中文",
+    "temperature": 0.5,
+    "maxTokens": 2000,
+    "medicalDisclaimer": "不得输出任何医疗诊断或皮肤健康建议",
+    "imageLimitation": "尊重照片拍摄条件限制，避免过度解读"
+  },
+  
+  "models": {
+    "vision": "doubao-1-5-thinking-vision-pro-250428",
+    "text": "doubao-1-5-pro-32k-250115",
+    "apiEndpoint": "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
+    "visionEndpoint": "https://ark.cn-beijing.volces.com/api/v3/chat/completions"
+  }
+} 

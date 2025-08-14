@@ -1,0 +1,192 @@
+<!--pages/report/report.ttml-->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading-container" tt:if="{{isLoading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载报告中...</text>
+  </view>
+
+  <!-- 报告内容 -->
+  <view class="report-container" tt:if="{{!isLoading && report}}">
+    <!-- 页面标题 -->
+    <view class="header">
+      <text class="title">您的个人风格报告</text>
+      <text class="subtitle">{{report.mainColorTone.type}}</text>
+    </view>
+
+    <!-- 主色调卡片 -->
+    <view class="main-tone-card card">
+      <view class="tone-header">
+        <text class="tone-title">主色调</text>
+        <text class="tone-type">{{report.mainColorTone.type}}</text>
+      </view>
+      <text class="tone-description">{{report.mainColorTone.description}}</text>
+    </view>
+
+    <!-- 三个主要模块 -->
+    <view class="modules-section">
+      <!-- 推荐色板 -->
+      <view class="module-card card" bindtap="showColorPopup">
+        <view class="module-icon">🎨</view>
+        <view class="module-content">
+          <text class="module-title">推荐色板</text>
+          <text class="module-subtitle">为您精选的10个最适合的颜色</text>
+        </view>
+        <view class="module-arrow">></view>
+      </view>
+
+      <!-- 适合风格 -->
+      <view class="module-card card" bindtap="showStylePopup">
+        <view class="module-icon">👗</view>
+        <view class="module-content">
+          <text class="module-title">适合风格</text>
+          <text class="module-subtitle">{{report.suitableStyle.primaryStyle}} + {{report.suitableStyle.secondaryStyle}}</text>
+        </view>
+        <view class="module-arrow">></view>
+      </view>
+
+      <!-- 推荐材质 -->
+      <view class="module-card card" bindtap="showMaterialPopup">
+        <view class="module-icon">🧵</view>
+        <view class="module-content">
+          <text class="module-title">推荐材质</text>
+          <text class="module-subtitle">{{report.recommendedMaterials.primary.join('、')}}</text>
+        </view>
+        <view class="module-arrow">></view>
+      </view>
+    </view>
+
+    <!-- 风格关键词 -->
+    <view class="keywords-section">
+      <text class="keywords-title">风格关键词</text>
+      <view class="keywords-list">
+        <text 
+          class="keyword-tag" 
+          tt:for="{{report.suitableStyle.styleKeywords}}" 
+          tt:key="index"
+        >
+          {{item}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 适用场景 -->
+    <view class="scenarios-section">
+      <text class="scenarios-title">适用场景</text>
+      <view class="scenarios-list">
+        <text 
+          class="scenario-tag" 
+          tt:for="{{report.suitableStyle.typicalScenarios}}" 
+          tt:key="index"
+        >
+          {{item}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 底部操作区 -->
+    <view class="bottom-actions">
+      <button class="btn btn-secondary" bindtap="viewHistory">历史报告</button>
+      <button class="btn btn-primary" bindtap="shareReport">分享报告</button>
+      <button class="btn btn-outline" bindtap="goHome">返回首页</button>
+    </view>
+  </view>
+
+  <!-- 色板弹窗 -->
+  <view class="popup-overlay" tt:if="{{showColorPopup}}" bindtap="closePopup">
+    <view class="popup-content" catchtap="stopPropagation">
+      <view class="popup-header">
+        <text class="popup-title">{{report.popups.colorPalettePopup.title}}</text>
+        <view class="popup-close" bindtap="closePopup">×</view>
+      </view>
+      <text class="popup-description">{{report.popups.colorPalettePopup.description}}</text>
+      
+      <view class="colors-grid">
+        <view 
+          class="color-item" 
+          tt:for="{{report.popups.colorPalettePopup.colors}}" 
+          tt:key="name"
+        >
+          <view class="color-swatch" style="background-color: {{item.hex}}"></view>
+          <text class="color-name">{{item.name}}</text>
+        </view>
+      </view>
+      
+      <text class="popup-tips">{{report.popups.colorPalettePopup.usageTips}}</text>
+    </view>
+  </view>
+
+  <!-- 风格弹窗 -->
+  <view class="popup-overlay" tt:if="{{showStylePopup}}" bindtap="closePopup">
+    <view class="popup-content" catchtap="stopPropagation">
+      <view class="popup-header">
+        <text class="popup-title">{{report.popups.stylePopup.title}}</text>
+        <view class="popup-close" bindtap="closePopup">×</view>
+      </view>
+      <text class="popup-description">{{report.popups.stylePopup.description}}</text>
+      
+      <view class="style-analysis">
+        <text class="analysis-text">{{report.popups.stylePopup.styleAnalysis}}</text>
+      </view>
+      
+      <view class="style-elements">
+        <text class="elements-title">风格元素</text>
+        <view class="elements-list">
+          <text 
+            class="element-tag" 
+            tt:for="{{report.popups.stylePopup.styleElements}}" 
+            tt:key="index"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+      
+      <view class="outfit-suggestions">
+        <text class="suggestions-title">搭配建议</text>
+        <view class="suggestions-list">
+          <text 
+            class="suggestion-item" 
+            tt:for="{{report.popups.stylePopup.outfitSuggestions}}" 
+            tt:key="index"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 材质弹窗 -->
+  <view class="popup-overlay" tt:if="{{showMaterialPopup}}" bindtap="closePopup">
+    <view class="popup-content" catchtap="stopPropagation">
+      <view class="popup-header">
+        <text class="popup-title">{{report.popups.materialPopup.title}}</text>
+        <view class="popup-close" bindtap="closePopup">×</view>
+      </view>
+      <text class="popup-description">{{report.popups.materialPopup.description}}</text>
+      
+      <view class="material-analysis">
+        <text class="analysis-text">{{report.popups.materialPopup.materialAnalysis}}</text>
+      </view>
+      
+      <view class="material-recommendations">
+        <text class="recommendations-title">推荐材质</text>
+        <view class="recommendations-list">
+          <text 
+            class="recommendation-item" 
+            tt:for="{{report.popups.materialPopup.recommendations}}" 
+            tt:key="index"
+          >
+            {{item}}
+          </text>
+        </view>
+      </view>
+      
+      <view class="care-tips">
+        <text class="tips-title">护理建议</text>
+        <text class="tips-text">{{report.popups.materialPopup.careTips}}</text>
+      </view>
+    </view>
+  </view>
+</view> 

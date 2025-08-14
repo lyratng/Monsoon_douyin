@@ -1,0 +1,15 @@
+{
+    "setting": {
+        "urlCheck": false,
+        "es6": true,
+        "postcss": true,
+        "minified": true,
+        "newFeature": true,
+        "autoCompile": true,
+        "compileHotReLoad": true,
+        "nativeCompile": true
+    },
+    "appid": "tt2e9a5827b19540ad01",
+    "projectname": "季风",
+    "douyinProjectType": "native"
+}

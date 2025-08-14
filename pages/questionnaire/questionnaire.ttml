@@ -1,0 +1,107 @@
+<!--pages/questionnaire/questionnaire.ttml-->
+<view class="container">
+  <!-- 加载状态 -->
+  <view class="loading-container" tt:if="{{isLoading}}">
+    <view class="loading">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载问卷中...</text>
+    </view>
+  </view>
+
+  <!-- 问卷内容 -->
+  <view class="questionnaire-container" tt:if="{{!isLoading && questionnaire}}">
+    <!-- 顶部进度条 -->
+    <view class="progress-section">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progress}}%"></view>
+      </view>
+      <text class="progress-text">{{currentQuestionIndex + 1}} / {{questionnaire.questions.length}}</text>
+    </view>
+
+    <!-- 当前问题 -->
+    <view class="question-section">
+      <view class="question-card card">
+        <!-- 问题标题 -->
+        <view class="question-title">
+          <text class="title-text">{{questionnaire.questions[currentQuestionIndex].title}}</text>
+        </view>
+
+        <!-- 问题类型提示 -->
+        <view class="question-hint" tt:if="{{questionnaire.questions[currentQuestionIndex].type === 'multi_select'}}">
+          <text class="hint-text">可多选（最多{{questionnaire.questions[currentQuestionIndex].maxSelect}}项）</text>
+        </view>
+
+        <!-- 答案选项 -->
+        <view class="options-section">
+          <view 
+            class="option-item {{item.isSelected ? 'selected' : ''}}"
+            tt:for="{{currentOptions}}"
+            tt:key="value"
+            bindtap="selectAnswer"
+            data-value="{{item.value}}"
+            data-type="{{questionnaire.questions[currentQuestionIndex].type}}"
+          >
+            <!-- 选项图标 -->
+            <view class="option-icon" tt:if="{{item.icon}}">
+              <text class="icon-text">{{item.icon}}</text>
+            </view>
+
+            <!-- 颜色选项 -->
+            <view class="color-option" tt:if="{{item.hex}}">
+              <view class="color-swatch" style="background-color: {{item.hex}}"></view>
+            </view>
+
+            <!-- 选项文本 -->
+            <view class="option-content">
+              <text class="option-text">{{item.label}}</text>
+            </view>
+
+            <!-- 选择状态 -->
+            <view class="option-status">
+              <view class="status-icon {{item.isSelected ? 'selected' : ''}}">
+                {{item.isSelected ? '✓' : ''}}
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作区 -->
+    <view class="bottom-actions">
+      <!-- 上一题按钮 -->
+      <button 
+        class="btn btn-secondary prev-btn" 
+        bindtap="prevQuestion"
+        tt:if="{{currentQuestionIndex > 0}}"
+      >
+        上一题
+      </button>
+
+      <!-- 跳过按钮 -->
+      <button 
+        class="btn btn-secondary skip-btn" 
+        bindtap="skipQuestion"
+        tt:if="{{currentQuestionIndex < questionnaire.questions.length - 1}}"
+      >
+        跳过
+      </button>
+
+      <!-- 下一题/提交按钮 -->
+      <button 
+        class="btn btn-primary next-btn" 
+        bindtap="nextQuestion"
+      >
+        {{currentQuestionIndex === questionnaire.questions.length - 1 ? '提交问卷' : '下一题'}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-container" tt:if="{{!isLoading && !questionnaire}}">
+    <text class="error-text">加载问卷失败，请重试</text>
+    <button class="btn btn-primary retry-btn" bindtap="loadQuestionnaire">
+      重新加载
+    </button>
+  </view>
+</view> 
