@@ -44,7 +44,8 @@
         <text class="upload-hint">AI将自动分析商品特征</text>
       </button>
       
-      <!-- 调试按钮 -->
+      <!-- 调试按钮（已注释，如需测试可取消注释） -->
+      <!-- 
       <button class="debug-btn" bindtap="testAI" style="margin-top: 20rpx; background: #FF6B6B; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
         🧪 测试AI调用
       </button>
@@ -52,6 +53,7 @@
       <button class="debug-btn" bindtap="testNetwork" style="margin-top: 10rpx; background: #4CAF50; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
         🌐 测试网络连接
       </button>
+      -->
     </view>
   </view>
 
@@ -100,9 +102,9 @@
           <text class="rating-score">{{analysisResult.overallRating}}</text>
         </view>
         <view class="rating-bar">
-          <view class="rating-fill" style="width: {{analysisResult.score * 100}}%"></view>
+          <view class="rating-fill" style="width: {{analysisResult.scorePercent}}%"></view>
         </view>
-        <text class="rating-percent">{{(analysisResult.score * 100).toFixed(0)}}%</text>
+        <text class="rating-percent">{{analysisResult.scorePercent}}%</text>
       </view>
 
       <!-- 推荐建议 -->
@@ -119,10 +121,10 @@
         <view class="analysis-item">
           <view class="analysis-header">
             <text class="analysis-label">颜色匹配</text>
-            <text class="analysis-score">{{(analysisResult.colorMatch * 100).toFixed(0)}}%</text>
+            <text class="analysis-score">{{analysisResult.colorMatchPercent}}%</text>
           </view>
           <view class="analysis-bar">
-            <view class="analysis-fill" style="width: {{analysisResult.colorMatch * 100}}%"></view>
+            <view class="analysis-fill" style="width: {{analysisResult.colorMatchPercent}}%"></view>
           </view>
         </view>
 
@@ -130,10 +132,10 @@
         <view class="analysis-item">
           <view class="analysis-header">
             <text class="analysis-label">风格匹配</text>
-            <text class="analysis-score">{{(analysisResult.styleMatch * 100).toFixed(0)}}%</text>
+            <text class="analysis-score">{{analysisResult.styleMatchPercent}}%</text>
           </view>
           <view class="analysis-bar">
-            <view class="analysis-fill" style="width: {{analysisResult.styleMatch * 100}}%"></view>
+            <view class="analysis-fill" style="width: {{analysisResult.styleMatchPercent}}%"></view>
           </view>
         </view>
 
@@ -141,10 +143,10 @@
         <view class="analysis-item">
           <view class="analysis-header">
             <text class="analysis-label">材质匹配</text>
-            <text class="analysis-score">{{(analysisResult.materialMatch * 100).toFixed(0)}}%</text>
+            <text class="analysis-score">{{analysisResult.materialMatchPercent}}%</text>
           </view>
           <view class="analysis-bar">
-            <view class="analysis-fill" style="width: {{analysisResult.materialMatch * 100}}%"></view>
+            <view class="analysis-fill" style="width: {{analysisResult.materialMatchPercent}}%"></view>
           </view>
         </view>
       </view>

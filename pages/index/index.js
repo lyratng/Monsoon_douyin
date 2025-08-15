@@ -6,6 +6,7 @@ Page({
   data: {
     isFirstLaunch: true,
     hasHistory: false,
+    hasShoppingHistory: false,
     userInfo: null
   },
 
@@ -30,8 +31,10 @@ Page({
   // 检查历史报告
   checkHistory() {
     const historyReports = app.getHistoryReports();
+    const shoppingHistory = app.getShoppingHistory();
     this.setData({
-      hasHistory: historyReports.length > 0
+      hasHistory: historyReports.length > 0,
+      hasShoppingHistory: shoppingHistory.length > 0
     });
   },
 
@@ -68,6 +71,13 @@ Page({
   viewHistory() {
     tt.navigateTo({
       url: '/pages/history/history'
+    });
+  },
+
+  // 查看历史购物建议
+  viewShoppingHistory() {
+    tt.navigateTo({
+      url: '/pages/shopping-history/shopping-history'
     });
   },
 

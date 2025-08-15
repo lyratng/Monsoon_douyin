@@ -11,12 +11,25 @@ Page({
     currentStep: 'upload', // upload, analyzing, result
   },
 
-  onLoad() {
-    this.loadUserReport();
+  onLoad(options) {
+    console.log('购物建议页面 onLoad, options:', options);
+    
+    // 如果是从历史记录跳转过来显示结果
+    if (options.showResult && app.globalData.currentShoppingAdvice) {
+      console.log('显示历史购物建议');
+      this.showHistoryResult(app.globalData.currentShoppingAdvice);
+    } else {
+      // 只有不是显示历史结果时才加载用户报告
+      this.loadUserReport();
+    }
   },
 
   onShow() {
-    this.loadUserReport();
+    console.log('购物建议页面 onShow');
+    // 只有在没有显示历史结果时才重新加载用户报告
+    if (!this.data.analysisResult) {
+      this.loadUserReport();
+    }
   },
 
   // 加载用户最近的分析报告
@@ -418,7 +431,7 @@ Page({
   },
 
   // 分析商品是否适合
-  analyzeItem(item) {
+  async analyzeItem(item) {
     console.log('=== 开始分析商品 ===');
     console.log('商品数据:', item);
     console.log('用户报告:', this.data.userReport);
@@ -429,13 +442,38 @@ Page({
     console.log('分析完成，结果:', analysis);
     
     // 强制更新数据
-    this.setData({
-      analysisResult: analysis,
-      currentStep: 'result',
-      isLoading: false
-    }, () => {
+          // 预先计算百分比
+      const analysisWithPercent = {
+        ...analysis,
+        scorePercent: Math.round(analysis.score * 100),
+        colorMatchPercent: Math.round(analysis.colorMatch * 100),
+        styleMatchPercent: Math.round(analysis.styleMatch * 100),
+        materialMatchPercent: Math.round(analysis.materialMatch * 100)
+      };
+      
+      console.log('添加百分比后的analysis对象:', analysisWithPercent);
+      
+      this.setData({
+        analysisResult: analysisWithPercent,
+        currentStep: 'result',
+        isLoading: false
+      }, async () => {
       console.log('数据更新完成');
       console.log('当前analysisResult:', this.data.analysisResult);
+      console.log('分数详情:');
+      console.log('- 总分:', analysis.score, '(', Math.round(analysis.score * 100) + '%)');
+      console.log('- 颜色匹配:', analysis.colorMatch, '(', Math.round(analysis.colorMatch * 100) + '%)');
+      console.log('- 风格匹配:', analysis.styleMatch, '(', Math.round(analysis.styleMatch * 100) + '%)');
+      console.log('- 材质匹配:', analysis.materialMatch, '(', Math.round(analysis.materialMatch * 100) + '%)');
+      
+      // 保存购物建议到历史记录
+      console.log('=== 准备保存购物建议 ===');
+      console.log('保存前的analysis对象:', analysis);
+      console.log('保存前的analysis.score类型:', typeof analysis.score, '值:', analysis.score);
+      console.log('保存前的analysis.colorMatch类型:', typeof analysis.colorMatch, '值:', analysis.colorMatch);
+      console.log('保存前的analysis.styleMatch类型:', typeof analysis.styleMatch, '值:', analysis.styleMatch);
+      console.log('保存前的analysis.materialMatch类型:', typeof analysis.materialMatch, '值:', analysis.materialMatch);
+              await this.saveShoppingAdvice(item, analysis);
     });
   },
 
@@ -680,11 +718,192 @@ Page({
     });
   },
 
+  // 显示历史记录结果
+  showHistoryResult(advice) {
+    console.log('显示历史购物建议:', advice);
+    
+    // 清理全局数据，避免重复显示
+    app.globalData.currentShoppingAdvice = null;
+    
+    this.setData({
+      uploadedItem: {
+        name: advice.itemName,
+        type: advice.itemType,
+        imageUrl: advice.imageUrl,
+        colors: advice.colors,
+        style: advice.style,
+        material: advice.material
+      },
+      analysisResult: {
+        score: Number(advice.score) || 0,
+        overallRating: advice.overallRating,
+        recommendation: advice.recommendation,
+        colorMatch: Number(advice.colorMatch) || 0,
+        styleMatch: Number(advice.styleMatch) || 0,
+        materialMatch: Number(advice.materialMatch) || 0,
+        reasons: this.generateReasonsFromHistory(advice),
+        suggestions: this.generateSuggestionsFromHistory(advice),
+        // 添加百分比字段
+        scorePercent: Math.round((Number(advice.score) || 0) * 100),
+        colorMatchPercent: Math.round((Number(advice.colorMatch) || 0) * 100),
+        styleMatchPercent: Math.round((Number(advice.styleMatch) || 0) * 100),
+        materialMatchPercent: Math.round((Number(advice.materialMatch) || 0) * 100)
+      },
+      currentStep: 'result',
+      isLoading: false
+    });
+    
+    console.log('历史记录显示 - 分数详情:');
+    console.log('- 总分:', Number(advice.score) || 0, '(', Math.round((Number(advice.score) || 0) * 100) + '%)');
+    console.log('- 颜色匹配:', Number(advice.colorMatch) || 0, '(', Math.round((Number(advice.colorMatch) || 0) * 100) + '%)');
+    console.log('- 风格匹配:', Number(advice.styleMatch) || 0, '(', Math.round((Number(advice.styleMatch) || 0) * 100) + '%)');
+    console.log('- 材质匹配:', Number(advice.materialMatch) || 0, '(', Math.round((Number(advice.materialMatch) || 0) * 100) + '%)');
+    
+    // 调试：检查设置的analysisResult
+    const analysisResult = {
+      score: Number(advice.score) || 0,
+      overallRating: advice.overallRating,
+      recommendation: advice.recommendation,
+      colorMatch: Number(advice.colorMatch) || 0,
+      styleMatch: Number(advice.styleMatch) || 0,
+      materialMatch: Number(advice.materialMatch) || 0,
+      reasons: this.generateReasonsFromHistory(advice),
+      suggestions: this.generateSuggestionsFromHistory(advice),
+      scorePercent: Math.round((Number(advice.score) || 0) * 100),
+      colorMatchPercent: Math.round((Number(advice.colorMatch) || 0) * 100),
+      styleMatchPercent: Math.round((Number(advice.styleMatch) || 0) * 100),
+      materialMatchPercent: Math.round((Number(advice.materialMatch) || 0) * 100)
+    };
+    
+    console.log('设置的analysisResult对象:', analysisResult);
+    console.log('百分比字段检查:');
+    console.log('- scorePercent:', analysisResult.scorePercent);
+    console.log('- colorMatchPercent:', analysisResult.colorMatchPercent);
+    console.log('- styleMatchPercent:', analysisResult.styleMatchPercent);
+    console.log('- materialMatchPercent:', analysisResult.materialMatchPercent);
+  },
+
+  // 从历史记录生成原因
+  generateReasonsFromHistory(advice) {
+    const reasons = [];
+    
+    if (advice.colorMatch > 0.7) {
+      reasons.push('颜色搭配与您的个人风格非常匹配');
+    } else if (advice.colorMatch > 0.4) {
+      reasons.push('颜色搭配与您的个人风格基本匹配');
+    } else {
+      reasons.push('颜色搭配与您的个人风格不太匹配');
+    }
+    
+    if (advice.styleMatch > 0.7) {
+      reasons.push('风格与您的个人偏好高度一致');
+    } else if (advice.styleMatch > 0.4) {
+      reasons.push('风格与您的个人偏好基本一致');
+    } else {
+      reasons.push('风格与您的个人偏好存在差异');
+    }
+    
+    if (advice.materialMatch > 0.7) {
+      reasons.push('材质选择符合您的需求');
+    } else if (advice.materialMatch > 0.4) {
+      reasons.push('材质选择基本符合您的需求');
+    } else {
+      reasons.push('材质选择可能不太适合您');
+    }
+    
+    return reasons;
+  },
+
+  // 从历史记录生成建议
+  generateSuggestionsFromHistory(advice) {
+    const suggestions = [];
+    
+    if (advice.score < 0.6) {
+      suggestions.push('建议考虑其他更适合您风格的商品');
+      suggestions.push('可以尝试调整颜色或风格选择');
+    } else if (advice.score < 0.8) {
+      suggestions.push('这个商品基本适合您，可以考虑购买');
+      suggestions.push('搭配时注意与其他单品的协调性');
+    } else {
+      suggestions.push('这个商品非常适合您，强烈推荐');
+      suggestions.push('可以作为您衣橱中的经典单品');
+    }
+    
+    return suggestions;
+  },
+
+  // 保存购物建议到历史记录
+  async saveShoppingAdvice(item, analysis) {
+    try {
+      console.log('=== saveShoppingAdvice 开始 ===');
+      console.log('传入的item:', item);
+      console.log('传入的analysis:', analysis);
+      console.log('analysis.score原始值:', analysis.score, '类型:', typeof analysis.score);
+      console.log('analysis.colorMatch原始值:', analysis.colorMatch, '类型:', typeof analysis.colorMatch);
+      console.log('analysis.styleMatch原始值:', analysis.styleMatch, '类型:', typeof analysis.styleMatch);
+      console.log('analysis.materialMatch原始值:', analysis.materialMatch, '类型:', typeof analysis.materialMatch);
+      
+      // 将图片转换为base64存储
+      let imageData = '';
+      if (item.imageUrl && !item.imageUrl.startsWith('data:image')) {
+        try {
+          console.log('开始转换图片为base64存储...');
+          imageData = await this.convertImageToBase64(item.imageUrl);
+          console.log('图片转换成功，base64长度:', imageData.length);
+        } catch (error) {
+          console.error('图片转换失败:', error);
+          imageData = item.imageUrl; // 保留原始路径作为备用
+        }
+      } else {
+        imageData = item.imageUrl; // 已经是base64或不需要转换
+      }
+      
+      const advice = {
+        itemName: item.name || '未知商品',
+        itemType: item.type || '未知类型',
+        imageUrl: imageData, // 使用base64数据
+        colors: item.colors || [],
+        style: item.style || '',
+        material: item.material || '',
+        score: Number(analysis.score) || 0,
+        overallRating: analysis.overallRating,
+        recommendation: analysis.recommendation,
+        colorMatch: Number(analysis.colorMatch) || 0,
+        styleMatch: Number(analysis.styleMatch) || 0,
+        materialMatch: Number(analysis.materialMatch) || 0
+      };
+      
+      console.log('转换后的advice对象:', advice);
+      console.log('转换后的score:', advice.score, '类型:', typeof advice.score);
+      console.log('转换后的colorMatch:', advice.colorMatch, '类型:', typeof advice.colorMatch);
+      console.log('转换后的styleMatch:', advice.styleMatch, '类型:', typeof advice.styleMatch);
+      console.log('转换后的materialMatch:', advice.materialMatch, '类型:', typeof advice.materialMatch);
+      
+      console.log('保存的购物建议数据:', advice);
+      console.log('分数类型检查:', {
+        score: typeof advice.score,
+        colorMatch: typeof advice.colorMatch,
+        styleMatch: typeof advice.styleMatch,
+        materialMatch: typeof advice.materialMatch
+      });
+      
+      app.saveShoppingAdvice(advice);
+      console.log('购物建议已保存到历史记录');
+    } catch (error) {
+      console.error('保存购物建议失败:', error);
+    }
+  },
+
   // 返回首页
   goHome() {
-    tt.navigateTo({
-      url: '/pages/index/index'
-    });
+    // 如果是从历史页面来的，返回历史页面
+    if (this.data.currentStep === 'result' && this.data.analysisResult) {
+      tt.navigateBack();
+    } else {
+      tt.navigateTo({
+        url: '/pages/index/index'
+      });
+    }
   },
 
   // 查看历史报告

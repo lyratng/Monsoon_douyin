@@ -9,6 +9,7 @@
     "pages/report/report",
     "pages/history/history",
     "pages/shopping/shopping",
+    "pages/shopping-history/shopping-history",
     "pages/test/test"
   ],
   "window": {

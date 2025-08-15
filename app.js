@@ -128,5 +128,83 @@ App({
       console.error('获取历史报告失败:', error);
       return [];
     }
+  },
+
+  // 保存购物建议历史
+  saveShoppingAdvice(advice) {
+    try {
+      console.log('=== app.js saveShoppingAdvice 开始 ===');
+      console.log('传入的advice对象:', advice);
+      console.log('advice.score:', advice.score, '类型:', typeof advice.score);
+      console.log('advice.colorMatch:', advice.colorMatch, '类型:', typeof advice.colorMatch);
+      console.log('advice.styleMatch:', advice.styleMatch, '类型:', typeof advice.styleMatch);
+      console.log('advice.materialMatch:', advice.materialMatch, '类型:', typeof advice.materialMatch);
+      
+      let shoppingHistory = tt.getStorageSync('shoppingHistory') || [];
+      
+      // 添加时间信息
+      const now = new Date();
+      advice.timestamp = now.toISOString();
+      advice.id = Date.now().toString();
+      advice.date = now.toLocaleDateString('zh-CN');
+      advice.time = now.toLocaleTimeString('zh-CN', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+      
+      // 限制最多保存5条建议
+      if (shoppingHistory.length >= 5) {
+        shoppingHistory = shoppingHistory.slice(-4);
+      }
+      
+      shoppingHistory.push(advice);
+      tt.setStorageSync('shoppingHistory', shoppingHistory);
+      
+      console.log('购物建议保存成功:', advice.date, advice.time);
+      console.log('保存后的完整advice对象:', advice);
+    } catch (error) {
+      console.error('保存购物建议失败:', error);
+    }
+  },
+
+  // 获取购物建议历史
+  getShoppingHistory() {
+    try {
+      console.log('=== app.js getShoppingHistory 开始 ===');
+      const history = tt.getStorageSync('shoppingHistory') || [];
+      console.log('从存储中获取的历史数据:', history);
+      console.log('历史数据长度:', history.length);
+      
+      if (history.length > 0) {
+        history.forEach((item, index) => {
+          console.log(`历史记录${index + 1}:`, {
+            itemName: item.itemName,
+            score: item.score,
+            scoreType: typeof item.score,
+            colorMatch: item.colorMatch,
+            colorMatchType: typeof item.colorMatch,
+            styleMatch: item.styleMatch,
+            styleMatchType: typeof item.styleMatch,
+            materialMatch: item.materialMatch,
+            materialMatchType: typeof item.materialMatch
+          });
+        });
+      }
+      
+      return history;
+    } catch (error) {
+      console.error('获取购物建议历史失败:', error);
+      return [];
+    }
+  },
+
+  // 保存购物建议历史（用于删除操作）
+  saveShoppingHistory(history) {
+    try {
+      tt.setStorageSync('shoppingHistory', history);
+      console.log('购物建议历史更新成功');
+    } catch (error) {
+      console.error('更新购物建议历史失败:', error);
+    }
   }
 });

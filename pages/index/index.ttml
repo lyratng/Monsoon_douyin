@@ -55,6 +55,18 @@
     </view>
   </view>
 
+  <!-- 历史购物建议入口 -->
+  <view class="history-section" tt:if="{{hasShoppingHistory}}">
+    <view class="history-card card" bindtap="viewShoppingHistory">
+      <view class="history-icon">🛍️</view>
+      <view class="history-content">
+        <text class="history-title">历史购物建议</text>
+        <text class="history-desc">查看之前的商品分析记录</text>
+      </view>
+      <view class="history-arrow">→</view>
+    </view>
+  </view>
+
   <!-- 底部装饰 -->
   <view class="footer-decoration">
     <view class="decoration-line"></view>
@@ -62,12 +74,14 @@
     <view class="decoration-line"></view>
   </view>
 
-  <!-- 测试按钮 -->
+  <!-- 测试按钮（已注释，如需测试可取消注释） -->
+  <!-- 
   <view class="test-section">
     <button class="btn btn-secondary test-btn" bindtap="goToTest">
       🧪 API测试
     </button>
   </view>
+  -->
 
   <!-- 分享按钮 -->
   <view class="share-section">

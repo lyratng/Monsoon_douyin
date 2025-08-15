@@ -1,0 +1,73 @@
+<!--pages/shopping-history/shopping-history.ttml-->
+<view class="container">
+  <view class="header">
+    <text class="title">历史购物建议</text>
+    <text class="subtitle">查看您的商品分析记录</text>
+  </view>
+
+  <view class="content">
+    <!-- 加载状态 -->
+    <view class="loading" tt:if="{{loading}}">
+      <view class="loading-spinner"></view>
+      <text>加载中...</text>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" tt:if="{{!loading && shoppingHistory.length === 0}}">
+      <view class="empty-icon">🛍️</view>
+      <text class="empty-title">暂无购物建议记录</text>
+      <text class="empty-desc">完成一次商品分析后，建议将在这里显示</text>
+      <button class="btn-primary" bindtap="goHome">开始分析</button>
+    </view>
+
+    <!-- 购物建议列表 -->
+    <view class="advice-list" tt:if="{{!loading && shoppingHistory.length > 0}}">
+      <view class="list-header">
+        <text class="count">共 {{shoppingHistory.length}} 条建议</text>
+        <button class="btn-clear-outline" bindtap="clearAllShoppingAdvice">清空</button>
+      </view>
+      
+      <view class="advice-item" tt:for="{{shoppingHistory}}" tt:key="index">
+        <view class="swipe-container">
+          <!-- 主要内容 -->
+          <view class="advice-content {{swipedIndex === index ? 'swiped' : ''}}" 
+                bindtap="viewShoppingAdvice" 
+                data-index="{{index}}"
+                bindtouchstart="onTouchStart"
+                bindtouchmove="onTouchMove"
+                bindtouchend="onTouchEnd">
+            <view class="advice-info">
+              <view class="advice-main">
+                <view class="advice-title">
+                  <text class="date">{{item.date}}</text>
+                  <text class="time">{{item.time}}</text>
+                </view>
+                <view class="advice-summary">
+                  <text class="item-name">{{item.itemName}}</text>
+                  <text class="rating">推荐指数: {{item.overallRating}}</text>
+                </view>
+                <view class="advice-details">
+                  <text class="item-type">{{item.itemType}}</text>
+                </view>
+              </view>
+              <view class="score-display">
+                <text class="score-number">{{item.scorePercent}}</text>
+                <text class="score-percent">%</text>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 左滑删除区域 -->
+          <view class="delete-area {{swipedIndex === index ? 'show' : ''}}" bindtap="deleteShoppingAdvice" data-index="{{index}}">
+            <text class="delete-text">删除</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部导航 -->
+  <view class="footer">
+    <button class="btn-home" bindtap="goHome">返回首页</button>
+  </view>
+</view>

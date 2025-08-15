@@ -206,6 +206,66 @@ page {
 2. 创建云函数
 3. 修改API调用逻辑
 
+## 调试功能
+
+### 主页API测试
+
+主页内置了API测试功能，用于验证豆包API的连通性：
+
+**位置**: `pages/index/index.ttml`
+
+**调试按钮**（当前已注释）：
+- 🧪 **API测试**: 跳转到专门的API测试页面
+
+**启用调试功能**：
+1. 打开 `pages/index/index.ttml`
+2. 找到注释的测试按钮部分（约第65-75行）
+3. 取消注释以下代码：
+```html
+<!-- 
+<view class="test-section">
+  <button class="btn btn-secondary test-btn" bindtap="goToTest">
+    🧪 API测试
+  </button>
+</view>
+-->
+```
+
+**调试方法**：
+- `goToTest()`: 跳转到 `/pages/test/test` 页面进行API测试
+
+### 购物建议页面调试
+
+购物建议页面内置了调试功能，用于测试AI调用和网络连接：
+
+**位置**: `pages/shopping/shopping.ttml`
+
+**调试按钮**（当前已注释）：
+- 🧪 **测试AI调用**: 测试豆包视觉API是否正常工作
+- 🌐 **测试网络连接**: 测试基本网络连通性
+
+**启用调试功能**：
+1. 打开 `pages/shopping/shopping.ttml`
+2. 找到注释的调试按钮部分（约第40-50行）
+3. 取消注释以下代码：
+```html
+<!-- 
+<button class="debug-btn" bindtap="testAI" style="margin-top: 20rpx; background: #FF6B6B; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
+  🧪 测试AI调用
+</button>
+
+<button class="debug-btn" bindtap="testNetwork" style="margin-top: 10rpx; background: #4CAF50; color: white; padding: 15rpx 30rpx; border-radius: 20rpx; font-size: 24rpx;">
+  🌐 测试网络连接
+</button>
+-->
+```
+
+**调试方法**：
+- `testAI()`: 使用测试图片调用豆包视觉API
+- `testNetwork()`: 发送简单请求测试网络连接
+
+**注意**: 调试功能仅用于开发测试，生产环境建议保持注释状态。
+
 ## 注意事项
 
 1. **API密钥安全**：不要在代码中硬编码API密钥

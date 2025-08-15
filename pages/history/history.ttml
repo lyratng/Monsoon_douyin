@@ -23,24 +23,36 @@
     <view class="report-list" tt:if="{{!loading && historyReports.length > 0}}">
       <view class="list-header">
         <text class="count">共 {{historyReports.length}} 份报告</text>
-        <button class="btn-clear" bindtap="clearAllReports">清空</button>
+        <button class="btn-clear-outline" bindtap="clearAllReports">清空</button>
       </view>
       
       <view class="report-item" tt:for="{{historyReports}}" tt:key="index">
-        <view class="report-info" bindtap="viewReport" data-index="{{index}}">
-          <view class="report-main">
-            <view class="report-title">
-              <text class="date">{{item.date}}</text>
-              <text class="time">{{item.time}}</text>
-            </view>
-            <view class="report-summary">
-              <text class="color-tone">{{item.mainColorTone.type}}</text>
-              <text class="style">{{item.suitableStyle.primaryStyle}}</text>
+        <view class="swipe-container">
+          <!-- 主要内容 -->
+          <view class="report-content {{swipedIndex === index ? 'swiped' : ''}}" 
+                bindtap="viewReport" 
+                data-index="{{index}}"
+                bindtouchstart="onTouchStart"
+                bindtouchmove="onTouchMove"
+                bindtouchend="onTouchEnd">
+            <view class="report-info">
+              <view class="report-main">
+                <view class="report-title">
+                  <text class="date">{{item.date}}</text>
+                  <text class="time">{{item.time}}</text>
+                </view>
+                <view class="report-summary">
+                  <text class="color-tone">{{item.mainColorTone.type}}</text>
+                  <text class="style">{{item.suitableStyle.primaryStyle}}</text>
+                </view>
+              </view>
+
             </view>
           </view>
-          <view class="report-actions">
-            <button class="btn-view" bindtap="viewReport" data-index="{{index}}">查看</button>
-            <button class="btn-delete" bindtap="deleteReport" data-index="{{index}}">删除</button>
+          
+          <!-- 左滑删除区域 -->
+          <view class="delete-area {{swipedIndex === index ? 'show' : ''}}" bindtap="deleteReport" data-index="{{index}}">
+            <text class="delete-text">删除</text>
           </view>
         </view>
       </view>
