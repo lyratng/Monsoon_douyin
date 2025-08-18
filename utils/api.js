@@ -52,7 +52,7 @@ class ApiService {
           'Authorization': `Bearer ${this.apiKey}`
         },
         data: data,
-        timeout: 30000,
+        timeout: 60000, // 增加到60秒
         success: (response) => {
           console.log('API响应:', response);
           console.log('状态码:', response.statusCode);
@@ -100,7 +100,21 @@ class ApiService {
       top_k: 40
     };
 
-    return await this.request(this.baseUrl, data);
+    // 添加重试机制
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`API调用尝试 ${attempt}/${maxRetries}`);
+        return await this.request(this.baseUrl, data);
+      } catch (error) {
+        console.error(`API调用尝试 ${attempt} 失败:`, error);
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        // 等待一段时间后重试
+        await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+      }
+    }
   }
 
   // 调用豆包多模态API（图像分析）
@@ -142,7 +156,22 @@ class ApiService {
     };
 
     console.log('发送给API的image_url开头:', data.messages[1].content[0].image_url.url.substring(0, 50) + '...');
-    return await this.request(this.baseUrl, data);
+    
+    // 添加重试机制
+    const maxRetries = 3;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Vision API调用尝试 ${attempt}/${maxRetries}`);
+        return await this.request(this.baseUrl, data);
+      } catch (error) {
+        console.error(`Vision API调用尝试 ${attempt} 失败:`, error);
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        // 等待一段时间后重试
+        await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+      }
+    }
   }
 
   // 分析单张照片

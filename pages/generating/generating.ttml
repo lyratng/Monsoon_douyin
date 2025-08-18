@@ -58,6 +58,39 @@
     </button>
   </view>
 
+  <!-- 季型分析测试按钮 -->
+  <view class="test-section">
+    <text class="test-title">季型分析测试</text>
+    <view class="test-buttons">
+      <button class="btn btn-test" bindtap="testSeasonAnalysis">
+        完整季型分析
+      </button>
+      <button class="btn btn-test" bindtap="testFusionLogic">
+        融合逻辑测试
+      </button>
+      <button class="btn btn-test" bindtap="testDefaultValues">
+        默认值测试
+      </button>
+    </view>
+    <view class="test-buttons">
+      <button class="btn btn-test" bindtap="testSinglePrompt" data-index="0">
+        手腕分析
+      </button>
+      <button class="btn btn-test" bindtap="testSinglePrompt" data-index="1">
+        脖子分析
+      </button>
+      <button class="btn btn-test" bindtap="testSinglePrompt" data-index="2">
+        正脸分析
+      </button>
+      <button class="btn btn-test" bindtap="testSinglePrompt" data-index="3">
+        半身分析
+      </button>
+      <button class="btn btn-test" bindtap="testSinglePrompt" data-index="4">
+        全身分析
+      </button>
+    </view>
+  </view>
+
   <!-- 底部装饰 -->
   <view class="footer-decoration">
     <text class="decoration-text">✨ 季风 Monsoon ✨</text>

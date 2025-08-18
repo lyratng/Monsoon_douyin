@@ -129,6 +129,681 @@ Page({
     }
   },
 
+  // ========== 季型分析模块 ==========
+  
+  // A. 手腕分析prompt
+  buildSeasonPromptA() {
+    return `你是专业的十二季色彩分析师。输入是一张"手腕/手背靠近手腕处"的清晰照片。请仅分析血管颜色来判断冷暖，不看指尖与掌心，不看指甲颜色。
+
+【枚举与数值规范】
+- 所有数值：范围[0,1]，最多三位小数；计算后先截断到[0,1]，再四舍五入至三位。
+- meta.light_condition ∈ {"natural","warm","cool","mixed"}
+- meta.photo_quality ∈ {"high","medium","low"}
+- meta.flags 为布尔标志对象，键至少包含：{"filter","beauty","overexposure","underexposure","strong_shadow","color_cast","occlusion"}
+- features 仅包含 name="warm_cool" 一项；weight 固定为 0.300。
+
+【判断步骤】
+1) 识别血管主观颜色比例：
+   - 估计 green_ratio 与 purple_ratio，二者和≈1.000（允许±0.020误差）。
+   - green_ratio>purple_ratio ⇒ value="warm"，否则 value="cool"；strength=较大者。
+   - 若二者非常接近（|差值|<0.05），仍需给出胜出侧，strength≥0.501。
+
+2) 光线识别（meta.light_condition）：
+   - 肤色/背景整体偏黄橙、白平衡偏暖 ⇒ "warm"
+   - 明显偏蓝青 ⇒ "cool"
+   - 区域混合或双色光 ⇒ "mixed"
+   - 接近日光中性 ⇒ "natural"
+
+3) 画质评估（meta.photo_quality）：
+   - "high"：对焦清晰、噪点低、无重度压缩/锐化伪影
+   - "medium"：轻微模糊或压缩但血管仍易辨
+   - "low"：明显模糊、强压缩、严重噪点/摩尔纹
+
+4) 标志（meta.flags）：
+   - filter：疑似滤镜/统一色调
+   - beauty：疑似美颜磨皮/瘦形
+   - overexposure/underexposure：局部过曝/欠曝
+   - strong_shadow：明显硬阴影
+   - color_cast：明显偏色
+   - occlusion：目标被遮挡
+
+5) 置信度计算（confidence）——以血管稳健性为基线：
+   - 基线：0.900
+   - 若 photo_quality="medium"：-0.100；"low"：-0.200
+   - 若 flags.filter 或 flags.beauty：各 -0.050
+   - 若 flags.overexposure 或 flags.underexposure 或 flags.strong_shadow：各 -0.050（最多-0.150）
+   - 若 light_condition="mixed"：-0.050
+   - 限幅：min=0.600，max=0.980
+
+6) 输出要求：仅输出 JSON，字段与模板一致；数值三位小数。
+
+【输出 JSON 模板】
+{
+  "part": "wrist",
+  "meta": {
+    "light_condition": "natural|warm|cool|mixed",
+    "photo_quality": "high|medium|low",
+    "flags": {
+      "filter": false,
+      "beauty": false,
+      "overexposure": false,
+      "underexposure": false,
+      "strong_shadow": false,
+      "color_cast": false,
+      "occlusion": false
+    },
+    "notes": "可简述取样区域与异常现象"
+  },
+  "observations": {
+    "green_ratio": 0.000,
+    "purple_ratio": 0.000
+  },
+  "features": [
+    {
+      "name": "warm_cool",
+      "value": "warm or cool",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.300
+    }
+  ]
+}`;
+  },
+
+  // B. 脖子分析prompt
+  buildSeasonPromptB() {
+    return `你是专业的十二季色彩分析师。输入是一张"脖颈区域"照片，尽量避开厚重彩妆、项链强反光与大片硬阴影；以皮肤中性色区（颈侧、锁骨上方）判断冷暖。
+
+【枚举与数值规范】
+- 数值范围与四舍五入：同上（0–1，三位小数）
+- meta.light_condition ∈ {"natural","warm","cool","mixed"}
+- meta.photo_quality ∈ {"high","medium","low"}
+- meta.flags 至少含：{"filter","beauty","overexposure","underexposure","strong_shadow","color_cast","occlusion","heavy_makeup"}
+- features 仅包含 name="warm_cool"，weight=0.300
+
+【判断步骤】
+1) 冷暖判定：
+   - 观察颈部中性色区底色与泛红/泛黄倾向：
+     * 偏桃粉/玫紫/青粉 ⇒ "cool"
+     * 偏金杏/橄榄/黄米 ⇒ "warm"
+   - value 取优势侧；strength 表示优势强度，若模糊也需 ≥0.501。
+
+2) 光线与画质：
+   - light_condition 与 photo_quality 判定标准同 A。
+   - heavy_makeup：若出现修容/粉底明显改变底色，设为 true。
+
+3) 置信度计算（从画质出发再按光线一致性微调）：
+   - 基线（按 photo_quality）："high"=0.800；"medium"=0.700；"low"=0.600
+   - 若 light_condition 与 value 方向相反（如光暖而判断为 cool，或光冷而判断为 warm）：+0.100
+   - 若 light_condition 与 value 同向：-0.100
+   - flags.filter/beauty：各 -0.050
+   - flags.overexposure/underexposure/strong_shadow/color_cast：各 -0.050（最多-0.150）
+   - flags.heavy_makeup：-0.100
+   - 限幅：min=0.550，max=0.950
+
+4) 输出仅 JSON；数值三位小数。
+
+【输出 JSON 模板】
+{
+  "part": "neck",
+  "meta": {
+    "light_condition": "natural|warm|cool|mixed",
+    "photo_quality": "high|medium|low",
+    "flags": {
+      "filter": false,
+      "beauty": false,
+      "overexposure": false,
+      "underexposure": false,
+      "strong_shadow": false,
+      "color_cast": false,
+      "occlusion": false,
+      "heavy_makeup": false
+    },
+    "notes": "注明是否有首饰反光/厚粉底/色温偏移等"
+  },
+  "features": [
+    {
+      "name": "warm_cool",
+      "value": "warm or cool",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.300
+    }
+  ]
+}`;
+  },
+
+  // C. 正脸分析prompt
+  buildSeasonPromptC() {
+    return `你是专业的十二季色彩分析师。输入是一张"正脸"照片，尽量直面镜头、无遮挡、不强背光。分别判断：冷暖(warm_cool)、深浅(contrast_depth: deep|light)、亮/柔(clarity: bright|soft)。
+
+【枚举与数值规范】
+- 数值：0–1，三位小数；四舍五入前先截断到[0,1]
+- meta.light_condition ∈ {"natural","warm","cool","mixed"}
+- meta.photo_quality ∈ {"high","medium","low"}
+- meta.flags 至少含：{"filter","beauty","overexposure","underexposure","strong_shadow","color_cast","occlusion","heavy_makeup","glasses_reflection"}
+- weights：warm_cool=0.240；contrast_depth=0.500；clarity=0.500
+
+【判定要点】
+1) 冷暖（warm_cool）：
+   - 取耳廓、颧侧、法令区等易显底色区域；避开口红/腮红影响。
+   - value 与 strength：优势侧≥0.501；明显优势≥0.700。
+
+2) 深浅（contrast_depth: deep|light）：
+   - 依据"头发-皮肤-五官"的明度跨度与阴影力度：
+     * deep：黑白对比大、轮廓边缘清晰、五官阴影深
+     * light：整体明度接近、阴影浅、对比度小
+   - strength 指偏向强度，明显 deep/light ≥0.700。
+
+3) 亮/柔（clarity: bright|soft）：
+   - bright：边缘清晰、毛孔/睫毛等微细节可辨、肌肤通透高光、色彩饱和稳定
+   - soft：轻微雾化/去纹理、边缘松散、饱和度偏低或偏灰
+   - strength：明显特征 ≥0.700。
+
+4) 光线/画质/标志：
+   - light_condition/photo_quality：标准同前
+   - flags.glasses_reflection：若镜片强反光影响对比/清晰度
+   - heavy_makeup：厚粉底/高遮瑕/强高光阴影修容
+
+5) 置信度计算：
+   - 对 warm_cool：
+     * 基线（按 photo_quality）：high=0.800，medium=0.700，low=0.600
+     * light_condition 与 value 相反：+0.100；同向：-0.100
+     * heavy_makeup：-0.100；filter/beauty：各 -0.050
+     * over/underexposure/strong_shadow/color_cast：各 -0.050（最多-0.150）
+     * 限幅：0.550–0.950
+   - 对 contrast_depth：
+     * 基线：high=0.850，medium=0.700，low=0.600
+     * 模糊/强去纹理(beauty=true)：-0.100
+     * over/underexposure/strong_shadow：各 -0.050（最多-0.150）
+     * glasses_reflection：-0.050
+     * 限幅：0.550–0.960
+   - 对 clarity：
+     * 基线：high=0.850，medium=0.700，low=0.600
+     * beauty 或 filter：各 -0.100
+     * 模糊、降噪/涂抹痕迹：-0.100
+     * over/underexposure/color_cast：各 -0.050（最多-0.150）
+     * 限幅：0.550–0.960
+
+6) 输出仅 JSON；数值三位小数。
+
+【输出 JSON 模板】
+{
+  "part": "face",
+  "meta": {
+    "light_condition": "natural|warm|cool|mixed",
+    "photo_quality": "high|medium|low",
+    "flags": {
+      "filter": false,
+      "beauty": false,
+      "overexposure": false,
+      "underexposure": false,
+      "strong_shadow": false,
+      "color_cast": false,
+      "occlusion": false,
+      "heavy_makeup": false,
+      "glasses_reflection": false
+    },
+    "notes": "注明是否口红/腮红影响、反光等"
+  },
+  "features": [
+    {
+      "name": "warm_cool",
+      "value": "warm or cool",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.240
+    },
+    {
+      "name": "contrast_depth",
+      "value": "deep or light",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.500
+    },
+    {
+      "name": "clarity",
+      "value": "bright or soft",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.500
+    }
+  ]
+}`;
+  },
+
+  // D. 半身分析prompt
+  buildSeasonPromptD() {
+    return `你是专业的十二季色彩分析师。输入是一张"半身"照片（含头肩与上衣）。在判断时，以裸露皮肤（颈、手臂）为主，衣物颜色仅作旁证；如衣物高饱和或强对比，需下调相关置信度并记录标志。
+
+【枚举与数值规范】
+- 数值：0–1，三位小数
+- meta.light_condition ∈ {"natural","warm","cool","mixed"}
+- meta.photo_quality ∈ {"high","medium","low"}
+- meta.flags 至少含：{"filter","beauty","overexposure","underexposure","strong_shadow","color_cast","occlusion","heavy_makeup","strong_clothing_influence","busy_background"}
+- weights：warm_cool=0.080；contrast_depth=0.250；clarity=0.250
+
+【判定要点】
+1) warm_cool：以可见皮肤底色为基准；衣物仅参考。
+2) contrast_depth：综合"人+衣"的整体明度反差（衣物极深/极浅会抬高或压低对比观感）。
+3) clarity：画面整体清晰度/通透感与边缘锐度（衣料纹理与灯光雾化会影响）。
+
+【置信度计算】
+- 对 warm_cool：
+  * 基线：high=0.750，medium=0.650，low=0.600
+  * light_condition 与 value 相反：+0.050；同向：-0.050
+  * strong_clothing_influence 或 busy_background：-0.100
+  * heavy_makeup：-0.050；filter/beauty：各 -0.050
+  * 过/欠曝、强阴影、偏色：各 -0.050（最多-0.150）
+  * 限幅：0.500–0.900
+- 对 contrast_depth：
+  * 基线：high=0.800，medium=0.680，low=0.600
+  * strong_clothing_influence/busy_background：-0.100
+  * 模糊/美颜：-0.100；过/欠曝、强阴影：各 -0.050
+  * 限幅：0.500–0.940
+- 对 clarity：
+  * 基线：high=0.800，medium=0.680，low=0.600
+  * filter/beauty 或明显降噪/涂抹：-0.100
+  * strong_clothing_influence/busy_background：-0.050
+  * 过/欠曝、偏色：各 -0.050
+  * 限幅：0.500–0.940
+
+【输出 JSON 模板】
+{
+  "part": "half_body",
+  "meta": {
+    "light_condition": "natural|warm|cool|mixed",
+    "photo_quality": "high|medium|low",
+    "flags": {
+      "filter": false,
+      "beauty": false,
+      "overexposure": false,
+      "underexposure": false,
+      "strong_shadow": false,
+      "color_cast": false,
+      "occlusion": false,
+      "heavy_makeup": false,
+      "strong_clothing_influence": false,
+      "busy_background": false
+    },
+    "notes": "如衣物/背景干扰强，需说明"
+  },
+  "features": [
+    {
+      "name": "warm_cool",
+      "value": "warm or cool",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.080
+    },
+    {
+      "name": "contrast_depth",
+      "value": "deep or light",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.250
+    },
+    {
+      "name": "clarity",
+      "value": "bright or soft",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.250
+    }
+  ]
+}`;
+  },
+
+  // E. 全身分析prompt
+  buildSeasonPromptE() {
+    return `你是专业的十二季色彩分析师。输入是一张"全身"照片。以裸露皮肤为准，服饰与背景仅作旁证；当服饰/背景强干扰时需降低相关置信度并记录标志。
+
+【枚举与数值规范】
+- 数值：0–1，三位小数
+- meta.light_condition ∈ {"natural","warm","cool","mixed"}
+- meta.photo_quality ∈ {"high","medium","low"}
+- meta.flags 至少含：{"filter","beauty","overexposure","underexposure","strong_shadow","color_cast","occlusion","heavy_makeup","strong_clothing_influence","busy_background"}
+- weights：warm_cool=0.080；contrast_depth=0.250；clarity=0.250
+
+【判定要点】
+1) warm_cool：以可见皮肤底色判断；服饰仅参考。
+2) contrast_depth：人物与服饰/背景整体明度反差；远景时注意曝光压缩。
+3) clarity：全身画面清晰度、边缘锐度与雾化程度。
+
+【置信度计算】
+- 对 warm_cool：
+  * 基线：high=0.700，medium=0.630，low=0.580
+  * light_condition 与 value 相反：+0.050；同向：-0.050
+  * strong_clothing_influence/busy_background：-0.100
+  * heavy_makeup：-0.050；filter/beauty：各 -0.050
+  * 过/欠曝、强阴影、偏色：各 -0.050（最多-0.150）
+  * 限幅：0.500–0.880
+- 对 contrast_depth：
+  * 基线：high=0.780，medium=0.660，low=0.580
+  * strong_clothing_influence/busy_background：-0.100
+  * 模糊/美颜：-0.100；过/欠曝、强阴影：各 -0.050
+  * 限幅：0.500–0.920
+- 对 clarity：
+  * 基线：high=0.780，medium=0.660，low=0.580
+  * filter/beauty 或明显降噪/涂抹：-0.100
+  * strong_clothing_influence/busy_background：-0.050
+  * 过/欠曝、偏色：各 -0.050
+  * 限幅：0.500–0.920
+
+【输出 JSON 模板】
+{
+  "part": "full_body",
+  "meta": {
+    "light_condition": "natural|warm|cool|mixed",
+    "photo_quality": "high|medium|low",
+    "flags": {
+      "filter": false,
+      "beauty": false,
+      "overexposure": false,
+      "underexposure": false,
+      "strong_shadow": false,
+      "color_cast": false,
+      "occlusion": false,
+      "heavy_makeup": false,
+      "strong_clothing_influence": false,
+      "busy_background": false
+    },
+    "notes": "说明远景压缩/背景强对比等"
+  },
+  "features": [
+    {
+      "name": "warm_cool",
+      "value": "warm or cool",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.080
+    },
+    {
+      "name": "contrast_depth",
+      "value": "deep or light",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.250
+    },
+    {
+      "name": "clarity",
+      "value": "bright or soft",
+      "strength": 0.000,
+      "confidence": 0.000,
+      "weight": 0.250
+    }
+  ]
+}`;
+  },
+
+  // F. 融合分析prompt
+  buildSeasonPromptF(firstLayerResults) {
+    // 解析第一层结果
+    const parsedResults = firstLayerResults.map((result, index) => {
+      try {
+        const content = result.choices[0].message.content;
+        return JSON.parse(content);
+      } catch (error) {
+        console.error(`解析第${index + 1}个结果失败:`, error);
+        return null;
+      }
+    }).filter(result => result !== null);
+
+    return `你是专业的十二季色彩分析融合器。输入是来自 A–E 的五段 JSON，它们都包含 part/meta/features。请按下述规则计算六类属性得分并输出唯一 JSON 结果。仅输出 JSON，不要多余文本。所有数值取 0–1、三位小数。
+
+【输入数据】
+${JSON.stringify(parsedResults, null, 2)}
+
+【属性集合】
+six_attrs = {"warm","cool","light","deep","bright","soft"}
+同义映射（用于季型表）："dark"≡"deep"；"muted"≡"soft"
+
+【计算规则】
+1) 初始化 scores[attr]=0
+2) 遍历每个输入的 features：
+   - name="warm_cool"：
+       value="warm" ⇒ scores.warm += strength*confidence*weight
+       value="cool" ⇒ scores.cool  += strength*confidence*weight
+   - name="contrast_depth"：
+       value="deep"  ⇒ scores.deep  += strength*confidence*weight
+       value="light" ⇒ scores.light += strength*confidence*weight
+   - name="clarity"：
+       value="bright"⇒ scores.bright+= strength*confidence*weight
+       value="soft"  ⇒ scores.soft  += strength*confidence*weight
+3) 所有加总完成后，将 scores 各值截断到[0,1]并四舍五入三位小数。
+4) 排序得到 ranking（从高到低的六项）。
+5) 形成 top3 为 ranking 的前三。
+6) **强制冷暖**：若 top2 不包含 {"warm","cool"}，则从 {"warm","cool"} 中选择分数更高者，替换第二名，并置 forced_coolwarm=true；否则 forced_coolwarm=false。
+7) 取调整后的 first 与 second，按映射表得到 season：
+   映射（First,Second → Season）：
+   (Bright, Warm) → 净春
+   (Warm, Bright) → 暖春
+   (Light, Warm) → 浅春
+   (Light, Cool) → 浅夏
+   (Cool, Muted) → 冷夏
+   (Muted, Cool) → 柔夏
+   (Muted, Warm) → 柔秋
+   (Dark,  Warm) → 深秋
+   (Warm,  Muted)→ 暖秋
+   (Dark,  Cool) → 深冬
+   (Cool,  Bright)→ 冷冬
+   (Bright,Cool) → 净冬
+   备注：在匹配时用 {"deep"→"Dark","soft"→"Muted","bright"→"Bright","light"→"Light"} 的名义进行匹配。
+
+8) **次优候选（secondary_candidates）**：
+   - 规则 A：保持第一不变，用第三与第一组成候选（若有映射）。
+   - 规则 B：保持第二不变，用第三与第二组成候选（若有映射）。
+   - 最多返回 2 个候选，按对应 pair 的 min(scores[first_like], scores[second_like]) 降序。
+   - 给出简短 reason，例如"第三属性接近第二，且与第一能形成有效季型"。
+
+9) 简短解释 rationale（≤70字）：说明贡献最大的维度/部位与关键置信度因素。
+
+【输出 JSON 模板】
+{
+  "scores": {
+    "warm": 0.000,
+    "cool": 0.000,
+    "light": 0.000,
+    "deep": 0.000,
+    "bright": 0.000,
+    "soft": 0.000
+  },
+  "ranking": [
+    {"attr": "X", "score": 0.000},
+    {"attr": "Y", "score": 0.000},
+    {"attr": "Z", "score": 0.000},
+    {"attr": "W", "score": 0.000},
+    {"attr": "U", "score": 0.000},
+    {"attr": "V", "score": 0.000}
+  ],
+  "top3": [
+    {"attr": "X", "score": 0.000},
+    {"attr": "Y", "score": 0.000},
+    {"attr": "Z", "score": 0.000}
+  ],
+  "pair_used": {
+    "first": "X",
+    "second": "Y",
+    "forced_coolwarm": false
+  },
+  "season": "净春 | 暖春 | 浅春 | 浅夏 | 冷夏 | 柔夏 | 柔秋 | 深秋 | 暖秋 | 深冬 | 冷冬 | 净冬",
+  "secondary_candidates": [
+    {
+      "pair": ["X","Z"],
+      "season": "…",
+      "reason": "简述为何成立（≤40字）"
+    }
+  ],
+  "rationale": "≤70字，说明关键来源与可信度因素"
+}`;
+  },
+
+  // ========== 季型分析核心函数 ==========
+  
+  // 季型分析主函数
+  async analyzeSeasonType(images) {
+    try {
+      console.log('=== 开始季型分析 ===');
+      const api = require('../../utils/api.js');
+      
+      // 1. 第一层分析：A-E五个prompt
+      const firstLayerResults = await this.analyzeSeasonFirstLayer(api, images);
+      
+      // 2. 第二层融合：F prompt
+      const seasonResult = await this.analyzeSeasonSecondLayer(api, firstLayerResults);
+      
+      console.log('季型分析完成:', seasonResult);
+      return seasonResult;
+      
+    } catch (error) {
+      console.error('季型分析失败:', error);
+      // 返回默认季型结果
+      return this.getDefaultSeasonResult();
+    }
+  },
+
+  // 第一层分析：A-E五个prompt
+  async analyzeSeasonFirstLayer(api, images) {
+    const seasonPrompts = [
+      this.buildSeasonPromptA(), // 手腕
+      this.buildSeasonPromptB(), // 脖子
+      this.buildSeasonPromptC(), // 正脸
+      this.buildSeasonPromptD(), // 半身
+      this.buildSeasonPromptE()  // 全身
+    ];
+    
+    const results = [];
+    
+    // 并行处理所有prompt
+    const promises = images.map(async (image, index) => {
+      if (index < seasonPrompts.length) {
+        try {
+          console.log(`=== 季型分析 ${index + 1}/5: ${['手腕', '脖子', '正脸', '半身', '全身'][index]} ===`);
+          const result = await api.callVisionAPI(image.imageData, seasonPrompts[index]);
+          console.log(`✅ 季型分析 ${index + 1} 完成:`, result);
+          return result;
+        } catch (error) {
+          console.error(`❌ 季型分析 ${index + 1} 失败:`, error);
+          return this.getDefaultSeasonAnalysis(index);
+        }
+      }
+      return null;
+    });
+    
+    const analysisResults = await Promise.all(promises);
+    
+    // 过滤掉null结果，确保有5个结果
+    for (let i = 0; i < 5; i++) {
+      if (analysisResults[i]) {
+        results.push(analysisResults[i]);
+      } else {
+        results.push(this.getDefaultSeasonAnalysis(i));
+      }
+    }
+    
+    return results;
+  },
+
+  // 第二层融合：F prompt
+  async analyzeSeasonSecondLayer(api, firstLayerResults) {
+    try {
+      console.log('=== 开始季型融合分析 ===');
+      
+      const fusionPrompt = this.buildSeasonPromptF(firstLayerResults);
+      const result = await api.callTextAPI(fusionPrompt, 0.3);
+      
+      console.log('季型融合分析完成:', result);
+      
+      // 解析结果
+      try {
+        const content = result.choices[0].message.content;
+        const seasonResult = JSON.parse(content);
+        return seasonResult;
+      } catch (parseError) {
+        console.error('季型融合结果解析失败:', parseError);
+        return this.getDefaultSeasonResult();
+      }
+      
+    } catch (error) {
+      console.error('季型融合分析失败:', error);
+      return this.getDefaultSeasonResult();
+    }
+  },
+
+  // 获取默认季型分析结果
+  getDefaultSeasonAnalysis(index) {
+    const parts = ['wrist', 'neck', 'face', 'half_body', 'full_body'];
+    const part = parts[index] || 'unknown';
+    
+    return {
+      choices: [{
+        message: {
+          content: JSON.stringify({
+            part: part,
+            meta: {
+              light_condition: "natural",
+              photo_quality: "medium",
+              flags: {
+                filter: false,
+                beauty: false,
+                overexposure: false,
+                underexposure: false,
+                strong_shadow: false,
+                color_cast: false,
+                occlusion: false
+              },
+              notes: "默认分析结果"
+            },
+            features: [
+              {
+                name: "warm_cool",
+                value: "warm",
+                strength: 0.600,
+                confidence: 0.700,
+                weight: 0.300
+              }
+            ]
+          })
+        }
+      }]
+    };
+  },
+
+  // 获取默认季型结果
+  getDefaultSeasonResult() {
+    return {
+      scores: {
+        warm: 0.600,
+        cool: 0.400,
+        light: 0.500,
+        deep: 0.500,
+        bright: 0.500,
+        soft: 0.500
+      },
+      ranking: [
+        {"attr": "warm", "score": 0.600},
+        {"attr": "light", "score": 0.500},
+        {"attr": "deep", "score": 0.500},
+        {"attr": "bright", "score": 0.500},
+        {"attr": "soft", "score": 0.500},
+        {"attr": "cool", "score": 0.400}
+      ],
+      top3: [
+        {"attr": "warm", "score": 0.600},
+        {"attr": "light", "score": 0.500},
+        {"attr": "deep", "score": 0.500}
+      ],
+      pair_used: {
+        first: "warm",
+        second: "light",
+        forced_coolwarm: false
+      },
+      season: "浅春",
+      secondary_candidates: [],
+      rationale: "默认季型分析结果"
+    };
+  },
+
   // 测试简单AI调用
   async testSimpleAI() {
     try {
@@ -210,14 +885,19 @@ Page({
       });
       console.log('最终传递给AI的图片数据数量:', imageDataList.length);
       
-      // 1. 分析照片
+      // 1. 季型分析（ABCDEF）
+      console.log('=== 开始季型分析（ABCDEF） ===');
+      const seasonResult = await this.analyzeSeasonType(images);
+      console.log('季型分析结果:', seasonResult);
+      
+      // 2. 分析照片（原有视觉分析）
       console.log('=== 开始AI照片分析 ===');
       console.log('准备分析的照片数量:', imageDataList.length);
       const imageAnalysis = await this.analyzeImagesWithAI(api, imageDataList);
       
-      // 2. 生成完整报告
+      // 3. 生成完整报告（集成季型结果）
       console.log('生成风格报告中...');
-      const report = await this.generateReportWithAI(api, questionnaireData, imageAnalysis);
+      const report = await this.generateReportWithAI(api, questionnaireData, imageAnalysis, seasonResult);
       
       console.log('AI分析完成:', report);
       return report;
@@ -264,14 +944,14 @@ Page({
   },
 
   // 使用AI生成完整报告
-  async generateReportWithAI(api, questionnaireData, imageAnalysis) {
+  async generateReportWithAI(api, questionnaireData, imageAnalysis, seasonResult) {
     const maxRetries = 2;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`AI生成报告尝试 ${attempt}/${maxRetries}`);
         
-        const prompt = this.buildAIPrompt(questionnaireData, imageAnalysis);
+        const prompt = this.buildAIPrompt(questionnaireData, imageAnalysis, seasonResult);
         
         const response = await api.callTextAPI(prompt, 0.5);
         
@@ -314,7 +994,7 @@ Page({
   },
 
   // 构建AI提示词
-  buildAIPrompt(questionnaireData, imageAnalysis) {
+  buildAIPrompt(questionnaireData, imageAnalysis, seasonResult) {
     const answers = questionnaireData.answers;
     
     // 简化照片分析结果
@@ -329,104 +1009,28 @@ Page({
       }
     }).join('\n');
     
-    return `基于以下信息生成详细的个人风格分析报告：
+    return `基于问卷和照片分析生成个人风格报告：
 
-## 问卷信息（按权重排序）
-**高权重信息（30%）：**
-- 颜色偏好(q6): ${answers.q6?.join(', ') || '未选择'} - 用于个性化色彩推荐
-- 风格偏好(q1): ${answers.q1?.join(', ') || '未选择'} - 用于风格和材质推荐
+## 季型分析结果（已通过专业12季色彩分析得出）
+**季型判断：** ${seasonResult?.season || '待分析'}
+**主要特征：** ${seasonResult?.pair_used?.first || 'warm'} + ${seasonResult?.pair_used?.second || 'light'}
+**分析依据：** ${seasonResult?.rationale || '基于多维度照片分析'}
+**置信度：** ${seasonResult?.top3?.[0]?.score ? Math.round(seasonResult.top3[0].score * 100) : 60}%
 
-**中权重信息（15%）：**
-- 生活节奏(q5): ${answers.q5 || '未选择'} - 影响材质实用性选择
-- 场合适应性(q2): ${answers.q2 || '未选择'} - 影响单品推荐策略
+问卷：颜色偏好(${answers.q6?.join(', ') || '无'})，风格偏好(${answers.q1?.join(', ') || '无'})，生活节奏(${answers.q5 || '无'})
 
-**低权重信息（5%）：**
-- 功能重视(q3): ${answers.q3 || '未选择'} - 影响材质选择倾向
-- 搭配注重(q7): ${answers.q7?.join(', ') || '未选择'} - 影响搭配建议
+照片分析：${simplifiedAnalysis}
 
-## 照片分析（权重70%）
-${simplifiedAnalysis}
+要求：
+1. 基于已判定的季型：${seasonResult?.season || '待分析'}
+2. 推荐10种颜色（结合用户偏好）
+3. 推荐3种材质
+4. 权重：季型50%，用户偏好25%，肤色15%，风格10%
 
-**照片分析要求：**
-1. 优先选择自然光最充足的照片进行肤色分析
-2. 综合多张照片避免光线和相机白平衡误差
-3. 分析要素权重：
-   - 面部+脖子肤色：25%（色调、亮度、饱和度、底色）
-   - 血管颜色：15%（蓝紫为冷，绿色为暖）
-   - 面部线条：5%（圆润为暖，棱角为冷）
-   - 发色+瞳色：5%（暖棕/冷棕/黑/金/灰）
-
-## 12季色彩分析标准
-请根据分析结果，将用户归类为以下12种季型之一：
-
-**春季型：**
-- 净春型：明亮鲜艳的暖色调
-- 暖春型：温暖明亮的色调  
-- 浅春型：浅淡温暖的色调
-
-**夏季型：**
-- 柔夏型：柔和的中性色调
-- 冷夏型：冷色调的柔和色
-- 浅夏型：浅淡的冷色调
-
-**秋季型：**
-- 柔秋型：柔和的暖色调
-- 暖秋型：温暖的深色调
-- 深秋型：深沉的暖色调
-
-**冬季型：**
-- 净冬型：明亮鲜艳的冷色调
-- 冷冬型：冷色调的深色
-- 深冬型：深沉的冷色调
-
-**重要说明：** 以上季型标准仅供参考，实际色彩推荐需要结合用户偏好进行定制化分析。
-
-## 定制化色彩推荐要求
-**色彩推荐权重分配：**
-- 季型基础色彩：40%（作为基础参考）
-- 用户颜色偏好：30%（优先考虑用户喜欢的颜色）
-- 肤色适配度：20%（确保与肤色和谐）
-- 风格一致性：10%（与整体风格匹配）
-
-**推荐逻辑：**
-1. 首先确定用户季型作为基础参考
-2. 优先选择用户喜欢的颜色类型
-3. 在用户喜欢的颜色范围内，选择最适合肤色的色调
-4. 确保推荐的颜色与用户风格偏好一致
-5. 最终生成10种定制化颜色，包含用户偏好但避免不合适的颜色
-
-## 分析逻辑要求
-
-**季型判断逻辑：**
-1. 基于照片分析确定基础季型（权重70%）
-2. 结合问卷颜色偏好微调，但保持季型不变
-3. 如果用户喜欢冷色但季型为暖色，推荐该季型中偏冷的颜色
-
-**个性化推荐逻辑：**
-1. 色彩推荐：基于季型标准色 + 用户颜色偏好调整
-2. 风格推荐：基于问卷风格偏好 + 季型特征
-3. 材质推荐：基于风格偏好 + 生活节奏 + 功能需求
-
-**照片分析优先级：**
-1. 优先选择自然光充足的照片
-2. 综合多张照片避免光线误差
-3. 重点关注肤色、血管、面部线条、发色瞳色
-
-## 要求
-请生成一份完整的JSON格式报告，包含以下字段：
-
-**重要提示：**
-1. 请确保返回的是有效的JSON格式，不要包含其他文字
-2. 颜色代码请使用标准的6位十六进制格式（如 #FF6B35）
-3. popups字段必须严格按照以下结构返回，不要简化或修改字段名
-4. 推荐色板必须包含10种颜色，材质推荐必须包含3种主要材质
-5. 文本内容要具体、实用，避免空泛的描述
-6. 请保持简洁，避免冗长的描述
-7. 色彩推荐要结合用户偏好，不要强制推荐用户不喜欢的颜色
-
+返回JSON格式：
 {
   "userProfile": {"questionnaireSummary": "总结", "imageFindings": "发现"},
-  "mainColorTone": {"type": "季型（如：暖春型）", "description": "描述", "season": "季节", "temperature": "冷暖"},
+  "mainColorTone": {"type": "${seasonResult?.season || '季型（如：暖春型）'}", "description": "基于专业12季色彩分析", "season": "季节", "temperature": "冷暖"},
   "colorPalette": {"mainColors": ["颜色1", "颜色2"], "extendedPalette": ["扩展1", "扩展2"]},
   "suitableStyle": {"primaryStyle": "主风格", "secondaryStyle": "次风格", "styleKeywords": ["关键词1", "关键词2"], "typicalScenarios": ["场景1", "场景2"], "recommendedItems": {"上衣": ["单品1"], "下装": ["单品2"], "鞋子": ["单品3"]}},
   "recommendedMaterials": {"primary": ["材质1", "材质2", "材质3"], "secondary": ["材质1", "材质2"], "avoid": ["避免1"], "materialDetails": ["详情1"]},
@@ -437,9 +1041,7 @@ ${simplifiedAnalysis}
     "materialPopup": {"title": "推荐材质", "description": "描述", "materialAnalysis": "分析", "recommendations": ["推荐1", "推荐2", "推荐3"], "careTips": "护理"}
   },
   "rationale": "分析依据"
-}
-
-只返回JSON，不要其他文字。`;
+}`;
   },
 
   // 解析AI响应（备用方案）
@@ -1058,6 +1660,8 @@ ${simplifiedAnalysis}
     tt.navigateBack();
   },
 
+  // ========== 调试和测试函数 ==========
+  
   // 调试函数 - 查看当前数据
   debugData() {
     console.log('=== 调试信息 ===');
@@ -1070,5 +1674,292 @@ ${simplifiedAnalysis}
       content: `问卷数据: ${JSON.stringify(app.globalData.questionnaireData, null, 2)}`,
       showCancel: false
     });
+  },
+
+  // 测试季型分析模块
+  async testSeasonAnalysis() {
+    try {
+      console.log('=== 开始季型分析模块测试 ===');
+      
+      const images = app.globalData.uploadedImages;
+      if (!images || images.length === 0) {
+        throw new Error('没有上传的照片数据');
+      }
+      
+      // 测试第一层分析
+      console.log('--- 测试第一层分析 ---');
+      const api = require('../../utils/api.js');
+      const firstLayerResults = await this.analyzeSeasonFirstLayer(api, images);
+      console.log('第一层分析结果:', firstLayerResults);
+      
+      // 测试第二层融合
+      console.log('--- 测试第二层融合 ---');
+      const seasonResult = await this.analyzeSeasonSecondLayer(api, firstLayerResults);
+      console.log('季型融合结果:', seasonResult);
+      
+      // 显示测试结果
+      tt.showModal({
+        title: '季型分析测试完成',
+        content: `季型: ${seasonResult?.season || '未知'}\n置信度: ${seasonResult?.top3?.[0]?.score ? Math.round(seasonResult.top3[0].score * 100) : 0}%\n依据: ${seasonResult?.rationale || '无'}`,
+        showCancel: false
+      });
+      
+      return seasonResult;
+      
+    } catch (error) {
+      console.error('季型分析测试失败:', error);
+      tt.showModal({
+        title: '测试失败',
+        content: error.message,
+        showCancel: false
+      });
+      return null;
+    }
+  },
+
+  // 测试单个prompt
+  async testSinglePrompt(e) {
+    const promptIndex = parseInt(e.currentTarget.dataset.index);
+    try {
+      console.log(`=== 测试单个Prompt ${promptIndex + 1} ===`);
+      
+      const images = app.globalData.uploadedImages;
+      if (!images || images.length === 0) {
+        throw new Error('没有上传的照片数据');
+      }
+      
+      if (promptIndex >= images.length) {
+        throw new Error(`照片数量不足，需要至少${promptIndex + 1}张照片`);
+      }
+      
+      const api = require('../../utils/api.js');
+      const prompts = [
+        this.buildSeasonPromptA(), // 手腕
+        this.buildSeasonPromptB(), // 脖子
+        this.buildSeasonPromptC(), // 正脸
+        this.buildSeasonPromptD(), // 半身
+        this.buildSeasonPromptE()  // 全身
+      ];
+      
+      const promptNames = ['手腕', '脖子', '正脸', '半身', '全身'];
+      const prompt = prompts[promptIndex];
+      const image = images[promptIndex];
+      
+      console.log(`测试${promptNames[promptIndex]}分析...`);
+      const result = await api.callVisionAPI(image.imageData, prompt);
+      
+      console.log(`${promptNames[promptIndex]}分析结果:`, result);
+      
+      // 解析结果
+      try {
+        const content = result.choices[0].message.content;
+        const parsedResult = JSON.parse(content);
+        
+        tt.showModal({
+          title: `${promptNames[promptIndex]}分析测试`,
+          content: `部位: ${parsedResult.part}\n特征: ${parsedResult.features?.[0]?.name || '无'}\n值: ${parsedResult.features?.[0]?.value || '无'}\n强度: ${parsedResult.features?.[0]?.strength || 0}\n置信度: ${parsedResult.features?.[0]?.confidence || 0}`,
+          showCancel: false
+        });
+        
+        return parsedResult;
+      } catch (parseError) {
+        console.error('解析结果失败:', parseError);
+        tt.showModal({
+          title: '解析失败',
+          content: '返回结果格式不正确',
+          showCancel: false
+        });
+        return null;
+      }
+      
+    } catch (error) {
+      console.error(`Prompt ${promptIndex + 1}测试失败:`, error);
+      tt.showModal({
+        title: '测试失败',
+        content: error.message,
+        showCancel: false
+      });
+      return null;
+    }
+  },
+
+  // 测试融合逻辑
+  async testFusionLogic() {
+    try {
+      console.log('=== 测试融合逻辑 ===');
+      
+      // 创建模拟的第一层结果
+      const mockResults = [
+        {
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                part: "wrist",
+                features: [{
+                  name: "warm_cool",
+                  value: "warm",
+                  strength: 0.700,
+                  confidence: 0.800,
+                  weight: 0.300
+                }]
+              })
+            }
+          }]
+        },
+        {
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                part: "neck",
+                features: [{
+                  name: "warm_cool",
+                  value: "warm",
+                  strength: 0.600,
+                  confidence: 0.750,
+                  weight: 0.300
+                }]
+              })
+            }
+          }]
+        },
+        {
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                part: "face",
+                features: [
+                  {
+                    name: "warm_cool",
+                    value: "warm",
+                    strength: 0.650,
+                    confidence: 0.800,
+                    weight: 0.240
+                  },
+                  {
+                    name: "contrast_depth",
+                    value: "light",
+                    strength: 0.600,
+                    confidence: 0.700,
+                    weight: 0.500
+                  },
+                  {
+                    name: "clarity",
+                    value: "bright",
+                    strength: 0.550,
+                    confidence: 0.750,
+                    weight: 0.500
+                  }
+                ]
+              })
+            }
+          }]
+        },
+        {
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                part: "half_body",
+                features: [
+                  {
+                    name: "warm_cool",
+                    value: "warm",
+                    strength: 0.500,
+                    confidence: 0.650,
+                    weight: 0.080
+                  },
+                  {
+                    name: "contrast_depth",
+                    value: "light",
+                    strength: 0.550,
+                    confidence: 0.680,
+                    weight: 0.250
+                  },
+                  {
+                    name: "clarity",
+                    value: "bright",
+                    strength: 0.600,
+                    confidence: 0.700,
+                    weight: 0.250
+                  }
+                ]
+              })
+            }
+          }]
+        },
+        {
+          choices: [{
+            message: {
+              content: JSON.stringify({
+                part: "full_body",
+                features: [
+                  {
+                    name: "warm_cool",
+                    value: "warm",
+                    strength: 0.450,
+                    confidence: 0.630,
+                    weight: 0.080
+                  },
+                  {
+                    name: "contrast_depth",
+                    value: "light",
+                    strength: 0.500,
+                    confidence: 0.660,
+                    weight: 0.250
+                  },
+                  {
+                    name: "clarity",
+                    value: "bright",
+                    strength: 0.550,
+                    confidence: 0.680,
+                    weight: 0.250
+                  }
+                ]
+              })
+            }
+          }]
+        }
+      ];
+      
+      const api = require('../../utils/api.js');
+      const fusionResult = await this.analyzeSeasonSecondLayer(api, mockResults);
+      
+      console.log('融合测试结果:', fusionResult);
+      
+      tt.showModal({
+        title: '融合逻辑测试',
+        content: `季型: ${fusionResult?.season || '未知'}\n主要特征: ${fusionResult?.pair_used?.first || '无'} + ${fusionResult?.pair_used?.second || '无'}\n依据: ${fusionResult?.rationale || '无'}`,
+        showCancel: false
+      });
+      
+      return fusionResult;
+      
+    } catch (error) {
+      console.error('融合逻辑测试失败:', error);
+      tt.showModal({
+        title: '测试失败',
+        content: error.message,
+        showCancel: false
+      });
+      return null;
+    }
+  },
+
+  // 测试默认值处理
+  testDefaultValues() {
+    console.log('=== 测试默认值处理 ===');
+    
+    const defaultAnalysis = this.getDefaultSeasonAnalysis(0);
+    const defaultResult = this.getDefaultSeasonResult();
+    
+    console.log('默认分析结果:', defaultAnalysis);
+    console.log('默认季型结果:', defaultResult);
+    
+    tt.showModal({
+      title: '默认值测试',
+      content: `默认季型: ${defaultResult.season}\n默认特征: ${defaultResult.pair_used.first} + ${defaultResult.pair_used.second}`,
+      showCancel: false
+    });
+    
+    return { defaultAnalysis, defaultResult };
   }
 }); 
