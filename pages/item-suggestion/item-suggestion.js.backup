@@ -1,0 +1,468 @@
+// pages/item-suggestion/item-suggestion.js
+const app = getApp();
+const { analyzeImage } = require('../../utils/api.js');
+
+Page({
+  /**
+   * 页面的初始数据
+   */
+  data: {
+    userProfile: null,
+    uploadedImage: null,
+    selectedSample: null,
+    sampleImages: [],
+    isAnalyzing: false
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(options) {
+    this.initPage();
+  },
+
+  /**
+   * 初始化页面
+   */
+  initPage() {
+    // 检查用户是否完成测试
+    const userProfile = app.getUserProfile();
+    if (!userProfile || !userProfile.style_report) {
+      tt.showModal({
+        title: '提示',
+        content: '请先完成个人风格测试，才能使用单品建议功能',
+        confirmText: '去测试',
+        success: (res) => {
+          if (res.confirm) {
+            tt.navigateTo({
+              url: '/pages/test/test'
+            });
+          }
+        }
+      });
+      return;
+    }
+
+    // 加载样例图片
+    this.loadSampleImages();
+    
+    this.setData({
+      userProfile: userProfile
+    });
+  },
+
+  /**
+   * 加载样例图片
+   */
+  loadSampleImages() {
+    // 加载20张样例图片
+    const sampleImages = [];
+    for (let i = 1; i <= 20; i++) {
+      sampleImages.push({
+        id: i,
+        name: `样例${i}`,
+        path: `/assets/images/sample-clothes/sample-${i}.jpg`
+      });
+    }
+    
+    this.setData({
+      sampleImages: sampleImages
+    });
+  },
+
+  /**
+   * 选择样例图片
+   */
+  selectSample(e) {
+    const sample = e.currentTarget.dataset.sample;
+    this.setData({
+      selectedSample: sample,
+      uploadedImage: null
+    });
+  },
+
+  /**
+   * 上传照片
+   */
+  uploadImage() {
+    tt.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFilePaths[0];
+        
+        // 检查文件大小（5MB限制）
+        tt.getFileInfo({
+          filePath: tempFilePath,
+          success: (fileInfo) => {
+            if (fileInfo.size > 5 * 1024 * 1024) {
+              tt.showToast({
+                title: '图片不能超过5MB',
+                icon: 'none'
+              });
+              return;
+            }
+            
+            this.setData({
+              uploadedImage: {
+                path: tempFilePath,
+                name: '用户上传',
+                type: '待分析'
+              },
+              selectedImage: null
+            });
+          },
+          fail: () => {
+            this.setData({
+              uploadedImage: {
+                path: tempFilePath,
+                name: '用户上传',
+                type: '待分析'
+              },
+              selectedImage: null
+            });
+          }
+        });
+      },
+      fail: (error) => {
+        console.error('选择图片失败:', error);
+        tt.showToast({
+          title: '选择图片失败',
+          icon: 'none'
+        });
+      }
+    });
+  },
+
+  /**
+   * 开始分析
+   */
+  async startAnalysis() {
+    const image = this.data.selectedSample || this.data.uploadedImage;
+    if (!image) {
+      tt.showToast({
+        title: '请先选择或上传图片',
+        icon: 'none'
+      });
+      return;
+    }
+
+    this.setData({
+      isAnalyzing: true
+    });
+
+    try {
+      // 调用单品分析API
+      const analysisResult = await this.analyzeItemSuitability(image);
+      
+      // 保存分析记录
+      this.saveAnalysisRecord(image, analysisResult);
+      
+      // 跳转到结果页面
+      tt.navigateTo({
+        url: `/pages/item-result/item-result?result=${encodeURIComponent(JSON.stringify(analysisResult))}`
+      });
+
+    } catch (error) {
+      console.error('分析失败:', error);
+      tt.showToast({
+        title: '分析失败，请重试',
+        icon: 'none'
+      });
+    } finally {
+      this.setData({
+        isAnalyzing: false
+      });
+    }
+  },
+
+  /**
+   * 分析单品适配度
+   */
+  async analyzeItemSuitability(image) {
+    const userProfile = this.data.userProfile;
+    
+    // 模拟两层API调用
+    
+    // 第一层：图像信息提取
+    const imageInfo = await this.extractImageInfo(image);
+    
+    // 第二层：适配度分析  
+    const suitabilityAnalysis = await this.analyzeSuitability(imageInfo, userProfile);
+    
+    return {
+      image: {
+        name: image.name,
+        type: image.type,
+        thumbnail: await this.generateThumbnail(image.path)
+      },
+      imageInfo: imageInfo,
+      analysis: suitabilityAnalysis,
+      timestamp: new Date().toISOString(),
+      user: userProfile.name
+    };
+  },
+
+  /**
+   * 第一层API：提取图像信息
+   */
+  async extractImageInfo(image) {
+    // 构建需求文档指定的prompt
+    const prompt = `请判断图中物体，如果不是衣服，请直接输出"图片非衣物，请重新上传"，跳过以下所有步骤，break.
+如果图中是一件衣物（可能是上衣、下装、鞋、配饰等），请你仔细分析，提取出如下信息，按照如下json格式输出。
+如果图中有多件衣物，取最主要的占据面积最大的那件来进行同样分析。
+
+{
+  "category": "",            // 大类，如 "Jacket", "Trousers", "Sneakers", "Handbag", "Necklace"
+  "sub_category": "",        // 子类，如 "Shearling Jacket", "Wide-leg Pants", "Crossbody Bag"
+  "gender": "",              // 目标性别：Women / Men / Unisex
+  "fit_shape": "",           // 版型或造型：Oversized / Slim / A-line / Rectangular
+  "material": {
+    "main": "",              // 主材质
+    "lining": "",            // 内衬（如适用）
+    "trim": "",              // 辅料/拼接
+    "hardware": ""           // 五金（适用于包/鞋/配饰）
+  },
+  "details": {
+    "structure": "",         // 结构：有无支撑骨架、硬挺/柔软、层次
+    "closure": "",           // 开合方式：拉链/纽扣/磁扣/套穿
+    "strap_handle": "",      // 包/鞋专用：肩带、手柄、鞋带、魔术贴
+    "length": "",            // 衣长/裤长/裙长/鞋帮高度
+    "silhouette": "",        // 轮廓：直筒、喇叭、圆头、尖头
+    "pockets": "",           // 口袋（如适用）
+    "ornament": "",          // 装饰：刺绣、铆钉、印花、金属件
+    "other": ""              // 其他显著特征
+  },
+  "color": {
+    "main": "",              // 主色
+    "contrast": "",          // 拼色/辅助色
+    "pattern": ""            // 图案：Solid / Striped / Plaid / Floral
+  },
+  "style": "",               // 风格：Minimalism / Streetwear / Retro / Elegant
+  "occasions": [             // 使用场景
+    "Casual", "Formal", "Outdoor"
+  ],
+  "season": "",              // 适用季节：Spring/Summer/Autumn/Winter
+  "pairing": [               // 搭配建议
+    ""
+  ]
+}`;
+
+    // 实际应调用GPT API，这里暂时返回模拟数据
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // 模拟图像信息提取结果
+    const mockImageInfo = {
+      category: "Jacket",
+      sub_category: "Knit Sweater",
+      gender: "Women",
+      fit_shape: "Oversized",
+      material: {
+        main: "针织面料",
+        lining: "",
+        trim: "",
+        hardware: ""
+      },
+      details: {
+        structure: "柔软",
+        closure: "套穿",
+        strap_handle: "",
+        length: "常规长度",
+        silhouette: "宽松",
+        pockets: "无",
+        ornament: "无",
+        other: "基础款设计"
+      },
+      color: {
+        main: "深棕色",
+        contrast: "",
+        pattern: "Solid"
+      },
+      style: "Casual",
+      occasions: ["Casual", "Weekend"],
+      season: "Autumn/Winter",
+      pairing: ["牛仔裤", "休闲裤", "短靴"]
+    };
+    
+    return mockImageInfo;
+  },
+
+  /**
+   * 第二层API：适配度分析
+   */
+  async analyzeSuitability(imageInfo, userProfile) {
+    // 构建需求文档指定的prompt
+    const styleReport = userProfile.styleReport;
+    
+    const prompt = `用户的档案如下：
+季型：${styleReport.season_analysis.season_12}
+能量类型：${styleReport.personality_traits.dominant_trait}
+MBTI：${styleReport.personality_traits.mbti}
+推荐颜色：${styleReport.color_palette.best_colors.map(c => c.name).join('、')}
+推荐材质：${Object.values(styleReport.shopping_guide.fabric_recommendations).join('、')}
+推荐风格：${styleReport.style_recommendations.daily_style}
+
+用户上传的单品如下：
+${JSON.stringify(imageInfo, null, 2)}
+
+请判断此衣服是否适合此用户。
+输出结构：
+
+{
+  "overall_evaluation": {
+    "conclusion": "整体适配度评价结论",
+    "suitability_score": 1-5分评分
+  },
+  "analysis": {
+    "color": {
+      "clothing_color": "衣物颜色描述",
+      "person_season": "用户季型",
+      "fit": "适合/不适合/部分适合",
+      "reason": "详细原因说明"
+    },
+    "material": {
+      "clothing_material": "衣物材质",
+      "recommended_materials": ["推荐材质列表"],
+      "fit": "适合/不适合/部分适合", 
+      "reason": "详细原因说明"
+    },
+    "style": {
+      "clothing_style": "衣物风格描述",
+      "person_energy": "用户能量类型描述",
+      "fit": "适合/不适合/部分适合",
+      "reason": "详细原因说明"
+    },
+    "pairing": {
+      "clothing_suggestions": ["搭配建议列表"],
+      "fit": "适合/不适合/部分可调和",
+      "reason": "详细原因说明"
+    },
+    "season": {
+      "clothing_season": "衣物适用季节",
+      "recommended_for_person": ["用户推荐季节搭配"],
+      "fit": "适合/不适合/不完全适合",
+      "reason": "详细原因说明"
+    }
+  },
+  "recommendations": {
+    "better_colors": ["更好的颜色选择"],
+    "better_materials": ["更好的材质选择"],
+    "better_styles": ["更好的风格选择"]
+  }
+}
+
+评分规则说明：
+suitability_score采用1-5分制，评分依据如下：
+- 5分：颜色、材质、风格三个维度都匹配用户季型和能量特征
+- 4分：三个维度中有两个匹配
+- 3分：三个维度中有一个匹配  
+- 2分：三个维度都不匹配（最低分，不出现1分）`;
+
+    // 实际应调用GPT API，这里暂时返回模拟数据
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // 模拟适配度分析结果（按照需求文档格式）
+    const mockAnalysis = {
+      overall_evaluation: {
+        conclusion: "整体部分适合。针织材质符合用户柔和气质，但深棕色与冷夏型特征有冲突。",
+        suitability_score: 3
+      },
+      analysis: {
+        color: {
+          clothing_color: "深棕色（Dark Brown）",
+          person_season: styleReport.season_analysis.season_12,
+          fit: "不适合",
+          reason: "冷夏型需要冷调、低对比、带灰感的颜色，深棕色偏暖、偏重，压暗肤色。"
+        },
+        material: {
+          clothing_material: "针织面料",
+          recommended_materials: Object.values(styleReport.shopping_guide.fabric_recommendations),
+          fit: "适合",
+          reason: "针织面料质感柔软，符合用户柔和气质特征，触感舒适。"
+        },
+        style: {
+          clothing_style: "休闲、基础款",
+          person_energy: styleReport.personality_traits.dominant_trait,
+          fit: "部分适合",
+          reason: "基础款符合简约风格，但可以选择更有设计感的款式突出知性气质。"
+        },
+        pairing: {
+          clothing_suggestions: [
+            "深色修身长裤",
+            "冷调色内搭",
+            "简约配饰"
+          ],
+          fit: "部分可调和",
+          reason: "通过冷调色搭配可以缓解颜色冲突，但仍非最佳选择。"
+        },
+        season: {
+          clothing_season: "秋冬",
+          recommended_for_person: ["羊绒", "精纺毛织物"],
+          fit: "适合",
+          reason: "针织面料适合秋冬穿着，保暖舒适。"
+        }
+      },
+      recommendations: {
+        better_colors: ["冷灰", "海军蓝", "深灰"],
+        better_materials: ["羊绒", "精纺毛织物", "莫代尔"],
+        better_styles: ["极简", "静奢老钱风", "知性优雅"]
+      }
+    };
+    
+    return mockAnalysis;
+  },
+
+  /**
+   * 生成缩略图
+   */
+  async generateThumbnail(imagePath) {
+    // 实际应该压缩图片，这里直接返回原路径
+    return imagePath;
+  },
+
+  /**
+   * 保存分析记录
+   */
+  saveAnalysisRecord(image, result) {
+    try {
+      // 获取现有记录
+      let records = tt.getStorageSync('item_analysis_records') || [];
+      
+      // 添加新记录
+      const record = {
+        id: Date.now(),
+        image: {
+          name: image.name,
+          type: image.type,
+          thumbnail: result.image.thumbnail
+        },
+        score: result.analysis.overall_score,
+        timestamp: result.timestamp,
+        analysis: result.analysis
+      };
+      
+      records.unshift(record);
+      
+      // 只保留最近5条记录
+      if (records.length > 5) {
+        records = records.slice(0, 5);
+      }
+      
+      // 保存到本地存储
+      tt.setStorageSync('item_analysis_records', records);
+      
+    } catch (error) {
+      console.error('保存分析记录失败:', error);
+    }
+  },
+
+  /**
+   * 移除上传的图片
+   */
+  removeImage() {
+    this.setData({
+      uploadedImage: null
+    });
+  }
+});

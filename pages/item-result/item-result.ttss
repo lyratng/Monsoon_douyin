@@ -1,0 +1,4 @@
+/* 单品分析结果页面样式 */
+.container {
+  padding: 40rpx;
+}

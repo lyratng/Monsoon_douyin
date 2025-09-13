@@ -1,0 +1,89 @@
+<!-- API测试页面模板 -->
+<view class="container">
+  <!-- 标题 -->
+  <view class="header">
+    <text class="title">🔧 API测试工具</text>
+    <text class="subtitle">调试AI对话API调用问题</text>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="buttons">
+    <button 
+      class="btn primary {{isTestRunning ? 'disabled' : ''}}" 
+      bindtap="startFullTest"
+      disabled="{{isTestRunning}}"
+    >
+      {{isTestRunning ? '测试进行中...' : '🚀 开始完整测试'}}
+    </button>
+    
+    <view class="quick-tests">
+      <button class="btn secondary" bindtap="quickTestConfig">📋 检查配置</button>
+      <button class="btn secondary" bindtap="quickTestNetwork">🌐 测试网络</button>
+      <button class="btn secondary" bindtap="quickTestChat">🤖 测试对话</button>
+    </view>
+    
+    <view class="log-controls">
+      <button class="btn outline" bindtap="copyLogs">📋 复制日志</button>
+      <button class="btn outline" bindtap="clearLogs">🗑️ 清空日志</button>
+    </view>
+  </view>
+
+  <!-- 测试结果概览 -->
+  <view class="results" tt:if="{{testResults.configCheck}}">
+    <text class="results-title">📊 测试结果概览</text>
+    
+    <view class="result-item">
+      <text class="result-label">配置检查:</text>
+      <text class="result-value {{testResults.configCheck.configOk ? 'success' : 'error'}}">
+        {{testResults.configCheck.configOk ? '✅ 通过' : '❌ 失败'}}
+      </text>
+    </view>
+    
+    <view class="result-item" tt:if="{{testResults.simpleTest}}">
+      <text class="result-label">网络连接:</text>
+      <text class="result-value {{testResults.simpleTest.success ? 'success' : 'error'}}">
+        {{testResults.simpleTest.success ? '✅ 成功' : '❌ 失败'}}
+      </text>
+    </view>
+    
+    <view class="result-item" tt:if="{{testResults.chatTest}}">
+      <text class="result-label">AI对话:</text>
+      <text class="result-value {{testResults.chatTest.success ? 'success' : 'error'}}">
+        {{testResults.chatTest.success ? '✅ 成功' : '❌ 失败'}}
+      </text>
+    </view>
+  </view>
+
+  <!-- 实时日志 -->
+  <view class="logs">
+    <text class="logs-title">📝 实时日志 ({{logs.length}}条)</text>
+    <scroll-view class="logs-content" scroll-y="true" scroll-top="0">
+      <view class="log-item" tt:for="{{logs}}" tt:key="index">
+        <text class="log-text">{{item}}</text>
+      </view>
+      <view class="log-placeholder" tt:if="{{logs.length === 0}}">
+        <text>暂无日志，点击测试按钮开始...</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 使用说明 -->
+  <view class="instructions">
+    <text class="instructions-title">📖 使用说明</text>
+    <view class="instruction-item">
+      <text>1. 首先检查API配置是否正确</text>
+    </view>
+    <view class="instruction-item">
+      <text>2. 测试网络连接是否正常</text>
+    </view>
+    <view class="instruction-item">
+      <text>3. 测试AI对话API是否可用</text>
+    </view>
+    <view class="instruction-item">
+      <text>4. 查看实时日志定位具体问题</text>
+    </view>
+    <view class="instruction-item">
+      <text>5. 复制日志信息进行进一步分析</text>
+    </view>
+  </view>
+</view>

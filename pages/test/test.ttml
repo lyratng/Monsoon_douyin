@@ -1,0 +1,329 @@
+<view class="test-container">
+  <!-- 进度条 -->
+  <view class="progress-bar">
+    <view class="progress-fill" style="width: {{(currentStep / totalSteps) * 100}}%"></view>
+  </view>
+  
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <text class="step-text">{{currentStep}} / {{totalSteps}}</text>
+  </view>
+
+  <!-- 第1页：基本信息 -->
+  <view wx:if="{{currentStep === 1}}" class="step-content fade-in">
+    <view class="step-title">基本信息</view>
+    
+    <!-- 性别选择 -->
+    <view class="form-group">
+      <view class="form-label">你的性别？</view>
+      <view class="gender-options">
+        <view 
+          class="option-btn {{gender === 'male' ? 'active' : ''}}"
+          data-gender="male"
+          bindtap="onGenderChange"
+        >男</view>
+        <view 
+          class="option-btn {{gender === 'female' ? 'active' : ''}}"
+          data-gender="female"
+          bindtap="onGenderChange"
+        >女</view>
+      </view>
+    </view>
+
+    <!-- 年龄滑动条 -->
+    <view class="form-group">
+      <view class="form-label">你的年龄？ <text class="value-display">{{age}}岁</text></view>
+      <slider 
+        class="custom-slider"
+        min="18" 
+        max="50" 
+        value="{{age}}"
+        bindchange="onAgeChange"
+        show-value="false"
+        activeColor="#2C2C2C"
+        backgroundColor="#E0E0E0"
+      />
+    </view>
+
+    <!-- 身高滑动条 -->
+    <view class="form-group">
+      <view class="form-label">你的身高？ <text class="value-display">{{height}}cm</text></view>
+      <slider 
+        class="custom-slider"
+        min="150" 
+        max="200" 
+        value="{{height}}"
+        bindchange="onHeightChange"
+        show-value="false"
+        activeColor="#2C2C2C"
+        backgroundColor="#E0E0E0"
+      />
+    </view>
+
+    <!-- 体重滑动条 -->
+    <view class="form-group">
+      <view class="form-label">你的体重？ <text class="value-display">{{weight}}kg</text></view>
+      <slider 
+        class="custom-slider"
+        min="40" 
+        max="150" 
+        value="{{weight}}"
+        bindchange="onWeightChange"
+        show-value="false"
+        activeColor="#2C2C2C"
+        backgroundColor="#E0E0E0"
+      />
+    </view>
+  </view>
+
+  <!-- 第2页：手腕血管颜色 -->
+  <view wx:elif="{{currentStep === 2}}" class="step-content fade-in">
+    <view class="step-title">手腕血管颜色</view>
+    <view class="step-description">请观察你的手腕血管主要颜色</view>
+    
+    <view class="wrist-color-options">
+      <view 
+        class="wrist-option {{wristColor === 'warm' ? 'active' : ''}}"
+        data-color="warm"
+        bindtap="onWristColorChange"
+      >
+        <view class="color-circle warm"></view>
+        <text>主要绿色</text>
+      </view>
+      
+      <view 
+        class="wrist-option {{wristColor === 'cool' ? 'active' : ''}}"
+        data-color="cool"
+        bindtap="onWristColorChange"
+      >
+        <view class="color-circle cool"></view>
+        <text>主要蓝紫色</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第3页：照片上传 -->
+  <view wx:elif="{{currentStep === 3}}" class="step-content fade-in">
+    <view class="step-title">面部照片分析</view>
+    <view class="step-description">请拍一张清晰的正脸照</view>
+    
+    <view class="photo-upload-container">
+      <view wx:if="{{!uploadedImage}}" class="upload-area" bindtap="chooseImage">
+        <view class="upload-icon">📷</view>
+        <text class="upload-text">点击拍照或选择照片</text>
+      </view>
+      
+      <view wx:else class="uploaded-image-container">
+        <image src="{{uploadedImage}}" class="uploaded-image" mode="aspectFit" />
+        <button class="reupload-btn" bindtap="chooseImage">重新上传</button>
+      </view>
+    </view>
+    
+    <view wx:if="{{isLoading}}" class="analysis-loading">
+      <view class="loading-icon">🔄</view>
+      <text>AI分析中...</text>
+    </view>
+    
+    <view wx:if="{{colorAnalysisResult}}" class="analysis-result">
+      <view class="result-title">✅ 分析完成</view>
+      <text class="result-text">季型：{{colorAnalysisResult.season_12}}</text>
+    </view>
+  </view>
+
+  <!-- 第4页：喜欢的颜色 -->
+  <view wx:elif="{{currentStep === 4}}" class="step-content fade-in">
+    <view class="step-title">你最喜欢的颜色？</view>
+    <view class="step-description">多选，至少选择一种</view>
+    
+    <view class="color-grid">
+      <view 
+        wx:for="{{colorOptions}}" 
+        wx:key="value"
+        class="color-item {{item.selected ? 'selected' : ''}}"
+        data-color="{{item.value}}"
+        bindtap="onColorToggle"
+      >
+        <view 
+          class="color-circle {{item.border ? 'with-border' : ''}}" 
+          style="background-color: {{item.color}}"
+        ></view>
+        <text class="color-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第5页：穿搭场合 -->
+  <view wx:elif="{{currentStep === 5}}" class="step-content fade-in">
+    <view class="step-title">你平时的穿搭场合？</view>
+    <view class="step-description">多选，选择你常需要的场合</view>
+    
+    <view class="occasion-list">
+      <view 
+        wx:for="{{occasionOptions}}" 
+        wx:key="value"
+        class="occasion-item {{item.selected ? 'selected' : ''}}"
+        data-occasion="{{item.value}}"
+        bindtap="onOccasionToggle"
+      >
+        <view class="occasion-checkbox">
+          <text wx:if="{{item.selected}}">✓</text>
+        </view>
+        <text class="occasion-name">{{item.name}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第6页：风格认知程度 -->
+  <view wx:elif="{{currentStep === 6}}" class="step-content fade-in">
+    <view class="step-title">你有多了解自己的风格？</view>
+    
+    <view class="radio-options">
+      <view 
+        class="radio-item {{styleAwareness === '几乎不了解 但我迫不及待想要找到风格' ? 'selected' : ''}}"
+        data-value="几乎不了解 但我迫不及待想要找到风格"
+        bindtap="onStyleAwarenessChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{styleAwareness === '几乎不了解 但我迫不及待想要找到风格'}}" class="radio-dot"></view>
+        </view>
+        <text>几乎不了解 但我迫不及待想要找到风格</text>
+      </view>
+      
+      <view 
+        class="radio-item {{styleAwareness === '我了解自己的肤色适合什么颜色衣服' ? 'selected' : ''}}"
+        data-value="我了解自己的肤色适合什么颜色衣服"
+        bindtap="onStyleAwarenessChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{styleAwareness === '我了解自己的肤色适合什么颜色衣服'}}" class="radio-dot"></view>
+        </view>
+        <text>我了解自己的肤色适合什么颜色衣服</text>
+      </view>
+      
+      <view 
+        class="radio-item {{styleAwareness === '我了解自己身材适合什么版型' ? 'selected' : ''}}"
+        data-value="我了解自己身材适合什么版型"
+        bindtap="onStyleAwarenessChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{styleAwareness === '我了解自己身材适合什么版型'}}" class="radio-dot"></view>
+        </view>
+        <text>我了解自己身材适合什么版型</text>
+      </view>
+      
+      <view 
+        class="radio-item {{styleAwareness === '我很了解自己的风格' ? 'selected' : ''}}"
+        data-value="我很了解自己的风格"
+        bindtap="onStyleAwarenessChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{styleAwareness === '我很了解自己的风格'}}" class="radio-dot"></view>
+        </view>
+        <text>我很了解自己的风格</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第7页：购物满意度 -->
+  <view wx:elif="{{currentStep === 7}}" class="step-content fade-in">
+    <view class="step-title">购物经历满意度</view>
+    <view class="step-description">你对自己过去的购物经历中大多数时候满意吗？</view>
+    
+    <view class="radio-options">
+      <view 
+        class="radio-item {{shoppingSatisfaction === '非常满意，我买衣服很准' ? 'selected' : ''}}"
+        data-value="非常满意，我买衣服很准"
+        bindtap="onShoppingSatisfactionChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{shoppingSatisfaction === '非常满意，我买衣服很准'}}" class="radio-dot"></view>
+        </view>
+        <text>非常满意，我买衣服很准</text>
+      </view>
+      
+      <view 
+        class="radio-item {{shoppingSatisfaction === '比较满意，我退换少量衣服' ? 'selected' : ''}}"
+        data-value="比较满意，我退换少量衣服"
+        bindtap="onShoppingSatisfactionChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{shoppingSatisfaction === '比较满意，我退换少量衣服'}}" class="radio-dot"></view>
+        </view>
+        <text>比较满意，我退换少量衣服</text>
+      </view>
+      
+      <view 
+        class="radio-item {{shoppingSatisfaction === '不太满意，我经常退换或者闲置衣服' ? 'selected' : ''}}"
+        data-value="不太满意，我经常退换或者闲置衣服"
+        bindtap="onShoppingSatisfactionChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{shoppingSatisfaction === '不太满意，我经常退换或者闲置衣服'}}" class="radio-dot"></view>
+        </view>
+        <text>不太满意，我经常退换或者闲置衣服</text>
+      </view>
+      
+      <view 
+        class="radio-item {{shoppingSatisfaction === '很不满意，甚至在穿搭上有点失去信心' ? 'selected' : ''}}"
+        data-value="很不满意，甚至在穿搭上有点失去信心"
+        bindtap="onShoppingSatisfactionChange"
+      >
+        <view class="radio-circle">
+          <view wx:if="{{shoppingSatisfaction === '很不满意，甚至在穿搭上有点失去信心'}}" class="radio-dot"></view>
+        </view>
+        <text>很不满意，甚至在穿搭上有点失去信心</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第8-15页：心理测试 -->
+  <view wx:elif="{{currentStep >= 8 && currentStep <= 15}}" class="step-content fade-in">
+    <view class="step-title">心理测试</view>
+    <!-- 根据步骤显示不同问题 -->
+    <include src="./psychology-questions.ttml" />
+  </view>
+
+  <!-- 第16页：MBTI选择 -->
+  <view wx:elif="{{currentStep === 16}}" class="step-content fade-in">
+    <view class="step-title">你的MBTI？</view>
+    <view class="step-description">选择你的人格类型</view>
+    
+    <view class="mbti-grid">
+      <view 
+        wx:for="{{mbtiOptions}}" 
+        wx:key="*this"
+        class="mbti-item {{mbtiType === item ? 'selected' : ''}}"
+        data-mbti="{{item}}"
+        bindtap="onMbtiChange"
+      >
+        <text>{{item}}</text>
+      </view>
+    </view>
+    
+    <view class="mbti-uncertain">
+      <view class="radio-item">
+        <view class="radio-circle"></view>
+        <text>不确定</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导航按钮 -->
+  <view class="navigation-buttons">
+    <button 
+      wx:if="{{currentStep > 1}}" 
+      class="btn btn-secondary nav-btn" 
+      bindtap="prevStep"
+    >
+      上一步
+    </button>
+    
+    <button 
+      class="btn btn-primary nav-btn {{currentStep === 1 ? 'full-width' : ''}}" 
+      bindtap="nextStep"
+      loading="{{isLoading}}"
+    >
+      {{currentStep === totalSteps ? '生成报告' : '下一步'}}
+    </button>
+  </view>
+</view>

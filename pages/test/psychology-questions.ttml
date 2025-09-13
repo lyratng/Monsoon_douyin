@@ -1,0 +1,185 @@
+<!-- 心理测试问题模板 -->
+
+<!-- 第8页 -->
+<view wx:if="{{currentStep === 8}}" class="psychology-question">
+  <view class="question-title">当你的日程被排得很满时，你通常会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[0] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>增添一些有趣的元素，让任务保持新鲜和有活力</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[0] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>预留缓冲时间，轻松地处理每一步，避免紧张</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[0] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>加快速度，更快推进，把任务迅速完成</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[0] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>去除非必要的部分，锁定重点，稳步前进</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第9页 -->
+<view wx:elif="{{currentStep === 9}}" class="psychology-question">
+  <view class="question-title">当通勤时间意外延长时，你最可能会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[1] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>换一条新路线，并享受这种不同的体验</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[1] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>平静地调整心态，让旅程变得舒适放松</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[1] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>寻找最快的替代路线，并有目的地赶路</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[1] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>坚持走一条直接、可靠的路线，即使更长，以保持一致性</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第10页 -->
+<view wx:elif="{{currentStep === 10}}" class="psychology-question">
+  <view class="question-title">你的周末计划突然取消了，你最可能会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[2] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>尝试一些新鲜或即兴的活动</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[2] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>享受空闲时光，放松下来，顺其自然</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[2] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>迅速安排其他活动，保持节奏不断</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[2] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>用来进行深思或长期规划</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第11页 -->
+<view wx:elif="{{currentStep === 11}}" class="psychology-question">
+  <view class="question-title">当你进入一个新的社交群体时，你通常会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[3] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>带来轻松氛围，让谈话自然展开</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[3] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>注意他人的舒适度，并以细腻方式建立联系</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[3] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>主动提出行动方案，引导方向</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[3] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>先观察，再谨慎地发表有分量的意见</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第12页 -->
+<view wx:elif="{{currentStep === 12}}" class="psychology-question">
+  <view class="question-title">如果有人给你模糊的指示，你通常会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[4] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>以尝试的心态动手，看看什么能行得通</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[4] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>温和地提出澄清问题，在明确后再开始</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[4] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>先推动起来，边做边定义细节</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[4] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>坚持要求明确范围，只有方向清晰才开始行动</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第13页 -->
+<view wx:elif="{{currentStep === 13}}" class="psychology-question">
+  <view class="question-title">当朋友因挫折而情绪低落时，你通常会：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[5] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>用轻松活泼的方式让他们振作起来</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[5] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>提供平静的陪伴，让他们感到舒适</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[5] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>给他们一个快速前进的计划，激励他们行动</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[5] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>提供真诚、深思熟虑并带有分量的建议</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第14页 -->
+<view wx:elif="{{currentStep === 14}}" class="psychology-question">
+  <view class="question-title">哪种环境最让你感到自然？</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[6] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>明亮、动态、不断变化的空间</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[6] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>柔和、圆润、流动的环境</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[6] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>干脆、充满能量、带有锋利边角的场所</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[6] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>干净、简约、线条笔直的空间</text>
+    </view>
+  </view>
+</view>
+
+<!-- 第15页 -->
+<view wx:elif="{{currentStep === 15}}" class="psychology-question">
+  <view class="question-title">你行动的方式最接近于：</view>
+  <view class="question-options">
+    <view class="option-item {{psychologyAnswers[7] === 'A' ? 'selected' : ''}}" data-choice="A" bindtap="onPersonalityChoice">
+      <view class="option-label">A</view>
+      <text>轻快、有弹性、带着玩味</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[7] === 'B' ? 'selected' : ''}}" data-choice="B" bindtap="onPersonalityChoice">
+      <view class="option-label">B</view>
+      <text>顺畅、流动、优雅自如</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[7] === 'C' ? 'selected' : ''}}" data-choice="C" bindtap="onPersonalityChoice">
+      <view class="option-label">C</view>
+      <text>迅速、干脆、目标明确</text>
+    </view>
+    <view class="option-item {{psychologyAnswers[7] === 'D' ? 'selected' : ''}}" data-choice="D" bindtap="onPersonalityChoice">
+      <view class="option-label">D</view>
+      <text>稳定、笔直、谨慎而有条理</text>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,72 @@
+<!-- AI对话聊天页面 -->
+<view class="chat-container">
+
+  <!-- 消息列表 -->
+  <scroll-view class="message-list" scroll-y="true" scroll-top="{{scrollTop}}" scroll-into-view="{{scrollToView}}">
+    <!-- 推荐问题 -->
+    <view wx:if="{{showRecommended}}" class="recommended-questions">
+      <view class="recommended-header">
+        <text class="recommended-title">推荐问题</text>
+        <text class="clear-btn" bindtap="clearChatHistory">清除记录</text>
+      </view>
+      <view class="question-grid">
+        <view wx:for="{{recommendedQuestions}}" wx:key="index" class="question-item" bindtap="onRecommendedQuestionTap" data-question="{{item}}">
+          <text class="question-text">{{item}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 消息项 -->
+    <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.type === 'user' ? 'user-message' : 'ai-message'}}" id="msg-{{item.id}}">
+      <!-- AI消息 -->
+      <view wx:if="{{item.type === 'ai'}}" class="ai-message-content">
+        <view class="ai-bubble">
+          <text class="message-text">{{item.content}}</text>
+          <text class="message-time">{{item.timestamp}}</text>
+        </view>
+      </view>
+
+      <!-- 用户消息 -->
+      <view wx:else class="user-message-content">
+        <view class="user-bubble">
+          <text class="message-text">{{item.content}}</text>
+          <text class="message-time">{{item.timestamp}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载状态 -->
+    <view wx:if="{{isLoading}}" class="loading-message">
+      <view class="loading-bubble">
+        <view class="typing-indicator">
+          <view class="dot"></view>
+          <view class="dot"></view>
+          <view class="dot"></view>
+        </view>
+        <text class="loading-text">思考中...</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入区域 -->
+  <view class="input-area">
+    <view class="input-container">
+      <textarea
+        class="input-textarea"
+        placeholder="请输入您的穿搭问题（最多200字）..."
+        value="{{inputText}}"
+        bindinput="onInputChange"
+        maxlength="200"
+        auto-height
+        cursor-spacing="20"
+        hold-keyboard="{{true}}"
+      ></textarea>
+      <view class="input-actions">
+        <text class="char-count">{{inputText.length}}/200</text>
+        <button class="send-btn {{inputText.trim() ? 'active' : ''}}" bindtap="sendMessage" disabled="{{isLoading}}">
+          <text class="send-text">发送</text>
+        </button>
+      </view>
+    </view>
+  </view>
+</view>

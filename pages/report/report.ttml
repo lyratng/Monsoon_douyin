@@ -1,0 +1,203 @@
+<!-- 个人风格报告页面 -->
+<view class="report-container">
+  <!-- 导航栏 -->
+  <view class="nav-bar">
+    <button class="nav-back-btn" bindtap="goToHome">
+      <text class="back-icon">←</text>
+      <text class="back-text">返回主页</text>
+    </button>
+    <text class="nav-title">个人风格报告</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">正在生成您的专属风格报告...</text>
+  </view>
+
+  <!-- 报告内容 -->
+  <view wx:else class="report-content">
+    <!-- 头部信息 -->
+    <view class="report-header">
+      <view class="user-info">
+        <text class="user-name">{{userProfile.name}}的专属风格报告</text>
+        <text class="report-date">生成日期：{{styleReport.generated_time || '今天'}}</text>
+      </view>
+    </view>
+
+    <!-- 季型分析 -->
+    <view class="section season-section">
+      <view class="section-title">
+        <text class="title-text">季型分析</text>
+        <text class="title-subtitle">您的色彩季型</text>
+      </view>
+      <view class="season-result">
+        <view class="season-main">
+          <text class="season-type">{{styleReport.season_analysis.season_12}}</text>
+          <text class="season-temp">{{styleReport.season_analysis.color_temperature}}</text>
+        </view>
+        <view class="season-attributes">
+          <view class="attribute-item">
+            <text class="attr-label">深浅</text>
+            <text class="attr-value">{{styleReport.season_analysis.depth}}</text>
+          </view>
+          <view class="attribute-item">
+            <text class="attr-label">对比</text>
+            <text class="attr-value">{{styleReport.season_analysis.contrast}}</text>
+          </view>
+          <view class="attribute-item">
+            <text class="attr-label">边缘</text>
+            <text class="attr-value">{{styleReport.season_analysis.edge}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 色彩搭配 -->
+    <view class="section color-section">
+      <view class="section-title">
+        <text class="title-text">专属色彩</text>
+        <text class="title-subtitle">最适合您的颜色搭配</text>
+      </view>
+      
+      <!-- 推荐色彩 -->
+      <view class="color-group">
+        <text class="color-group-title">推荐色彩</text>
+        <view class="color-palette">
+          <view wx:for="{{styleReport.color_palette.best_colors}}" wx:key="index" class="color-item">
+            <view class="color-block" style="background-color: {{item.hex}};"></view>
+            <text class="color-name">{{item.name}}</text>
+            <text class="color-category">{{item.category}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 避免色彩 -->
+      <view class="color-group avoid-colors">
+        <text class="color-group-title">建议避免</text>
+        <view class="avoid-palette">
+          <view wx:for="{{styleReport.color_palette.avoid_colors}}" wx:key="index" class="avoid-item">
+            <view class="color-block avoid-block" style="background-color: {{item.hex}};"></view>
+            <view class="avoid-info">
+              <text class="color-name">{{item.name}}</text>
+              <text class="avoid-reason">{{item.reason}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 性格特征 -->
+    <view class="section personality-section">
+      <view class="section-title">
+        <text class="title-text">性格特征</text>
+        <text class="title-subtitle">基于测试的个性分析</text>
+      </view>
+      <view class="personality-content">
+        <view class="dominant-trait">
+          <text class="trait-label">主要特质</text>
+          <text class="trait-value">{{styleReport.personality_traits.dominant_trait}}</text>
+        </view>
+        <view class="mbti-info">
+          <text class="mbti-label">MBTI类型</text>
+          <text class="mbti-value">{{styleReport.personality_traits.mbti}}</text>
+        </view>
+        <view class="style-keywords">
+          <text class="keywords-label">风格关键词</text>
+          <view class="keywords-list">
+            <text wx:for="{{styleReport.personality_traits.style_keywords}}" wx:key="index" class="keyword-tag">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 风格建议 -->
+    <view class="section style-section">
+      <view class="section-title">
+        <text class="title-text">风格建议</text>
+        <text class="title-subtitle">适合您的穿搭风格</text>
+      </view>
+      <view class="style-recommendations">
+        <view class="style-item">
+          <text class="style-label">日常风格</text>
+          <text class="style-desc">{{styleReport.style_recommendations.daily_style}}</text>
+        </view>
+        <view class="style-item">
+          <text class="style-label">职场风格</text>
+          <text class="style-desc">{{styleReport.style_recommendations.work_style}}</text>
+        </view>
+        <view class="style-item">
+          <text class="style-label">特殊场合</text>
+          <text class="style-desc">{{styleReport.style_recommendations.special_occasion}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 四季穿搭 -->
+    <view class="section seasonal-section">
+      <view class="section-title">
+        <text class="title-text">四季穿搭</text>
+        <text class="title-subtitle">不同季节的搭配建议</text>
+      </view>
+      <view class="seasonal-tips">
+        <view class="season-tip">
+          <text class="season-name">春季</text>
+          <text class="season-advice">{{styleReport.style_recommendations.seasonal_tips.spring}}</text>
+        </view>
+        <view class="season-tip">
+          <text class="season-name">夏季</text>
+          <text class="season-advice">{{styleReport.style_recommendations.seasonal_tips.summer}}</text>
+        </view>
+        <view class="season-tip">
+          <text class="season-name">秋季</text>
+          <text class="season-advice">{{styleReport.style_recommendations.seasonal_tips.autumn}}</text>
+        </view>
+        <view class="season-tip">
+          <text class="season-name">冬季</text>
+          <text class="season-advice">{{styleReport.style_recommendations.seasonal_tips.winter}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 购物指南 -->
+    <view class="section shopping-section">
+      <view class="section-title">
+        <text class="title-text">购物指南</text>
+        <text class="title-subtitle">打造完美衣橱的建议</text>
+      </view>
+      <view class="shopping-guide">
+        <view class="guide-item">
+          <text class="guide-label">衣橱必备</text>
+          <view class="essential-list">
+            <text wx:for="{{styleReport.shopping_guide.wardrobe_essentials}}" wx:key="index" class="essential-tag">{{item}}</text>
+          </view>
+        </view>
+        <view class="guide-item">
+          <text class="guide-label">面料推荐</text>
+          <view class="fabric-list">
+            <text wx:for="{{styleReport.shopping_guide.fabric_recommendations}}" wx:key="index" class="fabric-tag">{{item}}</text>
+          </view>
+        </view>
+        <view class="guide-item">
+          <text class="guide-label">图案建议</text>
+          <view class="pattern-list">
+            <text wx:for="{{styleReport.shopping_guide.pattern_suggestions}}" wx:key="index" class="pattern-tag">{{item}}</text>
+          </view>
+        </view>
+        <view class="guide-item">
+          <text class="guide-label">风格偶像</text>
+          <view class="icon-list">
+            <text wx:for="{{styleReport.shopping_guide.style_icons}}" wx:key="index" class="icon-tag">{{item}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="report-actions">
+      <button class="action-btn secondary-btn" bindtap="shareReport">分享报告</button>
+      <button class="action-btn primary-btn" bindtap="retakeTest">重新测试</button>
+    </view>
+  </view>
+</view>

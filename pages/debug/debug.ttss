@@ -1,0 +1,255 @@
+/* API调试页面样式 */
+
+.debug-container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 20rpx;
+}
+
+/* 头部 */
+.debug-header {
+  background: white;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.debug-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.debug-subtitle {
+  font-size: 24rpx;
+  color: #666;
+}
+
+/* 测试按钮区域 */
+.test-buttons {
+  background: white;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.test-btn {
+  width: 100%;
+  height: 80rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.test-btn:last-child {
+  margin-bottom: 0;
+}
+
+.test-btn.primary {
+  background: #4a90e2;
+  color: white;
+}
+
+.test-btn.secondary {
+  background: #28a745;
+  color: white;
+}
+
+.test-btn.warning {
+  background: #ffc107;
+  color: #333;
+}
+
+.test-btn.clear {
+  background: #dc3545;
+  color: white;
+}
+
+.test-btn:active {
+  transform: scale(0.98);
+  opacity: 0.8;
+}
+
+.test-btn[disabled] {
+  opacity: 0.6;
+  transform: none;
+}
+
+/* 加载状态 */
+.loading-indicator {
+  background: white;
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 6rpx solid #f0f0f0;
+  border-top: 6rpx solid #4a90e2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20rpx;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 日志区域 */
+.logs-section {
+  background: white;
+  border-radius: 16rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.logs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  background: #f8f9fa;
+}
+
+.logs-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.logs-actions {
+  display: flex;
+  gap: 12rpx;
+}
+
+.action-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 16rpx;
+}
+
+.action-btn.clear {
+  background: #dc3545;
+}
+
+.logs-container {
+  height: 600rpx;
+  background: #1e1e1e;
+}
+
+.empty-logs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #888;
+  margin-bottom: 8rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #666;
+}
+
+.log-item {
+  padding: 8rpx 16rpx;
+  border-bottom: 1rpx solid #333;
+}
+
+.log-text {
+  font-size: 24rpx;
+  color: #e0e0e0;
+  font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+/* 特殊日志颜色 */
+.log-item:has(.log-text:contains('✅')) .log-text {
+  color: #4ade80;
+}
+
+.log-item:has(.log-text:contains('❌')) .log-text {
+  color: #f87171;
+}
+
+.log-item:has(.log-text:contains('⚠️')) .log-text {
+  color: #fbbf24;
+}
+
+.log-item:has(.log-text:contains('📡')) .log-text {
+  color: #60a5fa;
+}
+
+/* 说明区域 */
+.instructions {
+  background: white;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.1);
+}
+
+.instructions-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.instructions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.instruction-item {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.4;
+  padding-left: 12rpx;
+  position: relative;
+}
+
+.instruction-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6rpx;
+  height: 6rpx;
+  background: #4a90e2;
+  border-radius: 50%;
+}

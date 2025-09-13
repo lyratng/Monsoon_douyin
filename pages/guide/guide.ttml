@@ -1,0 +1,83 @@
+<view class="guide-container">
+  <swiper 
+    class="guide-swiper" 
+    indicator-dots="false"
+    autoplay="{{false}}"
+    circular="{{false}}"
+    interval="999999"
+    duration="300"
+    bindchange="onSwiperChange"
+    current="{{currentPage - 1}}"
+  >
+    <!-- 引导页 1 -->
+    <swiper-item class="guide-item">
+      <view class="guide-content gradient-bg-1">
+        <view class="content-area">
+          <view class="text-container">
+            <view 
+              wx:for="{{currentPage === 1 ? animatedLines : []}}" 
+              wx:key="index" 
+              class="guide-line fade-in-line"
+              style="animation-delay: {{index * 0.3}}s;"
+            >
+              {{item.text}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+
+    <!-- 引导页 2 -->
+    <swiper-item class="guide-item">
+      <view class="guide-content gradient-bg-2">
+        <view class="content-area">
+          <view class="text-container">
+            <view 
+              wx:for="{{currentPage === 2 ? animatedLines : []}}" 
+              wx:key="index" 
+              class="guide-line fade-in-line"
+              style="animation-delay: {{index * 0.3}}s;"
+            >
+              {{item.text}}
+            </view>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+
+    <!-- 引导页 3 -->
+    <swiper-item class="guide-item">
+      <view class="guide-content gradient-bg-3">
+        <view class="content-area">
+          <view class="text-container">
+            <view 
+              wx:for="{{currentPage === 3 ? animatedLines : []}}" 
+              wx:key="index" 
+              class="guide-line fade-in-line"
+              style="animation-delay: {{index * 0.3}}s;"
+            >
+              {{item.text}}
+            </view>
+          </view>
+          
+          <!-- 开始按钮 -->
+          <view wx:if="{{currentPage === 3 && showStartButton}}" class="start-button-container fade-in">
+            <button class="btn btn-primary btn-large start-btn" bindtap="startTest">
+              开启
+            </button>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 页面指示器 -->
+  <view class="page-indicator">
+    <view 
+      wx:for="{{totalPages}}" 
+      wx:key="*this"
+      class="indicator-dot {{currentPage === index + 1 ? 'active' : ''}}"
+    ></view>
+  </view>
+
+</view>

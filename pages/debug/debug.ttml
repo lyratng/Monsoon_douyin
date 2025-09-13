@@ -1,0 +1,75 @@
+<!-- API调试页面 -->
+<view class="debug-container">
+  <!-- 头部 -->
+  <view class="debug-header">
+    <text class="debug-title">🔧 API调试工具</text>
+    <text class="debug-subtitle">用于排查API调用问题</text>
+  </view>
+
+  <!-- 测试按钮区域 -->
+  <view class="test-buttons">
+    <button class="test-btn primary" bindtap="testApiKeyConfig" disabled="{{isLoading}}">
+      🔑 检查API配置
+    </button>
+    
+    <button class="test-btn primary" bindtap="goToApiTest">
+      🚀 AI对话API专项测试
+    </button>
+    
+    <button class="test-btn secondary" bindtap="testDomainWhitelist" disabled="{{isLoading}}">
+      🌐 测试域名白名单
+    </button>
+    
+    <button class="test-btn secondary" bindtap="testNetworkConnection" disabled="{{isLoading}}">
+      📡 测试网络连接
+    </button>
+    
+    <button class="test-btn warning" bindtap="testImageAnalysis" disabled="{{isLoading}}">
+      🖼️ 测试图像分析
+    </button>
+    
+    <button class="test-btn warning" bindtap="testReportGeneration" disabled="{{isLoading}}">
+      📋 测试报告生成
+    </button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading-indicator">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">测试进行中...</text>
+  </view>
+
+  <!-- 日志区域 -->
+  <view class="logs-section">
+    <view class="logs-header">
+      <text class="logs-title">📋 调试日志</text>
+      <view class="logs-actions">
+        <button class="action-btn" bindtap="copyLogs" size="mini">复制</button>
+        <button class="action-btn clear" bindtap="clearLogs" size="mini">清除</button>
+      </view>
+    </view>
+    
+    <scroll-view class="logs-container" scroll-y="true">
+      <view wx:if="{{debugLogs.length === 0}}" class="empty-logs">
+        <text class="empty-text">暂无调试日志</text>
+        <text class="empty-hint">点击上方按钮开始测试</text>
+      </view>
+      
+      <view wx:for="{{debugLogs}}" wx:key="index" class="log-item">
+        <text class="log-text">{{item}}</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 说明区域 -->
+  <view class="instructions">
+    <text class="instructions-title">💡 使用说明</text>
+    <view class="instructions-list">
+      <text class="instruction-item">1. 首先检查API配置是否正确</text>
+      <text class="instruction-item">2. 测试域名白名单是否配置完成</text>
+      <text class="instruction-item">3. 测试网络连接是否正常</text>
+      <text class="instruction-item">4. 分别测试图像分析和报告生成API</text>
+      <text class="instruction-item">5. 查看调试日志找出具体问题</text>
+    </view>
+  </view>
+</view>

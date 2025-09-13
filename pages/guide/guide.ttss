@@ -1,0 +1,216 @@
+/* 引导页样式 - 诗意美学设计 */
+
+.guide-container {
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+.guide-swiper {
+  height: 100%;
+  width: 100%;
+}
+
+.guide-item {
+  height: 100%;
+  width: 100%;
+}
+
+.guide-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 120rpx 60rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 渐变背景 - 更柔和 */
+.gradient-bg-1 {
+  background: linear-gradient(135deg, 
+    #F5F5F0 0%, 
+    #F8F8F3 50%, 
+    #FAFAF5 100%);
+}
+
+.gradient-bg-2 {
+  background: linear-gradient(135deg, 
+    #F5F5F0 0%, 
+    #F3F6F8 50%, 
+    #F0F3F5 100%);
+}
+
+.gradient-bg-3 {
+  background: linear-gradient(135deg, 
+    #F5F5F0 0%, 
+    #F8F3F5 50%, 
+    #FAF5F7 100%);
+}
+
+/* 内容区域 */
+.content-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  width: 100%;
+}
+
+.text-container {
+  text-align: center;
+  margin-bottom: 80rpx;
+}
+
+/* 引导页文字 - 上升渐显动画设计 */
+.guide-line {
+  font-size: 40rpx;
+  font-weight: 300;
+  color: #2C2C2C;  /* 统一使用"你知道吗"的颜色 */
+  letter-spacing: 3rpx;
+  line-height: 2.2;
+  margin-bottom: 40rpx;
+  opacity: 0;
+  transform: translateY(30rpx);
+  max-width: 600rpx;
+  text-align: center;
+  will-change: opacity, transform;
+}
+
+.fade-in-line {
+  animation: fadeInLine 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-fill-mode: both;
+}
+
+/* 统一字号和颜色 */
+.guide-line:first-child {
+  margin-bottom: 60rpx;
+}
+
+/* 第二页和第三页缩小行间距30% */
+.guide-content.gradient-bg-2 .guide-line,
+.guide-content.gradient-bg-3 .guide-line {
+  margin-bottom: 28rpx; /* 40rpx * 0.7 = 28rpx */
+}
+
+.guide-content.gradient-bg-2 .guide-line:first-child,
+.guide-content.gradient-bg-3 .guide-line:first-child {
+  margin-bottom: 42rpx; /* 60rpx * 0.7 = 42rpx */
+}
+
+/* 开始按钮容器 */
+.start-button-container {
+  width: 100%;
+  max-width: 400rpx;
+  animation: fadeInUp 1s ease-out;
+}
+
+/* 页面指示器 */
+.page-indicator {
+  position: absolute;
+  bottom: 120rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16rpx;
+  z-index: 10;
+}
+
+.indicator-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: rgba(44, 44, 44, 0.3);
+  transition: all 0.4s ease;
+}
+
+.indicator-dot.active {
+  background: #2C2C2C;
+  width: 24rpx;
+  border-radius: 4rpx;
+}
+
+/* 开始按钮样式 */
+.start-btn {
+  width: 100%;
+  height: 88rpx;
+  background: #E8E8E3;
+  color: #999;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 2rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+}
+
+.start-btn::after {
+  border: none;
+}
+
+.start-btn:active {
+  background: #2C2C2C;
+  color: #FFFFFF;
+  transform: scale(0.98);
+  box-shadow: 0 16rpx 48rpx rgba(44, 44, 44, 0.2);
+}
+
+/* 上升渐显动画效果 */
+@keyframes fadeInLine {
+  0% {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(60rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 淡入效果 */
+.fade-in {
+  animation: fadeIn 1s ease-out;
+}
+
+/* 响应式适配 */
+@media (max-width: 750rpx) {
+  .guide-line {
+    font-size: 36rpx;
+    letter-spacing: 2rpx;
+    margin-bottom: 36rpx;
+  }
+  
+  .guide-line:first-child {
+    margin-bottom: 50rpx;
+  }
+}
+
+/* 确保容器不会超出屏幕 */
+.guide-content {
+  width: 100%;
+  box-sizing: border-box;
+}

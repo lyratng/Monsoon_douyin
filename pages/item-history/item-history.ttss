@@ -1,0 +1,4 @@
+/* 单品历史记录页面样式 */
+.container {
+  padding: 40rpx;
+}
