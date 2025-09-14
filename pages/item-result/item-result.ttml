@@ -2,7 +2,7 @@
 <view class="container">
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading-container">
-    <view class="loading-icon">🎯</view>
+    <view class="loading-icon">●</view>
     <text class="loading-text">加载结果中...</text>
   </view>
 
@@ -36,7 +36,7 @@
               wx:key="*this"
               class="star {{item <= analysisResult.suitabilityResult.overall_evaluation.suitability_score ? 'filled' : ''}}"
             >
-              ⭐
+              ★
             </view>
           </view>
           <text class="score-text">{{analysisResult.suitabilityResult.overall_evaluation.suitability_score}}/5分</text>
@@ -51,7 +51,6 @@
         <!-- 颜色分析 -->
         <view class="analysis-card">
           <view class="card-header">
-            <text class="card-icon">🎨</text>
             <text class="card-title">颜色分析</text>
             <text class="fit-badge {{analysisResult.suitabilityResult.analysis.color.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.color.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
               {{analysisResult.suitabilityResult.analysis.color.fit}}
@@ -73,7 +72,6 @@
         <!-- 材质分析 -->
         <view class="analysis-card">
           <view class="card-header">
-            <text class="card-icon">🧵</text>
             <text class="card-title">材质分析</text>
             <text class="fit-badge {{analysisResult.suitabilityResult.analysis.material.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.material.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
               {{analysisResult.suitabilityResult.analysis.material.fit}}
@@ -95,7 +93,6 @@
         <!-- 风格分析 -->
         <view class="analysis-card">
           <view class="card-header">
-            <text class="card-icon">💫</text>
             <text class="card-title">风格分析</text>
             <text class="fit-badge {{analysisResult.suitabilityResult.analysis.style.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.style.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
               {{analysisResult.suitabilityResult.analysis.style.fit}}
@@ -117,7 +114,6 @@
         <!-- 搭配建议 -->
         <view class="analysis-card">
           <view class="card-header">
-            <text class="card-icon">👔</text>
             <text class="card-title">搭配建议</text>
             <text class="fit-badge {{analysisResult.suitabilityResult.analysis.pairing.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.pairing.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
               {{analysisResult.suitabilityResult.analysis.pairing.fit}}
@@ -137,7 +133,7 @@
 
       <!-- 更好的选择 -->
       <view class="recommendations-section">
-        <text class="section-title">🌟 更好的选择</text>
+        <text class="section-title">更好的选择</text>
         
         <view wx:if="{{analysisResult.suitabilityResult.recommendations.better_colors.length > 0}}" class="recommendation-group">
           <text class="group-title">推荐颜色</text>
@@ -186,11 +182,11 @@
     <!-- 固定底部操作栏 -->
     <view class="bottom-bar">
       <button class="secondary-button" bindtap="viewHistory">
-        <text class="button-text">历史记录</text>
+        <text class="button-text">历史</text>
       </button>
       
       <button class="secondary-button" bindtap="shareResult">
-        <text class="button-text">分享结果</text>
+        <text class="button-text">分享</text>
       </button>
       
       <button class="primary-button" bindtap="analyzeAgain">

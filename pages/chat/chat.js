@@ -72,6 +72,11 @@ Page({
         this.addWelcomeMessage();
       }
 
+      // 延迟滚动到底部，确保DOM渲染完成
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 100);
+
     } catch (error) {
       console.error('初始化聊天失败:', error);
       tt.showToast({
@@ -146,6 +151,11 @@ Page({
       showRecommended: false
     });
 
+    // 滚动到新消息
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
+
     // 调用AI回复
     this.getAIResponse(content);
   },
@@ -184,6 +194,11 @@ Page({
         messages: [...this.data.messages, aiMessage],
         isLoading: false
       });
+
+      // 滚动到新消息
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 100);
 
       // 更新记忆
       this.updateMemory(userMessage, aiResponse.reply, aiResponse.memory_extract);
@@ -566,6 +581,24 @@ personality_test_scores: ${JSON.stringify(userProfile.personality_test.scores)}
   },
 
   /**
+   * 滚动到聊天底部
+   */
+  scrollToBottom() {
+    const messages = this.data.messages;
+    if (messages.length > 0) {
+      const lastMessageId = `msg-${messages[messages.length - 1].id}`;
+      this.setData({
+        scrollToView: lastMessageId
+      });
+    } else {
+      // 如果没有消息，设置一个很大的scrollTop值来滚动到底部
+      this.setData({
+        scrollTop: 999999
+      });
+    }
+  },
+
+  /**
    * 生命周期函数--监听页面显示
    */
   onShow() {
@@ -576,5 +609,10 @@ personality_test_scores: ${JSON.stringify(userProfile.personality_test.scores)}
         userProfile: userProfile
       });
     }
+    
+    // 每次显示页面时滚动到底部
+    setTimeout(() => {
+      this.scrollToBottom();
+    }, 100);
   }
 });

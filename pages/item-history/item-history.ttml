@@ -8,13 +8,13 @@
 
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading-container">
-    <view class="loading-icon">📋</view>
+    <view class="loading-icon">●</view>
     <text class="loading-text">加载历史记录中...</text>
   </view>
 
   <!-- 空状态 -->
   <view wx:elif="{{isEmpty}}" class="empty-container">
-    <view class="empty-icon">🎯</view>
+    <view class="empty-icon">○</view>
     <text class="empty-title">暂无分析记录</text>
     <text class="empty-subtitle">快去分析你的第一件单品吧</text>
     <button class="empty-button" bindtap="analyzeNew">
@@ -37,12 +37,11 @@
           <!-- 卡片头部 -->
           <view class="card-header">
             <view class="item-info">
-              <text class="item-category">{{item.categoryDisplay}}</text>
-              <text class="item-color">{{item.colorDisplay}}</text>
+              <text class="item-title">{{item.colorDisplay}}{{item.categoryDisplay}}</text>
             </view>
             <view class="card-actions">
               <text class="time-text">{{item.formattedTime}}</text>
-              <view class="delete-btn" bindtap="deleteItem" data-index="{{index}}" catchtap="true">
+              <view class="delete-btn" catchtap="deleteItem" data-index="{{index}}">
                 <text class="delete-icon">✕</text>
               </view>
             </view>
@@ -58,43 +57,10 @@
                 wx:for-item="star"
                 class="star {{star ? 'filled' : ''}}"
               >
-                ⭐
+                ★
               </view>
             </view>
             <text class="score-text">{{item.suitabilityResult.overall_evaluation.suitability_score}}/5分</text>
-          </view>
-
-          <!-- 分析结论 -->
-          <view class="conclusion-section">
-            <text class="conclusion-text">{{item.suitabilityResult.overall_evaluation.conclusion}}</text>
-          </view>
-
-          <!-- 快速分析信息 -->
-          <view class="quick-analysis">
-            <view class="analysis-item">
-              <text class="analysis-label">颜色：</text>
-              <text class="analysis-value {{item.suitabilityResult.analysis.color.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.color.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
-                {{item.suitabilityResult.analysis.color.fit}}
-              </text>
-            </view>
-            <view class="analysis-item">
-              <text class="analysis-label">材质：</text>
-              <text class="analysis-value {{item.suitabilityResult.analysis.material.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.material.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
-                {{item.suitabilityResult.analysis.material.fit}}
-              </text>
-            </view>
-            <view class="analysis-item">
-              <text class="analysis-label">风格：</text>
-              <text class="analysis-value {{item.suitabilityResult.analysis.style.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.style.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
-                {{item.suitabilityResult.analysis.style.fit}}
-              </text>
-            </view>
-          </view>
-
-          <!-- 查看详情提示 -->
-          <view class="view-detail-hint">
-            <text class="hint-text">点击查看详细分析</text>
-            <text class="hint-arrow">→</text>
           </view>
         </view>
       </view>
@@ -106,7 +72,7 @@
     <!-- 固定底部操作栏 -->
     <view class="bottom-bar">
       <button class="secondary-button" bindtap="clearAll">
-        <text class="button-text">清空记录</text>
+        <text class="button-text">清空</text>
       </button>
       
       <button class="primary-button" bindtap="analyzeNew">

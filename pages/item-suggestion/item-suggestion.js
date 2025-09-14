@@ -270,6 +270,9 @@ Page({
    */
   async saveAnalysisResult(image, clothingInfo, suitabilityResult) {
     try {
+      // 保存图片到本地（如果是用户上传的临时图片）
+      const savedImagePath = await this.saveImageToLocal(image.path);
+      
       // 获取现有历史记录
       let history = [];
       try {
@@ -284,12 +287,13 @@ Page({
         timestamp: new Date().toISOString(),
         image: {
           name: image.name,
-          type: image.type || 'unknown'
+          type: image.type || 'unknown',
+          path: savedImagePath || image.path // 使用保存后的路径，如果保存失败则使用原路径
         },
         clothingInfo: clothingInfo,
         suitabilityResult: suitabilityResult,
-        // 保存缩略图（如果是用户上传的图片）
-        thumbnail: image.path.startsWith('http') ? image.path : null
+        // 保存缩略图
+        thumbnail: savedImagePath || (image.path.startsWith('http') ? image.path : null)
       };
       
       // 添加到历史记录开头
@@ -308,6 +312,68 @@ Page({
       console.error('保存历史记录失败:', error);
       // 不阻断主流程，只记录错误
     }
+  },
+
+  /**
+   * 保存图片到本地文件系统
+   */
+  saveImageToLocal(tempFilePath) {
+    return new Promise((resolve, reject) => {
+      // 如果已经是本地路径或网络路径，直接返回
+      if (!tempFilePath.startsWith('ttfile://temp/')) {
+        resolve(tempFilePath);
+        return;
+      }
+
+      const fs = tt.getFileSystemManager();
+      const timestamp = Date.now();
+      const fileName = `clothing_${timestamp}.jpg`;
+      const savedPath = `${tt.env.USER_DATA_PATH}/images/${fileName}`;
+      
+      // 确保目录存在
+      try {
+        fs.mkdirSync(`${tt.env.USER_DATA_PATH}/images`, true);
+      } catch (e) {
+        // 目录可能已存在，忽略错误
+      }
+      
+      // 压缩并保存图片
+      tt.compressImage({
+        src: tempFilePath,
+        quality: 60, // 压缩质量，节省空间
+        success: (res) => {
+          // 复制压缩后的图片到永久位置
+          fs.copyFile({
+            srcPath: res.tempFilePath,
+            destPath: savedPath,
+            success: () => {
+              console.log('图片保存成功:', savedPath);
+              resolve(savedPath);
+            },
+            fail: (error) => {
+              console.error('复制图片失败:', error);
+              reject(error);
+            }
+          });
+        },
+        fail: (error) => {
+          console.error('压缩图片失败:', error);
+          // 压缩失败，尝试直接复制原图
+          fs.copyFile({
+            srcPath: tempFilePath,
+            destPath: savedPath,
+            success: () => {
+              console.log('原图保存成功:', savedPath);
+              resolve(savedPath);
+            },
+            fail: (copyError) => {
+              console.error('复制原图失败:', copyError);
+              reject(copyError);
+            }
+          });
+        }
+      });
+    });
   },
 
   /**

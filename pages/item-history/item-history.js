@@ -40,6 +40,11 @@ Page({
       
       // 处理历史记录数据，添加格式化信息
       const processedHistory = history.map(item => {
+        // 数据迁移：确保图片路径存在
+        if (!item.image.path && item.thumbnail) {
+          item.image.path = item.thumbnail;
+        }
+        
         return {
           ...item,
           formattedTime: this.formatTime(item.timestamp),
@@ -148,7 +153,7 @@ Page({
     // 构造结果数据格式，与分析页面保持一致
     const resultData = {
       image: {
-        path: historyItem.thumbnail || '/assets/images/placeholder.jpg',
+        path: historyItem.image.path || historyItem.thumbnail || '/assets/images/placeholder.jpg',
         name: historyItem.image.name,
         type: historyItem.image.type
       },

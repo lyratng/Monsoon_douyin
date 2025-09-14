@@ -12,27 +12,30 @@
     <view class="upload-section">
       <view class="upload-container" bindtap="uploadImage">
         <view class="upload-box">
-          <!-- 轮播背景图片 -->
-          <view class="carousel-bg bg-1 {{currentBgIndex === 0 ? 'active' : ''}}"></view>
-          <view class="carousel-bg bg-2 {{currentBgIndex === 1 ? 'active' : ''}}"></view>
-          <view class="carousel-bg bg-3 {{currentBgIndex === 2 ? 'active' : ''}}"></view>
-          
-          <view class="upload-icon">
-            <text class="icon-text">+</text>
+          <!-- 未上传时显示轮播背景和上传提示 -->
+          <view wx:if="{{!uploadedImage}}">
+            <!-- 轮播背景图片 -->
+            <view class="carousel-bg bg-1 {{currentBgIndex === 0 ? 'active' : ''}}"></view>
+            <view class="carousel-bg bg-2 {{currentBgIndex === 1 ? 'active' : ''}}"></view>
+            <view class="carousel-bg bg-3 {{currentBgIndex === 2 ? 'active' : ''}}"></view>
+            
+            <view class="upload-icon">
+              <text class="icon-text">+</text>
+            </view>
           </view>
-          <text class="upload-label">拍照上传</text>
+          
+          <!-- 已上传时显示图片 -->
+          <view wx:else class="uploaded-content">
+            <image class="uploaded-image-in-box" src="{{uploadedImage.path}}" mode="aspectFill" lazy-load="true" />
+            <view class="remove-overlay-in-box" bindtap="removeImage">
+              <text class="remove-text">✕</text>
+            </view>
+          </view>
         </view>
       </view>
       <text class="hint-text">请拍摄或上传一件衣物照片，季风将判断是否适合你</text>
     </view>
 
-    <!-- 已上传图片显示 -->
-    <view wx:if="{{uploadedImage}}" class="uploaded-item">
-      <image class="uploaded-image" src="{{uploadedImage.path}}" mode="aspectFill" lazy-load="true" />
-      <view class="remove-overlay" bindtap="removeImage">
-        <text class="remove-text">✕</text>
-      </view>
-    </view>
 
     <!-- 样例图片区域 -->
     <view class="samples-section">
@@ -61,7 +64,7 @@
   <view class="bottom-bar">
     <!-- 历史记录按钮 -->
     <button class="secondary-button" bindtap="viewHistory">
-      <text class="button-text">历史记录</text>
+      <text class="button-text">历史</text>
     </button>
     
     <!-- 分析按钮 -->
@@ -92,8 +95,7 @@
       />
       
       <view class="loading-content">
-        <text class="loading-text">AI分析中</text>
-        <text class="loading-subtitle">正在分析单品适配度...</text>
+        <text class="loading-text">AI正在分析单品匹配度...</text>
       </view>
     </view>
   </view>
