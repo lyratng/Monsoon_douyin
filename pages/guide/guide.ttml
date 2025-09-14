@@ -12,12 +12,18 @@
     <!-- 引导页 1 -->
     <swiper-item class="guide-item">
       <view class="guide-content gradient-bg-1">
-        <view class="content-area">
-          <view class="text-container">
+        <view class="content-area-with-image">
+          <!-- 左侧抽象图案 -->
+          <view class="image-container">
+            <image class="abstract-pattern" src="/assets/images/guide/abstract-pattern.jpg" mode="aspectFill"></image>
+          </view>
+          
+          <!-- 右侧文字区域 -->
+          <view class="text-container-right">
             <view 
               wx:for="{{currentPage === 1 ? animatedLines : []}}" 
               wx:key="index" 
-              class="guide-line fade-in-line"
+              class="guide-line fade-in-line right-align"
               style="animation-delay: {{index * 0.3}}s;"
             >
               {{item.text}}
@@ -29,17 +35,23 @@
 
     <!-- 引导页 2 -->
     <swiper-item class="guide-item">
-      <view class="guide-content gradient-bg-2">
-        <view class="content-area">
-          <view class="text-container">
+      <view class="guide-content gradient-bg-1">
+        <view class="content-area-with-image-right">
+          <!-- 左侧文字区域 -->
+          <view class="text-container-left">
             <view 
               wx:for="{{currentPage === 2 ? animatedLines : []}}" 
               wx:key="index" 
-              class="guide-line fade-in-line"
+              class="guide-line fade-in-line left-align"
               style="animation-delay: {{index * 0.3}}s;"
             >
               {{item.text}}
             </view>
+          </view>
+          
+          <!-- 右侧心脏图案 -->
+          <view class="image-container-right">
+            <image class="heart-pattern" src="/assets/images/guide/heart-pattern.jpg" mode="aspectFill"></image>
           </view>
         </view>
       </view>
@@ -47,24 +59,34 @@
 
     <!-- 引导页 3 -->
     <swiper-item class="guide-item">
-      <view class="guide-content gradient-bg-3">
-        <view class="content-area">
-          <view class="text-container">
-            <view 
-              wx:for="{{currentPage === 3 ? animatedLines : []}}" 
-              wx:key="index" 
-              class="guide-line fade-in-line"
-              style="animation-delay: {{index * 0.3}}s;"
-            >
-              {{item.text}}
+      <view class="guide-content gradient-bg-1">
+        <view class="content-area-page3">
+          <!-- 上半部分：文字和按钮 -->
+          <view class="upper-section">
+            <view class="text-container-page3">
+              <view 
+                wx:for="{{currentPage === 3 ? animatedLines : []}}" 
+                wx:key="index" 
+                class="guide-line fade-in-line"
+                style="animation-delay: {{index * 0.3}}s;"
+              >
+                {{item.text}}
+              </view>
+            </view>
+            
+            <!-- 开始按钮 -->
+            <view wx:if="{{currentPage === 3 && showStartButton}}" class="start-button-container-page3 fade-in">
+              <button class="btn btn-primary btn-large start-btn" bindtap="startTest">
+                开启
+              </button>
             </view>
           </view>
           
-          <!-- 开始按钮 -->
-          <view wx:if="{{currentPage === 3 && showStartButton}}" class="start-button-container fade-in">
-            <button class="btn btn-primary btn-large start-btn" bindtap="startTest">
-              开启
-            </button>
+          <!-- 下半部分：正方形图片区域 -->
+          <view class="lower-section">
+            <view class="square-image-container">
+              <image class="guide-square-image" src="/assets/images/guide/guide-square.jpg" mode="aspectFill"></image>
+            </view>
           </view>
         </view>
       </view>

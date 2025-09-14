@@ -104,7 +104,7 @@
   <!-- 底部操作栏 -->
   <view wx:if="{{!loading}}" class="bottom-actions">
     <button class="action-btn secondary-btn" bindtap="retakeTest">重新测试</button>
-    <button class="action-btn secondary-btn" bindtap="saveAsImage">保存为图片</button>
+    <button class="action-btn secondary-btn" bindtap="saveAsImage">保存图片</button>
     <button class="action-btn primary-btn" bindtap="backToHome">返回主页</button>
   </view>
 

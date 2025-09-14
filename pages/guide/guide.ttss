@@ -1,20 +1,45 @@
 /* 引导页样式 - 诗意美学设计 */
 
+/* 强制清除所有可能的边距和内边距 */
+page {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
 .guide-container {
   height: 100vh;
   position: relative;
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100vw;
+  box-sizing: border-box;
 }
 
 .guide-swiper {
   height: 100%;
-  width: 100%;
+  width: 100vw;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative;
+  left: 0;
+}
+
+/* 隐藏swiper内置的指示器 */
+.guide-swiper .wx-swiper-dots {
+  display: none !important;
+}
+
+.guide-swiper .wx-swiper-dot {
+  display: none !important;
 }
 
 .guide-item {
   height: 100%;
-  width: 100%;
+  width: 100vw;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .guide-content {
@@ -34,6 +59,10 @@
     #F5F5F0 0%, 
     #F8F8F3 50%, 
     #FAFAF5 100%);
+  padding: 0 !important;  /* 第一页去掉左边距 */
+  margin: 0 !important;
+  width: 100vw;
+  position: relative;
 }
 
 .gradient-bg-2 {
@@ -41,6 +70,7 @@
     #F5F5F0 0%, 
     #F3F6F8 50%, 
     #F0F3F5 100%);
+  padding: 0 !important;  /* 第二页去掉内边距 */
 }
 
 .gradient-bg-3 {
@@ -60,6 +90,58 @@
   width: 100%;
 }
 
+/* 第一页带图片的内容区域 */
+.content-area-with-image {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+}
+
+/* 左侧图片容器 */
+.image-container {
+  width: 50vw;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;  /* 改为从顶部开始 */
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;  /* 图片对齐到底部 */
+  justify-content: flex-start;  /* 图片对齐到左边 */
+  overflow: hidden;  /* 确保不会有多余的部分 */
+}
+
+.abstract-pattern {
+  width: 100%;
+  height: 100vh;  /* 改为100vh，填满整个屏幕高度 */
+  object-fit: cover;
+  object-position: left bottom;  /* 保持左下角对齐 */
+  display: block;
+}
+
+/* 右侧文字容器 */
+.text-container-right {
+  width: 50vw;
+  text-align: right;
+  padding: 120rpx 40rpx 80rpx 20rpx;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
 .text-container {
   text-align: center;
   margin-bottom: 80rpx;
@@ -71,13 +153,84 @@
   font-weight: 300;
   color: #2C2C2C;  /* 统一使用"你知道吗"的颜色 */
   letter-spacing: 3rpx;
-  line-height: 2.2;
-  margin-bottom: 40rpx;
+  line-height: 1.5;  /* 缩小行距30%：从2.2降至1.5 */
+  margin-bottom: 28rpx;  /* 相应减少间距：从40rpx降至28rpx */
   opacity: 0;
   transform: translateY(30rpx);
   max-width: 600rpx;
   text-align: center;
   will-change: opacity, transform;
+}
+
+/* 右对齐的文字样式 */
+.guide-line.right-align {
+  text-align: right;
+  max-width: none;
+}
+
+/* 左对齐的文字样式 */
+.guide-line.left-align {
+  text-align: left;
+  max-width: none;
+  color: #2C2C2C;
+  font-size: 36rpx;  /* 调小字号，比第一页更精致 */
+  font-weight: 300;
+  letter-spacing: 2rpx;  /* 稍微减少字间距 */
+  line-height: 1.4;  /* 稍微调整行高 */
+  margin-bottom: 42rpx;  /* 再增加30%：从32rpx增加到42rpx */
+}
+
+/* 第二页带图片的内容区域（图片在右侧） */
+.content-area-with-image-right {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  width: 100vw;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+}
+
+/* 左侧文字容器 */
+.text-container-left {
+  width: 50vw;
+  text-align: left;
+  padding: 150rpx 20rpx 80rpx 40rpx;  /* 上边距增加，下边距减少，整体下移1/3 */
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+/* 右侧图片容器 */
+.image-container-right {
+  width: 50vw;
+  height: 100vh;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.heart-pattern {
+  width: 100%;
+  height: 80vh;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
 }
 
 .fade-in-line {
@@ -135,13 +288,13 @@
 
 /* 开始按钮样式 */
 .start-btn {
-  width: 100%;
+  width: 50%;  /* 缩小宽度50% */
   height: 88rpx;
   background: #E8E8E3;
-  color: #999;
+  color: #2C2C2C;  /* 改为深色文字，提高可读性 */
   border: none;
   border-radius: 44rpx;
-  font-size: 28rpx;
+  font-size: 32rpx;  /* 保持较大字号以确保清晰 */
   font-weight: 300;
   letter-spacing: 2rpx;
   transition: all 0.3s ease;
@@ -153,10 +306,10 @@
 }
 
 .start-btn:active {
-  background: #2C2C2C;
+  background: #1A1A1A;  /* 更深的背景色 */
   color: #FFFFFF;
-  transform: scale(0.98);
-  box-shadow: 0 16rpx 48rpx rgba(44, 44, 44, 0.2);
+  transform: scale(0.95);  /* 更明显的缩放反馈 */
+  box-shadow: 0 4rpx 16rpx rgba(44, 44, 44, 0.4);  /* 压缩阴影 */
 }
 
 /* 上升渐显动画效果 */
@@ -213,4 +366,96 @@
 .guide-content {
   width: 100%;
   box-sizing: border-box;
+}
+
+/* 第三页专用布局 */
+.content-area-page3 {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* 上半部分：文字和按钮 */
+.upper-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60rpx 40rpx 40rpx 40rpx;
+  box-sizing: border-box;
+}
+
+/* 第三页文字容器 */
+.text-container-page3 {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+/* 第三页按钮容器 - 确保居中并添加流畅动画 */
+.start-button-container-page3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* 按钮淡入动画 - 与文字动画保持一致 */
+.start-button-container-page3.fade-in {
+  animation: fadeInButton 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30rpx);
+}
+
+@keyframes fadeInButton {
+  0% {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 确保按钮内文字居中 */
+.start-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+/* 下半部分：正方形图片区域 */
+.lower-section {
+  width: 100%;
+  height: 100vw;  /* 正方形高度等于屏幕宽度 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* 正方形图片容器 */
+.square-image-container {
+  width: 100vw;
+  height: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* 正方形图片 */
+.guide-square-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }

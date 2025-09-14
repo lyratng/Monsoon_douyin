@@ -28,68 +28,17 @@
     </view>
   </view>
 
-  <!-- 已有报告的用户页面 -->
-  <view wx:else class="report-container">
-    <view class="report-header">
-      <view class="user-type-display">
-        <view class="season-type">{{seasonType}}</view>
-        <view class="energy-type">{{energyType}}</view>
-      </view>
-      <view class="report-description">
-        你的专属风格报告已生成
-      </view>
+  <!-- 已有报告的用户页面 - 极简风格 -->
+  <view wx:else class="report-simple-container">
+    <view class="simple-hero">
+      <text class="simple-title">季风</text>
+      <text class="simple-subtitle">AI穿搭风格诊断</text>
+      <text class="simple-description">你的专属风格报告已生成</text>
     </view>
-
-    <view class="action-cards">
-      <view class="action-card main-card" bindtap="viewReport">
-        <view class="card-icon">📊</view>
-        <view class="card-title">查看完整报告</view>
-        <view class="card-desc">颜色、材质、风格全面分析</view>
-        <view class="card-arrow">→</view>
-      </view>
-
-      <view class="action-cards-row">
-        <view class="action-card small-card" bindtap="shareReport">
-          <view class="card-icon">📤</view>
-          <view class="card-title">分享报告</view>
-        </view>
-        
-        <view class="action-card small-card" bindtap="retakeTest">
-          <view class="card-icon">🔄</view>
-          <view class="card-title">重新测试</view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 快速访问 -->
-    <view class="quick-access">
-      <view class="quick-title">快速访问</view>
-      <view class="quick-buttons">
-        <navigator url="/pages/chat/chat" class="quick-btn">
-          <view class="quick-icon">💬</view>
-          <view class="quick-text">AI对话</view>
-        </navigator>
-        
-        <navigator url="/pages/item-suggestion/item-suggestion" class="quick-btn">
-          <view class="quick-icon">👔</view>
-          <view class="quick-text">单品建议</view>
-        </navigator>
-        
-        <navigator url="/pages/api-test/api-test" class="quick-btn debug-btn">
-          <view class="quick-icon">🔧</view>
-          <view class="quick-text">API测试</view>
-        </navigator>
-        
-        <navigator url="/pages/debug/debug" class="quick-btn debug-btn">
-          <view class="quick-icon">🐛</view>
-          <view class="quick-text">调试工具</view>
-        </navigator>
-        
-        <view class="quick-btn" bindtap="viewMockReport">
-          <view class="quick-icon">📋</view>
-          <view class="quick-text">查看模拟报告</view>
-        </view>
-      </view>
+    
+    <view class="simple-actions">
+      <button class="simple-btn primary" bindtap="viewReport">查看风格报告</button>
+      <button class="simple-btn secondary" bindtap="retakeTest">重新测试</button>
     </view>
   </view>
 </view>

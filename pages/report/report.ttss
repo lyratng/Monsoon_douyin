@@ -19,7 +19,7 @@
   -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;  /* 改为左对齐，避免重叠 */
   padding: 20rpx 40rpx;
   box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
   z-index: 1000;
@@ -55,9 +55,7 @@
   font-size: 36rpx;
   font-weight: 300;
   color: #2C2C2C;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-left: 40rpx;  /* 给返回按钮留出空间 */
   letter-spacing: 2rpx;
 }
 

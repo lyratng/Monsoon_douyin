@@ -142,11 +142,15 @@
   background: #F5F5F0;
   border: 1rpx solid #E8E8E3;
   border-radius: 16rpx;
-  padding: 52rpx 24rpx; /* 40rpx * 1.3 = 52rpx */
+  padding: 24rpx;
   text-align: center;
   flex: 1;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 280rpx;  /* 增加高度以适配3:4图片比例 */
 }
 
 .wrist-option.active {
@@ -160,20 +164,34 @@
   transform: scale(0.98);
 }
 
-.color-circle {
-  width: 60rpx;
-  height: 60rpx;
-  border-radius: 50%;
-  margin: 0 auto 16rpx auto;
+/* 手腕图片样式 - 3:4比例 */
+.wrist-image {
+  width: 120rpx;
+  height: 160rpx;  /* 3:4比例 */
+  border-radius: 12rpx;
+  margin-bottom: 20rpx;
+  object-fit: cover;
   border: 1rpx solid #E8E8E3;
+  transition: all 0.3s ease;
 }
 
-.color-circle.warm {
-  background: linear-gradient(45deg, #8BC34A, #4CAF50);
+.wrist-option.active .wrist-image {
+  border-color: #FFFFFF;
+  box-shadow: 0 4rpx 16rpx rgba(255, 255, 255, 0.3);
 }
 
-.color-circle.cool {
-  background: linear-gradient(45deg, #3F51B5, #9C27B0);
+/* 手腕标签文字 - 按照UI设计指南 */
+.wrist-label {
+  font-size: 28rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  letter-spacing: 1rpx;
+  line-height: 1.4;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+.wrist-option.active .wrist-label {
+  color: #FFFFFF;
 }
 
 
@@ -266,7 +284,7 @@
   border: 1rpx solid #E8E8E3;
 }
 
-/* 颜色选择网格 - 白色容器包装 */
+/* 颜色选择网格 - 正方形白色容器包装 */
 .color-grid {
   background: #FFFFFF;
   border: 1rpx solid #E8E8E3;
@@ -288,19 +306,14 @@
   transition: all 0.3s ease;
   position: relative;
   cursor: pointer;
+  aspect-ratio: 1;  /* 强制为正方形 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.color-item::before {
-  content: '';
-  width: 20rpx;
-  height: 20rpx;
-  border: 2rpx solid #E8E8E3;
-  border-radius: 4rpx;
-  position: absolute;
-  top: 12rpx;
-  right: 12rpx;
-  transition: all 0.3s ease;
-}
+/* 右上角方框已移除 */
 
 .color-item.selected {
   border-color: #2C2C2C !important;
@@ -309,26 +322,25 @@
   box-shadow: 0 8rpx 32rpx rgba(44, 44, 44, 0.2) !important;
 }
 
-.color-item.selected::before {
-  background: #FFFFFF;
-  border-color: #FFFFFF;
-}
-
-.color-item.selected::after {
-  content: '✓';
-  position: absolute;
-  top: 10rpx;
-  right: 10rpx;
-  color: #2C2C2C;
-  font-size: 20rpx;
-  font-weight: bold;
-  line-height: 1;
-}
+/* 选中后的右上角方框和打钩效果已完全移除 */
 
 .color-item:active {
   transform: scale(0.98);
 }
 
+.color-square {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 8rpx;  /* 正方形圆角 */
+  margin: 0 auto 12rpx;
+  border: 1rpx solid #E8E8E3;
+}
+
+.color-square.with-border {
+  border: 2rpx solid #999;
+}
+
+/* 保留原有的圆形样式（如果需要） */
 .color-sample {
   width: 60rpx;
   height: 60rpx;
@@ -378,6 +390,7 @@
   transform: scale(0.98);
 }
 
+/* 小白方框和打钩样式已移除
 .occasion-checkbox {
   width: 24rpx;
   height: 24rpx;
@@ -397,6 +410,7 @@
   color: #2C2C2C;
   font-weight: bold;
 }
+*/
 
 .occasion-name {
   font-size: 28rpx;
@@ -705,12 +719,14 @@
   max-width: 400rpx;
 }
 
+/* 加载图标动画已移除
 .loading-icon {
   font-size: 64rpx;
   margin-bottom: 24rpx;
   display: block;
   animation: spin 2s linear infinite;
 }
+*/
 
 .loading-text {
   font-size: 32rpx;
@@ -728,10 +744,12 @@
   line-height: 1.4;
 }
 
+/* 旋转动画已移除
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+*/
 
 /* 动画效果 */
 .fade-in {

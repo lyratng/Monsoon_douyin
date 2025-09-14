@@ -26,13 +26,13 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "个人风格报告",
+        "text": "风格报告",
         "iconPath": "/assets/images/tabbar/profile-normal.png",
         "selectedIconPath": "/assets/images/tabbar/profile-active.png"
       },
       {
         "pagePath": "pages/chat/chat",
-        "text": "AI交互聊天",
+        "text": "智能问答",
         "iconPath": "/assets/images/tabbar/chat-normal.png",
         "selectedIconPath": "/assets/images/tabbar/chat-active.png"
       },
@@ -79,7 +79,12 @@
     "/assets/images/sample-clothes/sample-20.jpg",
     "/assets/images/backgrounds/carousel/bg-1.jpg",
     "/assets/images/backgrounds/carousel/bg-2.jpg",
-    "/assets/images/backgrounds/carousel/bg-3.jpg"
+    "/assets/images/backgrounds/carousel/bg-3.jpg",
+    "/assets/images/guide/abstract-pattern.jpg",
+    "/assets/images/guide/heart-pattern.jpg",
+    "/assets/images/guide/guide-square.jpg",
+    "/assets/images/test/wrist-warm.jpg",
+    "/assets/images/test/wrist-cool.jpg"
   ],
   "debug": true
 }

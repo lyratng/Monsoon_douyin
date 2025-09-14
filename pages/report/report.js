@@ -307,10 +307,10 @@ Page({
    * 返回主页
    */
   backToHome() {
-    // 设置全局标记，让主页显示极简初始页面
+    // 不设置showInitialPage，让主页正常显示（包括已测出的风格报告按钮）
     const app = getApp();
     app.globalData = app.globalData || {};
-    app.globalData.showInitialPage = true;
+    // 移除错误的showInitialPage设置，让主页正常判断是否有报告
     
     // 跳转到主页
     tt.switchTab({

@@ -87,8 +87,8 @@
         data-color="warm"
         bindtap="onWristColorChange"
       >
-        <view class="color-circle warm"></view>
-        <text>主要绿色</text>
+        <image class="wrist-image" src="/assets/images/test/wrist-warm.jpg" mode="aspectFill"></image>
+        <text class="wrist-label">主要绿色</text>
       </view>
       
       <view 
@@ -96,8 +96,8 @@
         data-color="cool"
         bindtap="onWristColorChange"
       >
-        <view class="color-circle cool"></view>
-        <text>主要蓝紫色</text>
+        <image class="wrist-image" src="/assets/images/test/wrist-cool.jpg" mode="aspectFill"></image>
+        <text class="wrist-label">主要蓝紫色</text>
       </view>
     </view>
   </view>
@@ -119,15 +119,14 @@
       </view>
     </view>
     
-    <view wx:if="{{isLoading}}" class="analysis-loading">
-      <view class="loading-icon">🔄</view>
-      <text>AI分析中...</text>
-    </view>
+    <!-- AI分析加载动效已移除，用户可直接进入下一步 -->
     
+    <!-- 调试信息已注释掉
     <view wx:if="{{colorAnalysisResult}}" class="analysis-result">
       <view class="result-title">✅ 分析完成</view>
       <text class="result-text">季型：{{colorAnalysisResult.season_12}}</text>
     </view>
+    -->
   </view>
 
   <!-- 第4页：喜欢的颜色 -->
@@ -144,7 +143,7 @@
         bindtap="onColorToggle"
       >
         <view 
-          class="color-circle {{item.border ? 'with-border' : ''}}" 
+          class="color-square {{item.border ? 'with-border' : ''}}" 
           style="background-color: {{item.color}}"
         ></view>
         <text class="color-name">{{item.name}}</text>
@@ -165,9 +164,7 @@
         data-occasion="{{item.value}}"
         bindtap="onOccasionToggle"
       >
-        <view class="occasion-checkbox">
-          <text wx:if="{{item.selected}}">✓</text>
-        </view>
+        <!-- 小白方框和打钩已移除 -->
         <text class="occasion-name">{{item.name}}</text>
       </view>
     </view>
@@ -321,7 +318,6 @@
     <button 
       class="btn btn-primary nav-btn {{currentStep === 1 ? 'full-width' : ''}}" 
       bindtap="nextStep"
-      loading="{{isLoading}}"
     >
       {{currentStep === totalSteps ? '生成报告' : '下一步'}}
     </button>

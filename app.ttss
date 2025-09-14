@@ -6,6 +6,25 @@ page {
   background-color: #F5F5F0;
   color: #2C2C2C;
   line-height: 1.6;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 全局强制隐藏所有swiper内置指示器 */
+.wx-swiper-dots {
+  display: none !important;
+}
+
+.wx-swiper-dot {
+  display: none !important;
+}
+
+swiper .wx-swiper-dots {
+  display: none !important;
+}
+
+swiper .wx-swiper-dot {
+  display: none !important;
 }
 
 /* 容器样式 */
