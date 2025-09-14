@@ -91,7 +91,7 @@ Page({
         this.setData({
           showStartButton: true
         });
-      }, lines.length * 300 + 200); // 动画时间：0.3s间隔 + 0.2s延迟 = 更流畅的跟随效果
+      }, (lines.length - 1) * 300); // 与最后一行文字同时开始动画
     }
     
     // 动画完成后的回调

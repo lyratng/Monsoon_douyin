@@ -20,9 +20,14 @@
   <view wx:else class="report-content">
     <!-- 头部结果 -->
     <view class="report-header fade-in">
-      <text class="user-type">{{styleReport['季型名称']}}</text>
-      <text class="user-subtype">{{styleReport['能量类型名称']}}</text>
+      <!-- 第一行：季型名称和能量类型名称并排显示 -->
+      <view class="header-first-line">
+        <text class="user-type">{{styleReport['季型名称']}}</text>
+        <text class="user-subtype">{{styleReport['能量类型名称']}}</text>
+      </view>
+      <!-- 第二行：适合颜色描述 -->
       <text class="type-description">{{styleReport['适合颜色的简短描述']}}</text>
+      <!-- 第三行：能量匹配描述 -->
       <text class="energy-description">{{styleReport['能量匹配的风格简短描述']}}</text>
     </view>
 
@@ -40,14 +45,33 @@
     <!-- 推荐材质 -->
     <view class="report-card fade-in">
       <text class="card-title">推荐材质</text>
-      <view class="material-seasons">
-        <view wx:for="{{['春', '夏', '秋', '冬']}}" wx:key="season" class="season-group">
-          <text class="season-name">{{item}}</text>
-          <view class="material-grid">
-            <view wx:for="{{styleReport['推荐的材质列表（按季节）'][item]}}" wx:key="material" class="material-item">
-              <text class="material-name">{{item.name}}</text>
-              <text class="material-reason">{{item.why}}</text>
-            </view>
+      <!-- 田字格季节选择 -->
+      <view class="season-grid">
+        <view wx:for="{{['春', '夏', '秋', '冬']}}" wx:key="season" 
+              class="season-card {{selectedSeason === item ? 'selected' : ''}}" 
+              bindtap="selectSeason" 
+              data-season="{{item}}">
+          <image class="season-bg-image" src="/assets/images/seasons/{{item}}.jpg" mode="aspectFill" />
+          <!-- 移除season-overlay和season-label，只保留纯图片 -->
+        </view>
+      </view>
+    </view>
+
+    <!-- 材质详情弹窗 -->
+    <view wx:if="{{showMaterialModal}}" class="material-modal" bindtap="closeMaterialModal">
+      <view class="modal-content {{modalAnimationClass}}" catchtap="stopPropagation">
+        <!-- 关闭按钮 -->
+        <view class="modal-close" bindtap="closeMaterialModal">×</view>
+        <!-- 季节标题 -->
+        <view class="modal-season-header">
+          <view class="season-line"></view>
+          <text class="modal-season-name">{{selectedSeason}}</text>
+        </view>
+        <!-- 材质列表 -->
+        <view class="modal-material-grid">
+          <view wx:for="{{styleReport['推荐的材质列表（按季节）'][selectedSeason]}}" wx:key="material" class="modal-material-item">
+            <text class="modal-material-name">{{item.name}}</text>
+            <text class="modal-material-reason">{{item.why}}</text>
           </view>
         </view>
       </view>

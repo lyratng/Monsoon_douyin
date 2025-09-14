@@ -19,15 +19,16 @@
   -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
-  justify-content: flex-start;  /* 改为左对齐，避免重叠 */
   padding: 20rpx 40rpx;
   box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.05);
   z-index: 1000;
 }
 
 .nav-back-btn {
+  flex: 1; /* 左栏占1份 */
   display: flex;
   align-items: center;
+  justify-content: flex-start; /* 靠左对齐 */
   background: transparent;
   border: none;
   padding: 0;
@@ -48,19 +49,20 @@
 }
 
 .back-text {
-  font-size: 32rpx;
+  font-size: 26rpx; /* 从32rpx减小到26rpx，避免换行 */
 }
 
 .nav-title {
+  flex: 2; /* 中栏占2份，给标题更多空间 */
   font-size: 36rpx;
   font-weight: 300;
   color: #2C2C2C;
-  margin-left: 40rpx;  /* 给返回按钮留出空间 */
   letter-spacing: 2rpx;
+  text-align: center; /* 在中栏内居中 */
 }
 
 .nav-placeholder {
-  width: 120rpx;
+  flex: 1; /* 右栏占1份，与左栏平衡 */
 }
 
 /* 加载状态 */
@@ -119,12 +121,21 @@
   -webkit-backdrop-filter: blur(10px);
 }
 
+/* 第一行容器：让季型名称和能量类型名称并排显示 */
+.header-first-line {
+  display: flex;
+  align-items: flex-end; /* 改为底部对齐 */
+  justify-content: center;
+  gap: 40rpx; /* 两个字段之间的间距 */
+  margin-bottom: 40rpx;
+}
+
 .user-type {
   font-size: 64rpx;
   font-weight: 300;
   color: #2C2C2C;
   letter-spacing: 4rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: 0; /* 移除bottom margin，由容器控制 */
   line-height: 1.2;
 }
 
@@ -133,7 +144,7 @@
   font-weight: 300;
   color: #666;
   letter-spacing: 2rpx;
-  margin-bottom: 40rpx;
+  margin-bottom: 0; /* 移除bottom margin，由容器控制 */
   line-height: 1.3;
 }
 
@@ -176,7 +187,7 @@
   letter-spacing: 2rpx;
   margin-bottom: 40rpx;
   padding-bottom: 20rpx;
-  border-bottom: 2rpx solid #E8E8E3;
+  /* border-bottom: 2rpx solid #E8E8E3; 移除横线 */
   text-align: center;
 }
 
@@ -191,30 +202,30 @@
 /* 色彩建议网格 */
 .color-palette {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32rpx;
+  grid-template-columns: repeat(4, 1fr); /* 改成4列 */
+  gap: 16rpx; /* 减少间距 */
   margin-bottom: 20rpx;
 }
 
 .color-item {
   text-align: center;
-  padding: 20rpx;
+  padding: 12rpx; /* 减少内边距 */
 }
 
 .color-swatch {
-  width: 80rpx;
-  height: 80rpx;
-  border-radius: 50%;
+  width: 100rpx;  /* 稍微减小以适应4列布局 */
+  height: 100rpx; /* 稍微减小以适应4列布局 */
+  border-radius: 16rpx; /* 圆角方形 */
   margin: 0 auto 16rpx;
   border: 2rpx solid #E8E8E3;
   box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
 }
 
 .color-name {
-  font-size: 32rpx;
+  font-size: 26rpx; /* 从32rpx减小到26rpx */
   font-weight: 300;
   color: #2C2C2C;
-  letter-spacing: 1rpx;
+  letter-spacing: 0.5rpx; /* 稍微减少字间距 */
   line-height: 1.4;
 }
 
@@ -250,61 +261,193 @@
   flex: 1;
 }
 
-/* 材质建议 */
-.material-seasons {
-  display: flex;
-  flex-direction: column;
-  gap: 32rpx;
+/* 推荐材质 - 一行四个布局 */
+.season-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr; /* 一行四列 */
+  gap: 20rpx; /* 增大间距 */
+  margin-top: 40rpx;
 }
 
-.season-group {
-  background: linear-gradient(135deg, #F5F5F0 0%, #FFFFFF 100%);
+.season-card {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/3; /* 1:3比例，细长的窄条 */
+  border-radius: 20rpx; /* 保持圆角 */
+  overflow: hidden;
+  background: #FFFFFF;
   border: 1rpx solid #E8E8E3;
-  border-radius: 16rpx;
-  padding: 32rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-.season-name {
-  font-size: 40rpx;
+.season-card:active {
+  transform: scale(0.95);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
+}
+
+.season-bg-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.season-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 移除背景遮罩和模糊效果 */
+}
+
+.season-label {
+  font-size: 48rpx;
+  font-weight: 500; /* 增加字体粗细，更清晰 */
+  color: #FFFFFF;
+  letter-spacing: 4rpx;
+  text-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.8), 0 0 20rpx rgba(0, 0, 0, 0.6); /* 增强文字阴影，确保在任何背景上都清晰可见 */
+}
+
+/* 材质详情弹窗 */
+.material-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  width: 100%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+  transform-origin: center;
+  animation: modalSlideIn 0.3s ease-out forwards;
+}
+
+.modal-close {
+  position: absolute;
+  top: 20rpx;
+  right: 20rpx;
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 30rpx;
+  background: rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-close:active {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+}
+
+.modal-season-header {
+  display: flex;
+  align-items: center;
+  padding: 40rpx 40rpx 30rpx;
+  border-bottom: 1rpx solid #E8E8E3;
+}
+
+.season-line {
+  width: 6rpx;
+  height: 40rpx;
+  background: #2C2C2C;
+  margin-right: 24rpx;
+  border-radius: 3rpx;
+}
+
+.modal-season-name {
+  font-size: 44rpx;
   font-weight: 300;
   color: #2C2C2C;
   letter-spacing: 2rpx;
-  margin-bottom: 24rpx;
-  display: block;
-  padding-left: 24rpx;
-  border-left: 6rpx solid #2C2C2C;
 }
 
-.material-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16rpx;
+.modal-material-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 40rpx;
 }
 
-.material-item {
-  background: #FFFFFF;
+.modal-material-item {
+  background: linear-gradient(135deg, #F5F5F0 0%, #FFFFFF 100%);
   border: 1rpx solid #E8E8E3;
-  border-radius: 12rpx;
-  padding: 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 }
 
-.material-name {
+.modal-material-name {
   font-size: 36rpx;
   font-weight: 300;
   color: #2C2C2C;
   letter-spacing: 1rpx;
   line-height: 1.4;
-  margin-bottom: 8rpx;
+  margin-bottom: 12rpx;
 }
 
-.material-reason {
+.modal-material-reason {
   font-size: 30rpx;
   font-weight: 300;
   color: #666;
   letter-spacing: 0.5rpx;
   line-height: 1.6;
+}
+
+/* 弹窗动画 */
+.modal-content {
+  transform-origin: center;
+  animation: modalSlideIn 0.3s ease-out forwards;
+}
+
+@keyframes modalSlideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-slide-out {
+  animation: modalSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes modalSlideOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
 }
 
 /* 场合穿搭 */
@@ -544,6 +687,10 @@
 
 /* 响应式适配 */
 @media (max-width: 750rpx) {
+  .header-first-line {
+    gap: 30rpx; /* 小屏幕减少间距 */
+  }
+  
   .user-type {
     font-size: 56rpx;
   }
@@ -557,11 +704,20 @@
   }
   
   .color-palette {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr); /* 手机端也保持4列 */
   }
 
-  .material-grid {
-    grid-template-columns: 1fr;
+  .season-grid {
+    gap: 16rpx; /* 小屏幕也保持较大间距 */
+    grid-template-columns: 1fr 1fr 1fr 1fr; /* 小屏幕也保持一行四个 */
+  }
+  
+  .season-card {
+    /* aspect-ratio: 1 自动适应，保持正方形基准高度 */
+  }
+  
+  .season-label {
+    font-size: 40rpx; /* 小屏幕减小字号 */
   }
 
   .card-title {
@@ -576,8 +732,12 @@
     font-size: 34rpx;
   }
 
-  .material-name {
-    font-size: 34rpx;
+  .modal-material-name {
+    font-size: 34rpx; /* 小屏幕材质名称字号 */
+  }
+  
+  .modal-season-name {
+    font-size: 40rpx; /* 小屏幕季节标题字号 */
   }
 
   .category-title {

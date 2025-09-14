@@ -30,15 +30,23 @@
 
   <!-- 已有报告的用户页面 - 极简风格 -->
   <view wx:else class="report-simple-container">
-    <view class="simple-hero">
-      <text class="simple-title">季风</text>
-      <text class="simple-subtitle">AI穿搭风格诊断</text>
-      <text class="simple-description">你的专属风格报告已生成</text>
+    <!-- 全屏背景照片 -->
+    <view class="photo-background">
+      <image class="main-photo" src="/assets/images/home/main-photo.jpg" />
     </view>
     
-    <view class="simple-actions">
-      <button class="simple-btn primary" bindtap="viewReport">查看风格报告</button>
-      <button class="simple-btn secondary" bindtap="retakeTest">重新测试</button>
+    <!-- 浮动内容区域 -->
+    <view class="floating-content">
+      <view class="simple-hero">
+        <text class="simple-title">季风</text>
+        <text class="simple-subtitle">AI穿搭风格诊断</text>
+        <text class="simple-description">你的专属风格报告已生成</text>
+      </view>
+      
+      <view class="simple-actions">
+        <button class="simple-btn primary" bindtap="viewReport">查看风格报告</button>
+        <button class="simple-btn secondary" bindtap="retakeTest">重新测试</button>
+      </view>
     </view>
   </view>
 </view>

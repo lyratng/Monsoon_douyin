@@ -16,12 +16,14 @@
     "navigationBarBackgroundColor": "#F5F5F0",
     "navigationBarTitleText": "季风",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#F5F5F0"
+    "backgroundColor": "#F5F5F0",
+    "enablePullDownRefresh": false,
+    "onReachBottomDistance": 50
   },
   "tabBar": {
     "color": "#999999",
     "selectedColor": "#2C2C2C",
-    "backgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F5F0",
     "borderStyle": "black",
     "list": [
       {

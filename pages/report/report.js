@@ -8,7 +8,11 @@ Page({
   data: {
     userProfile: null,
     styleReport: null,
-    loading: true
+    loading: true,
+    // 材质弹窗相关
+    showMaterialModal: false,
+    selectedSeason: '',
+    modalAnimationClass: ''
   },
 
   /**
@@ -306,16 +310,48 @@ Page({
   /**
    * 返回主页
    */
-  backToHome() {
-    // 不设置showInitialPage，让主页正常显示（包括已测出的风格报告按钮）
-    const app = getApp();
-    app.globalData = app.globalData || {};
-    // 移除错误的showInitialPage设置，让主页正常判断是否有报告
-    
+  goToHome() {
     // 跳转到主页
     tt.switchTab({
       url: '/pages/index/index'
     });
+  },
+
+  /**
+   * 选择季节
+   */
+  selectSeason(e) {
+    const season = e.currentTarget.dataset.season;
+    this.setData({
+      selectedSeason: season,
+      showMaterialModal: true,
+      modalAnimationClass: 'modal-slide-in'
+    });
+  },
+
+  /**
+   * 关闭材质弹窗
+   */
+  closeMaterialModal() {
+    this.setData({
+      modalAnimationClass: 'modal-slide-out'
+    });
+    
+    // 延迟隐藏弹窗，等待动画完成
+    setTimeout(() => {
+      this.setData({
+        showMaterialModal: false,
+        selectedSeason: '',
+        modalAnimationClass: ''
+      });
+    }, 300);
+  },
+
+  /**
+   * 阻止事件冒泡
+   */
+  stopPropagation() {
+    // 阻止点击卡片内容时关闭弹窗
   },
 
   /**

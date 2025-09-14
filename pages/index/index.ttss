@@ -75,16 +75,55 @@
 .report-simple-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   height: 100vh;
-  padding: 40rpx;
+  width: 100vw;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 上半部分：照片区域 - 强制覆盖到最顶部 */
+.photo-background {
+  position: fixed;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100vw !important;
+  height: 60vh !important; /* 从50vh增加到60vh */
+  z-index: 9999;
+  overflow: hidden;
+  transform: translateY(-44px); /* 强制向上偏移，覆盖状态栏 */
+}
+
+.main-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+/* 浮动内容区域 */
+.floating-content {
+  position: fixed;
+  top: calc(60vh - 130rpx); /* 从-160rpx调整到-130rpx，整体向下平移30rpx */
+  left: 0;
+  right: 0;
+  height: auto; /* 改为自动高度 */
+  z-index: 10000; /* 提升到最高层 */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 40rpx;
   text-align: center;
   box-sizing: border-box;
+  background: transparent; /* 改为透明背景，允许重叠显示 */
 }
 
 .simple-hero {
-  margin-bottom: 120rpx;
+  margin-top: 0; /* 确保顶部无间距 */
+  margin-bottom: 60rpx; /* 减少文字和按钮之间的间距 */
+  padding-top: 0; /* 确保顶部无padding */
 }
 
 .simple-title {
@@ -92,9 +131,11 @@
   font-weight: 200;
   color: #2C2C2C;
   letter-spacing: 10rpx;
-  margin-bottom: 40rpx;
+  margin-top: 0; /* 确保顶部无间距 */
+  margin-bottom: 20rpx; /* 从40rpx减少到20rpx */
   display: block;
   animation: fadeIn 1s ease-out;
+  text-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.8), 0 0 20rpx rgba(255, 255, 255, 0.6); /* 白色阴影增强可读性 */
 }
 
 .simple-subtitle {
@@ -102,10 +143,11 @@
   font-weight: 300;
   color: #999;
   letter-spacing: 3rpx;
-  margin-bottom: 30rpx;
+  margin-bottom: 15rpx; /* 从30rpx减少到15rpx */
   display: block;
   animation: fadeIn 1s ease-out 0.3s;
   animation-fill-mode: both;
+  text-shadow: 0 1rpx 4rpx rgba(255, 255, 255, 0.8); /* 白色阴影 */
 }
 
 .simple-description {
@@ -116,13 +158,14 @@
   display: block;
   animation: fadeIn 1s ease-out 0.6s;
   animation-fill-mode: both;
+  text-shadow: 0 1rpx 4rpx rgba(255, 255, 255, 0.8); /* 白色阴影 */
 }
 
 .simple-actions {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 16rpx; /* 从24rpx减少到16rpx */
   align-items: center;
 }
 
@@ -163,6 +206,7 @@
   background: #E8E8E3;
   color: #666;
   border: 2rpx solid #E8E8E3;
+  margin-top: 20rpx; /* 单独给"重新测试"按钮添加上边距 */
 }
 
 .simple-btn.secondary:active {

@@ -402,13 +402,16 @@ page {
   justify-content: center;
   align-items: center;
   width: 100%;
+  margin-top: -40rpx;
+  opacity: 0;
+  transform: translateY(30rpx);
+  will-change: opacity, transform;
 }
 
 /* 按钮淡入动画 - 与文字动画保持一致 */
 .start-button-container-page3.fade-in {
-  animation: fadeInButton 0.6s ease-out forwards;
-  opacity: 0;
-  transform: translateY(30rpx);
+  animation: fadeInButton 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-fill-mode: both;
 }
 
 @keyframes fadeInButton {
