@@ -12,13 +12,18 @@
     <view class="upload-section">
       <view class="upload-container" bindtap="uploadImage">
         <view class="upload-box">
+          <!-- 轮播背景图片 -->
+          <view class="carousel-bg bg-1 {{currentBgIndex === 0 ? 'active' : ''}}"></view>
+          <view class="carousel-bg bg-2 {{currentBgIndex === 1 ? 'active' : ''}}"></view>
+          <view class="carousel-bg bg-3 {{currentBgIndex === 2 ? 'active' : ''}}"></view>
+          
           <view class="upload-icon">
-            <text class="icon-text">📷</text>
+            <text class="icon-text">+</text>
           </view>
           <text class="upload-label">拍照上传</text>
         </view>
       </view>
-      <text class="hint-text">请拍摄或上传一件衣物照片</text>
+      <text class="hint-text">请拍摄或上传一件衣物照片，季风将判断是否适合你</text>
     </view>
 
     <!-- 已上传图片显示 -->
@@ -54,6 +59,12 @@
 
   <!-- 固定底部操作栏 -->
   <view class="bottom-bar">
+    <!-- 历史记录按钮 -->
+    <button class="secondary-button" bindtap="viewHistory">
+      <text class="button-text">历史记录</text>
+    </button>
+    
+    <!-- 分析按钮 -->
     <button 
       class="analyze-button {{(uploadedImage || selectedSample) && !isAnalyzing ? 'active' : ''}}"
       bindtap="startAnalysis"
@@ -71,9 +82,19 @@
   <!-- 分析加载遮罩 -->
   <view wx:if="{{isAnalyzing}}" class="analysis-loading">
     <view class="loading-modal">
-      <view class="loading-icon">🎯</view>
-      <text class="loading-text">AI分析中</text>
-      <text class="loading-subtitle">正在分析单品适配度...</text>
+      <!-- 轮播背景图片 -->
+      <image 
+        wx:for="{{backgroundImages}}" 
+        wx:key="*this"
+        class="carousel-bg-loading {{index === currentBgIndex ? 'active' : ''}}"
+        src="{{item}}"
+        mode="aspectFill"
+      />
+      
+      <view class="loading-content">
+        <text class="loading-text">AI分析中</text>
+        <text class="loading-subtitle">正在分析单品适配度...</text>
+      </view>
     </view>
   </view>
 </view>

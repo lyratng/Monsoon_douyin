@@ -263,7 +263,7 @@ async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-        'X-Title': '季风AI穿搭助手' // OpenRouter所需
+        'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
       },
       timeout: CONFIG.TIMEOUT,
       data: {
@@ -411,7 +411,7 @@ function generateStyleReport(userProfile) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-        'X-Title': '季风AI穿搭助手' // OpenRouter所需
+        'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
       },
       timeout: CONFIG.TIMEOUT,
       data: {
@@ -609,9 +609,296 @@ function getOccasionName(occasion) {
   return names[occasion] || occasion;
 }
 
+/**
+ * 第一层API：衣物信息提取
+ * @param {string} base64Image - base64编码的图片
+ * @returns {Promise<Object>} 衣物信息
+ */
+async function extractClothingInfo(base64Image) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  const prompt = `请判断图中物体，如果不是衣服，请直接输出"图片非衣物，请重新上传"，跳过以下所有步骤，break.
+如果图中是一件衣物（可能是上衣、下装、鞋、配饰等），请你仔细分析，提取出如下信息，按照如下json格式输出。
+如果图中有多件衣物，取最主要的占据面积最大的那件来进行同样分析。
+
+请严格按照以下JSON格式输出，不要包含任何其他文字：
+
+{
+  "category": "",
+  "sub_category": "",
+  "gender": "",
+  "fit_shape": "",
+  "material": {
+    "main": "",
+    "lining": "",
+    "trim": "",
+    "hardware": ""
+  },
+  "details": {
+    "structure": "",
+    "closure": "",
+    "strap_handle": "",
+    "length": "",
+    "silhouette": "",
+    "pockets": "",
+    "ornament": "",
+    "other": ""
+  },
+  "color": {
+    "main": "",
+    "contrast": "",
+    "pattern": ""
+  },
+  "style": "",
+  "occasions": [],
+  "season": "",
+  "pairing": []
+}`;
+
+  try {
+    console.log('🔍 第一层API：衣物信息提取');
+    console.log('  - 图片大小:', base64Image.length, '字符');
+    
+    const res = await apiRequestWithRetry({
+      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://monsoon-douyin.app',
+        'X-Title': 'Monsoon AI Fashion Assistant'
+      },
+      timeout: CONFIG.TIMEOUT,
+      data: {
+        model: CONFIG.GPT_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: prompt
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64Image}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.1
+      }
+    });
+
+    const rawContent = res.data.choices[0].message.content;
+    console.log('🤖 衣物信息提取原始内容:', rawContent);
+    
+    // 检查是否为非衣物
+    if (rawContent.includes('图片非衣物，请重新上传')) {
+      return {
+        error: '图片非衣物，请重新上传',
+        isClothing: false
+      };
+    }
+    
+    // 清理Markdown代码块标记
+    let content = rawContent.trim();
+    if (content.startsWith('```json')) {
+      content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (content.startsWith('```')) {
+      content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    content = content.trim();
+    
+    console.log('🧹 衣物信息清理后内容:', content);
+    
+    // 尝试解析JSON
+    let result;
+    try {
+      result = JSON.parse(content);
+      result.isClothing = true;
+      console.log('✅ 衣物信息JSON解析成功:', result);
+    } catch (parseError) {
+      console.warn('⚠️ JSON解析失败，使用默认结果:', parseError.message);
+      result = {
+        error: 'AI回复格式异常，请重新上传',
+        isClothing: false
+      };
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('衣物信息提取失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 第二层API：适配度分析
+ * @param {Object} clothingInfo - 第一层提取的衣物信息
+ * @param {Object} userProfile - 用户档案
+ * @returns {Promise<Object>} 适配度分析结果
+ */
+async function analyzeSuitability(clothingInfo, userProfile) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  // 构建用户档案信息
+  const styleReport = userProfile.style_report || userProfile['style_report'];
+  const userInfo = `
+用户的档案如下：
+季型名称: ${styleReport['季型名称'] || styleReport.season_name || '冷夏型'}
+适合颜色描述: ${styleReport['适合颜色的简短描述'] || styleReport.season_description || '适合低对比度、带灰感的柔和色彩'}
+能量类型: ${styleReport['能量类型名称'] || styleReport.energy_type_name || '自洽自律型'}
+能量描述: ${styleReport['能量匹配的风格简短描述'] || styleReport.energy_description || '沉稳优雅，适合柔软飘逸的风格'}
+推荐颜色: ${JSON.stringify(styleReport['推荐的颜色列表'] || styleReport.recommended_colors || [])}
+推荐风格: ${JSON.stringify(styleReport['推荐的风格列表'] || styleReport.recommended_styles || [])}`;
+
+  const prompt = `${userInfo}
+
+用户上传的单品如下：
+${JSON.stringify(clothingInfo, null, 2)}
+
+请判断此衣服是否适合此用户。
+
+请严格按照以下JSON格式输出，不要包含任何其他文字：
+
+{
+  "overall_evaluation": {
+    "conclusion": "",
+    "suitability_score": 0
+  },
+  "analysis": {
+    "color": {
+      "clothing_color": "",
+      "person_season": "",
+      "fit": "",
+      "reason": ""
+    },
+    "material": {
+      "clothing_material": "",
+      "recommended_materials": [],
+      "fit": "",
+      "reason": ""
+    },
+    "style": {
+      "clothing_style": "",
+      "person_energy": "",
+      "fit": "",
+      "reason": ""
+    },
+    "pairing": {
+      "clothing_suggestions": [],
+      "fit": "",
+      "reason": ""
+    },
+    "season": {
+      "clothing_season": "",
+      "recommended_for_person": [],
+      "fit": "",
+      "reason": ""
+    }
+  },
+  "recommendations": {
+    "better_colors": [],
+    "better_materials": [],
+    "better_styles": []
+  }
+}
+
+评分规则：
+- 5分：颜色、材质、风格三个维度都匹配用户季型和能量特征
+- 4分：三个维度中有两个匹配
+- 3分：三个维度中有一个匹配
+- 2分：三个维度都不匹配（最低分）`;
+
+  try {
+    console.log('🔍 第二层API：适配度分析');
+    
+    const res = await apiRequestWithRetry({
+      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://monsoon-douyin.app',
+        'X-Title': 'Monsoon AI Fashion Assistant'
+      },
+      timeout: CONFIG.TIMEOUT,
+      data: {
+        model: CONFIG.GPT_MODEL,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        max_tokens: 1500,
+        temperature: 0.3
+      }
+    });
+
+    const rawContent = res.data.choices[0].message.content;
+    console.log('🤖 适配度分析原始内容:', rawContent);
+    
+    // 清理Markdown代码块标记
+    let content = rawContent.trim();
+    if (content.startsWith('```json')) {
+      content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (content.startsWith('```')) {
+      content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    content = content.trim();
+    
+    console.log('🧹 适配度分析清理后内容:', content);
+    
+    // 尝试解析JSON
+    let result;
+    try {
+      result = JSON.parse(content);
+      console.log('✅ 适配度分析JSON解析成功:', result);
+    } catch (parseError) {
+      console.warn('⚠️ JSON解析失败，使用默认结果:', parseError.message);
+      result = {
+        overall_evaluation: {
+          conclusion: "分析过程中出现错误，请重新尝试",
+          suitability_score: 3
+        },
+        analysis: {
+          color: { fit: "无法分析", reason: "系统错误" },
+          material: { fit: "无法分析", reason: "系统错误" },
+          style: { fit: "无法分析", reason: "系统错误" },
+          pairing: { fit: "无法分析", reason: "系统错误" },
+          season: { fit: "无法分析", reason: "系统错误" }
+        },
+        recommendations: {
+          better_colors: [],
+          better_materials: [],
+          better_styles: []
+        }
+      };
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('适配度分析失败:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   analyzeImage,
   generateStyleReport,
+  extractClothingInfo,
+  analyzeSuitability,
   getApiKey,
   setApiKey,
   CONFIG

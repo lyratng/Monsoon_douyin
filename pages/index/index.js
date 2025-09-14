@@ -4,17 +4,37 @@ Page({
     hasReport: false,
     userProfile: null,
     seasonType: '',
-    energyType: ''
+    energyType: '',
+    showInitial: false
   },
 
-  onLoad: function() {
+  onLoad: function(options) {
     console.log('个人风格报告页面加载');
-    this.checkUserReport();
+    
+    // 检查是否需要显示极简初始页面
+    if (options && options.showInitial === 'true') {
+      this.setData({
+        showInitial: true,
+        hasReport: false
+      });
+    } else {
+      this.checkUserReport();
+    }
   },
 
   onShow: function() {
-    // 每次显示页面时都检查报告状态
-    this.checkUserReport();
+    // 检查是否从报告页面返回，如果是则显示极简页面
+    const app = getApp();
+    if (app.globalData && app.globalData.showInitialPage) {
+      this.setData({
+        showInitial: true,
+        hasReport: false
+      });
+      // 清除标记
+      app.globalData.showInitialPage = false;
+    } else if (!this.data.showInitial) {
+      this.checkUserReport();
+    }
   },
 
   // 检查用户是否已有报告
@@ -55,6 +75,13 @@ Page({
     } else {
       this.startTest();
     }
+  },
+
+  // 查看模拟报告
+  viewMockReport: function() {
+    tt.navigateTo({
+      url: '/pages/report/report'
+    });
   },
 
   // 重新测试

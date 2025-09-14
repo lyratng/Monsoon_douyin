@@ -1,4 +1,407 @@
-/* 单品历史记录页面样式 */
+/* 单品分析历史记录页面样式 */
+
+/* 基础容器 */
 .container {
-  padding: 40rpx;
+  min-height: 100vh;
+  background: #F5F5F0;
+  position: relative;
+}
+
+/* 页面标题 */
+.page-header {
+  padding: 32rpx 40rpx 24rpx;
+  background: #F5F5F0;
+  border-bottom: 1rpx solid #E8E8E3;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  letter-spacing: 2rpx;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  background: #F5F5F0;
+}
+
+.loading-icon {
+  font-size: 80rpx;
+  margin-bottom: 32rpx;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-text {
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 300;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+/* 空状态 */
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  padding: 0 40rpx;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 32rpx;
+  opacity: 0.6;
+}
+
+.empty-title {
+  font-size: 36rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  margin-bottom: 16rpx;
+  letter-spacing: 1rpx;
+}
+
+.empty-subtitle {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 300;
+  margin-bottom: 48rpx;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.empty-button {
+  width: 240rpx;
+  height: 88rpx;
+  border: none;
+  border-radius: 44rpx;
+  background: #2C2C2C;
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(44, 44, 44, 0.2);
+}
+
+.empty-button::after {
+  border: none;
+}
+
+.empty-button:active {
+  background: #1A1A1A;
+  transform: scale(0.98);
+}
+
+/* 历史记录内容 */
+.history-content {
+  height: calc(100vh - 120rpx);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 主内容区域 */
+.main-content {
+  flex: 1;
+  padding: 0 40rpx;
+}
+
+/* 历史记录列表 */
+.history-list {
+  padding: 24rpx 0;
+}
+
+/* 历史记录卡片 */
+.history-card {
+  background: #FFFFFF;
+  border-radius: 24rpx;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.history-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.item-info {
+  flex: 1;
+}
+
+.item-category {
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  letter-spacing: 1rpx;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.item-color {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 300;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.time-text {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.delete-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 24rpx;
+  background: #F5F5F5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.delete-btn:active {
+  background: #FFEBEE;
+  transform: scale(0.9);
+}
+
+.delete-icon {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.delete-btn:active .delete-icon {
+  color: #C62828;
+}
+
+/* 评分区域 */
+.score-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  gap: 16rpx;
+}
+
+.score-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 300;
+  min-width: 80rpx;
+}
+
+.stars-container {
+  display: flex;
+  gap: 4rpx;
+}
+
+.star {
+  font-size: 32rpx;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+
+.star.filled {
+  opacity: 1;
+}
+
+.score-text {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 300;
+  margin-left: 8rpx;
+}
+
+/* 结论区域 */
+.conclusion-section {
+  margin-bottom: 24rpx;
+}
+
+.conclusion-text {
+  font-size: 28rpx;
+  color: #2C2C2C;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* 快速分析信息 */
+.quick-analysis {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 20rpx;
+  flex-wrap: wrap;
+}
+
+.analysis-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.analysis-label {
+  font-size: 26rpx;
+  color: #666;
+  font-weight: 300;
+}
+
+.analysis-value {
+  font-size: 26rpx;
+  font-weight: 400;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  letter-spacing: 0.5rpx;
+}
+
+.fit-good {
+  background: #E8F5E8;
+  color: #2E7D32;
+}
+
+.fit-bad {
+  background: #FFEBEE;
+  color: #C62828;
+}
+
+.fit-neutral {
+  background: #FFF3E0;
+  color: #F57C00;
+}
+
+/* 查看详情提示 */
+.view-detail-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.hint-arrow {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+/* 底部间距 */
+.bottom-spacing {
+  height: 120rpx;
+}
+
+/* 固定底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+  border-top: 1rpx solid #E8E8E3;
+  z-index: 100;
+  display: flex;
+  gap: 16rpx;
+}
+
+.secondary-button {
+  flex: 0 0 auto;
+  width: 160rpx;
+  height: 88rpx;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 44rpx;
+  background: #F5F5F0;
+  color: #666;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondary-button::after {
+  border: none;
+}
+
+.secondary-button:active {
+  background: #E8E8E3;
+  transform: scale(0.98);
+}
+
+.primary-button {
+  flex: 1;
+  height: 88rpx;
+  border: none;
+  border-radius: 44rpx;
+  background: #2C2C2C;
+  color: #FFFFFF;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(44, 44, 44, 0.2);
+}
+
+.primary-button::after {
+  border: none;
+}
+
+.primary-button:active {
+  background: #1A1A1A;
+  transform: scale(0.98);
+}
+
+.button-text {
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
 }

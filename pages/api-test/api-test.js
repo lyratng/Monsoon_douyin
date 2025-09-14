@@ -118,7 +118,7 @@ Page({
           'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`,
           'Content-Type': 'application/json',
           'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-          'X-Title': '季风AI穿搭助手' // OpenRouter所需
+          'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
         },
         timeout: 10000,
         success: (res) => {
@@ -170,7 +170,7 @@ Page({
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${CONFIG.OPENAI_API_KEY}`,
           'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-          'X-Title': '季风AI穿搭助手' // OpenRouter所需
+          'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
         },
         timeout: CONFIG.TIMEOUT,
         data: {
@@ -194,8 +194,19 @@ Page({
             
             try {
               if (res.data?.choices?.[0]?.message?.content) {
-                const content = res.data.choices[0].message.content;
-                this.addLog(`  - AI回复: ${content.substring(0, 100)}...`);
+                const rawContent = res.data.choices[0].message.content;
+                this.addLog(`  - AI回复: ${rawContent.substring(0, 100)}...`);
+                
+                // 清理Markdown代码块标记
+                let content = rawContent.trim();
+                if (content.startsWith('```json')) {
+                  content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                } else if (content.startsWith('```')) {
+                  content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                }
+                content = content.trim();
+                
+                this.addLog(`  - 清理后内容: ${content.substring(0, 80)}...`);
                 
                 // 尝试解析JSON
                 const parsed = JSON.parse(content);

@@ -1,3 +1,201 @@
+<!-- 单品分析结果页面 -->
 <view class="container">
-  <text>单品分析结果页面</text>
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-icon">🎯</view>
+    <text class="loading-text">加载结果中...</text>
+  </view>
+
+  <!-- 分析结果内容 -->
+  <view wx:else class="result-content">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <text class="title">单品分析结果</text>
+    </view>
+
+    <!-- 主内容区域 - 可滚动 -->
+    <scroll-view class="main-content" scroll-y="true">
+      <!-- 上传的图片展示 -->
+      <view class="image-section">
+        <image 
+          class="analyzed-image" 
+          src="{{analysisResult.image.path}}" 
+          mode="aspectFit"
+          lazy-load="true"
+        />
+        <text class="image-label">{{analysisResult.image.name}}</text>
+      </view>
+
+      <!-- 总体适配度 -->
+      <view class="overall-section">
+        <view class="score-container">
+          <text class="score-label">总体适配度</text>
+          <view class="stars-container">
+            <view 
+              wx:for="{{[1,2,3,4,5]}}" 
+              wx:key="*this"
+              class="star {{item <= analysisResult.suitabilityResult.overall_evaluation.suitability_score ? 'filled' : ''}}"
+            >
+              ⭐
+            </view>
+          </view>
+          <text class="score-text">{{analysisResult.suitabilityResult.overall_evaluation.suitability_score}}/5分</text>
+        </view>
+        <text class="conclusion-text">{{analysisResult.suitabilityResult.overall_evaluation.conclusion}}</text>
+      </view>
+
+      <!-- 详细分析部分 -->
+      <view class="analysis-section">
+        <text class="section-title">详细分析</text>
+
+        <!-- 颜色分析 -->
+        <view class="analysis-card">
+          <view class="card-header">
+            <text class="card-icon">🎨</text>
+            <text class="card-title">颜色分析</text>
+            <text class="fit-badge {{analysisResult.suitabilityResult.analysis.color.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.color.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+              {{analysisResult.suitabilityResult.analysis.color.fit}}
+            </text>
+          </view>
+          <view class="card-content">
+            <view class="analysis-row">
+              <text class="label">衣物颜色：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.color.clothing_color}}</text>
+            </view>
+            <view class="analysis-row">
+              <text class="label">您的季型：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.color.person_season}}</text>
+            </view>
+            <text class="reason">{{analysisResult.suitabilityResult.analysis.color.reason}}</text>
+          </view>
+        </view>
+
+        <!-- 材质分析 -->
+        <view class="analysis-card">
+          <view class="card-header">
+            <text class="card-icon">🧵</text>
+            <text class="card-title">材质分析</text>
+            <text class="fit-badge {{analysisResult.suitabilityResult.analysis.material.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.material.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+              {{analysisResult.suitabilityResult.analysis.material.fit}}
+            </text>
+          </view>
+          <view class="card-content">
+            <view class="analysis-row">
+              <text class="label">衣物材质：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.material.clothing_material}}</text>
+            </view>
+            <view class="analysis-row" wx:if="{{analysisResult.suitabilityResult.analysis.material.recommended_materials.length > 0}}">
+              <text class="label">推荐材质：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.material.recommended_materials.join('、')}}</text>
+            </view>
+            <text class="reason">{{analysisResult.suitabilityResult.analysis.material.reason}}</text>
+          </view>
+        </view>
+
+        <!-- 风格分析 -->
+        <view class="analysis-card">
+          <view class="card-header">
+            <text class="card-icon">💫</text>
+            <text class="card-title">风格分析</text>
+            <text class="fit-badge {{analysisResult.suitabilityResult.analysis.style.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.style.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+              {{analysisResult.suitabilityResult.analysis.style.fit}}
+            </text>
+          </view>
+          <view class="card-content">
+            <view class="analysis-row">
+              <text class="label">衣物风格：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.style.clothing_style}}</text>
+            </view>
+            <view class="analysis-row">
+              <text class="label">您的能量：</text>
+              <text class="value">{{analysisResult.suitabilityResult.analysis.style.person_energy}}</text>
+            </view>
+            <text class="reason">{{analysisResult.suitabilityResult.analysis.style.reason}}</text>
+          </view>
+        </view>
+
+        <!-- 搭配建议 -->
+        <view class="analysis-card">
+          <view class="card-header">
+            <text class="card-icon">👔</text>
+            <text class="card-title">搭配建议</text>
+            <text class="fit-badge {{analysisResult.suitabilityResult.analysis.pairing.fit === '适合' ? 'fit-good' : analysisResult.suitabilityResult.analysis.pairing.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+              {{analysisResult.suitabilityResult.analysis.pairing.fit}}
+            </text>
+          </view>
+          <view class="card-content">
+            <view wx:if="{{analysisResult.suitabilityResult.analysis.pairing.clothing_suggestions.length > 0}}" class="suggestions-list">
+              <text class="label">搭配方案：</text>
+              <view wx:for="{{analysisResult.suitabilityResult.analysis.pairing.clothing_suggestions}}" wx:key="index" class="suggestion-item">
+                <text class="suggestion-text">• {{item}}</text>
+              </view>
+            </view>
+            <text class="reason">{{analysisResult.suitabilityResult.analysis.pairing.reason}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 更好的选择 -->
+      <view class="recommendations-section">
+        <text class="section-title">🌟 更好的选择</text>
+        
+        <view wx:if="{{analysisResult.suitabilityResult.recommendations.better_colors.length > 0}}" class="recommendation-group">
+          <text class="group-title">推荐颜色</text>
+          <view class="tags-container">
+            <text 
+              wx:for="{{analysisResult.suitabilityResult.recommendations.better_colors}}" 
+              wx:key="index"
+              class="tag color-tag"
+            >
+              {{item}}
+            </text>
+          </view>
+        </view>
+
+        <view wx:if="{{analysisResult.suitabilityResult.recommendations.better_materials.length > 0}}" class="recommendation-group">
+          <text class="group-title">推荐材质</text>
+          <view class="tags-container">
+            <text 
+              wx:for="{{analysisResult.suitabilityResult.recommendations.better_materials}}" 
+              wx:key="index"
+              class="tag material-tag"
+            >
+              {{item}}
+            </text>
+          </view>
+        </view>
+
+        <view wx:if="{{analysisResult.suitabilityResult.recommendations.better_styles.length > 0}}" class="recommendation-group">
+          <text class="group-title">推荐风格</text>
+          <view class="tags-container">
+            <text 
+              wx:for="{{analysisResult.suitabilityResult.recommendations.better_styles}}" 
+              wx:key="index"
+              class="tag style-tag"
+            >
+              {{item}}
+            </text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部间距 -->
+      <view class="bottom-spacing"></view>
+    </scroll-view>
+
+    <!-- 固定底部操作栏 -->
+    <view class="bottom-bar">
+      <button class="secondary-button" bindtap="viewHistory">
+        <text class="button-text">历史记录</text>
+      </button>
+      
+      <button class="secondary-button" bindtap="shareResult">
+        <text class="button-text">分享结果</text>
+      </button>
+      
+      <button class="primary-button" bindtap="analyzeAgain">
+        <text class="button-text">再次分析</text>
+      </button>
+    </view>
+  </view>
 </view>

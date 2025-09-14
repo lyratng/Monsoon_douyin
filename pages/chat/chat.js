@@ -352,7 +352,7 @@ personality_test_scores: ${JSON.stringify(userProfile.personality_test.scores)}
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
           'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-          'X-Title': '季风AI穿搭助手' // OpenRouter所需
+          'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
         },
         timeout: CONFIG.TIMEOUT,
         data: requestData,
@@ -371,8 +371,19 @@ personality_test_scores: ${JSON.stringify(userProfile.personality_test.scores)}
             if (res.statusCode === 200) {
               console.log('✅ API调用成功');
               if (res.data && res.data.choices && res.data.choices[0]) {
-                const content = res.data.choices[0].message.content;
-                console.log('🤖 AI回复原始内容:', content);
+                const rawContent = res.data.choices[0].message.content;
+                console.log('🤖 AI回复原始内容:', rawContent);
+                
+                // 清理Markdown代码块标记
+                let content = rawContent.trim();
+                if (content.startsWith('```json')) {
+                  content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+                } else if (content.startsWith('```')) {
+                  content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+                }
+                content = content.trim();
+                
+                console.log('🧹 清理后内容:', content);
                 console.log('🔄 尝试解析JSON...');
                 const result = JSON.parse(content);
                 console.log('✅ JSON解析成功:', result);

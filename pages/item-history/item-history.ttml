@@ -1,3 +1,117 @@
+<!-- 单品分析历史记录页面 -->
 <view class="container">
-  <text>单品历史记录页面</text>
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="title">历史记录</text>
+    <text class="subtitle">最近10次单品分析</text>
+  </view>
+
+  <!-- 加载状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <view class="loading-icon">📋</view>
+    <text class="loading-text">加载历史记录中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{isEmpty}}" class="empty-container">
+    <view class="empty-icon">🎯</view>
+    <text class="empty-title">暂无分析记录</text>
+    <text class="empty-subtitle">快去分析你的第一件单品吧</text>
+    <button class="empty-button" bindtap="analyzeNew">
+      <text class="button-text">开始分析</text>
+    </button>
+  </view>
+
+  <!-- 历史记录列表 -->
+  <view wx:else class="history-content">
+    <!-- 主内容区域 - 可滚动 -->
+    <scroll-view class="main-content" scroll-y="true">
+      <view class="history-list">
+        <view 
+          wx:for="{{historyList}}" 
+          wx:key="id"
+          class="history-card"
+          bindtap="viewDetail"
+          data-index="{{index}}"
+        >
+          <!-- 卡片头部 -->
+          <view class="card-header">
+            <view class="item-info">
+              <text class="item-category">{{item.categoryDisplay}}</text>
+              <text class="item-color">{{item.colorDisplay}}</text>
+            </view>
+            <view class="card-actions">
+              <text class="time-text">{{item.formattedTime}}</text>
+              <view class="delete-btn" bindtap="deleteItem" data-index="{{index}}" catchtap="true">
+                <text class="delete-icon">✕</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 适配度评分 -->
+          <view class="score-section">
+            <text class="score-label">适配度</text>
+            <view class="stars-container">
+              <view 
+                wx:for="{{item.scoreStars}}" 
+                wx:key="*this"
+                wx:for-item="star"
+                class="star {{star ? 'filled' : ''}}"
+              >
+                ⭐
+              </view>
+            </view>
+            <text class="score-text">{{item.suitabilityResult.overall_evaluation.suitability_score}}/5分</text>
+          </view>
+
+          <!-- 分析结论 -->
+          <view class="conclusion-section">
+            <text class="conclusion-text">{{item.suitabilityResult.overall_evaluation.conclusion}}</text>
+          </view>
+
+          <!-- 快速分析信息 -->
+          <view class="quick-analysis">
+            <view class="analysis-item">
+              <text class="analysis-label">颜色：</text>
+              <text class="analysis-value {{item.suitabilityResult.analysis.color.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.color.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+                {{item.suitabilityResult.analysis.color.fit}}
+              </text>
+            </view>
+            <view class="analysis-item">
+              <text class="analysis-label">材质：</text>
+              <text class="analysis-value {{item.suitabilityResult.analysis.material.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.material.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+                {{item.suitabilityResult.analysis.material.fit}}
+              </text>
+            </view>
+            <view class="analysis-item">
+              <text class="analysis-label">风格：</text>
+              <text class="analysis-value {{item.suitabilityResult.analysis.style.fit === '适合' ? 'fit-good' : item.suitabilityResult.analysis.style.fit === '不适合' ? 'fit-bad' : 'fit-neutral'}}">
+                {{item.suitabilityResult.analysis.style.fit}}
+              </text>
+            </view>
+          </view>
+
+          <!-- 查看详情提示 -->
+          <view class="view-detail-hint">
+            <text class="hint-text">点击查看详细分析</text>
+            <text class="hint-arrow">→</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 底部间距 -->
+      <view class="bottom-spacing"></view>
+    </scroll-view>
+
+    <!-- 固定底部操作栏 -->
+    <view class="bottom-bar">
+      <button class="secondary-button" bindtap="clearAll">
+        <text class="button-text">清空记录</text>
+      </button>
+      
+      <button class="primary-button" bindtap="analyzeNew">
+        <text class="button-text">分析新单品</text>
+      </button>
+    </view>
+  </view>
 </view>

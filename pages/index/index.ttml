@@ -1,6 +1,18 @@
 <view class="container gradient-bg">
+  <!-- 极简初始页面 -->
+  <view wx:if="{{showInitial}}" class="initial-container">
+    <view class="initial-hero">
+      <text class="initial-title">季风</text>
+      <text class="initial-subtitle">AI穿搭风格诊断</text>
+    </view>
+    
+    <view class="initial-actions">
+      <button class="initial-btn" bindtap="startTest">开启风格之旅</button>
+    </view>
+  </view>
+
   <!-- 首次用户引导页面 -->
-  <view wx:if="{{!hasReport}}" class="first-time-container">
+  <view wx:elif="{{!hasReport}}" class="first-time-container">
     <view class="hero-section">
       <text class="title-main">季风</text>
       <text class="subtitle">AI穿搭风格诊断</text>
@@ -72,6 +84,11 @@
           <view class="quick-icon">🐛</view>
           <view class="quick-text">调试工具</view>
         </navigator>
+        
+        <view class="quick-btn" bindtap="viewMockReport">
+          <view class="quick-icon">📋</view>
+          <view class="quick-text">查看模拟报告</view>
+        </view>
       </view>
     </view>
   </view>

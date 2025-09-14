@@ -73,23 +73,97 @@
 
 .upload-container:active .upload-box {
   border-color: #2C2C2C;
-  background: #FAFAFA;
+  transform: scale(0.98);
+}
+
+/* 轮播背景图片 */
+.carousel-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 18rpx;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 0;
+}
+
+.carousel-bg.active {
+  opacity: 1;
+}
+
+.carousel-bg.bg-1 {
+  background-image: url('../../assets/images/backgrounds/carousel/bg-1.jpg');
+}
+
+.carousel-bg.bg-2 {
+  background-image: url('../../assets/images/backgrounds/carousel/bg-2.jpg');
+}
+
+.carousel-bg.bg-3 {
+  background-image: url('../../assets/images/backgrounds/carousel/bg-3.jpg');
+}
+
+/* 加载弹窗的轮播背景 */
+.carousel-bg-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 36rpx;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 0;
+}
+
+.carousel-bg-loading.active {
+  opacity: 1;
+}
+
+/* 加载弹窗内容容器 */
+.loading-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* 为背景图片添加半透明遮罩，确保文字清晰可见 */
+.upload-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 18rpx;
+  z-index: 1;
 }
 
 .upload-icon {
   margin-bottom: 24rpx;
+  position: relative;
+  z-index: 2;
 }
 
 .icon-text {
   font-size: 64rpx;
-  opacity: 0.7;
+  opacity: 0.9;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .upload-label {
   font-size: 28rpx;
   color: #2C2C2C;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 1rpx;
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 1rpx 4rpx rgba(255, 255, 255, 0.8);
 }
 
 .hint-text {
@@ -222,10 +296,38 @@
   background: #FFFFFF;
   border-top: 1rpx solid #E8E8E3;
   z-index: 100;
+  display: flex;
+  gap: 16rpx;
+}
+
+.secondary-button {
+  flex: 0 0 auto;
+  width: 160rpx;
+  height: 88rpx;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 44rpx;
+  background: #F5F5F0;
+  color: #666;
+  font-size: 28rpx;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondary-button::after {
+  border: none;
+}
+
+.secondary-button:active {
+  background: #E8E8E3;
+  transform: scale(0.98);
 }
 
 .analyze-button {
-  width: 100%;
+  flex: 1;
   height: 88rpx;
   border: none;
   border-radius: 44rpx;
@@ -301,12 +403,17 @@
 }
 
 .loading-modal {
+  width: 480rpx;
+  height: 480rpx;
   background: #FFFFFF;
-  border-radius: 24rpx;
-  padding: 60rpx 48rpx;
+  border-radius: 36rpx;
   text-align: center;
-  min-width: 320rpx;
-  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 24rpx 72rpx rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading-icon {
@@ -325,19 +432,21 @@
 }
 
 .loading-text {
-  font-size: 32rpx;
-  color: #2C2C2C;
-  font-weight: 300;
+  font-size: 42rpx;
+  color: #FFFFFF;
+  font-weight: 500;
   letter-spacing: 1rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
   display: block;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.6), 0 1rpx 4rpx rgba(0, 0, 0, 0.4);
 }
 
 .loading-subtitle {
-  font-size: 24rpx;
-  color: #999;
+  font-size: 30rpx;
+  color: #FFFFFF;
   font-weight: 300;
   letter-spacing: 0.5rpx;
+  text-shadow: 0 1rpx 6rpx rgba(0, 0, 0, 0.5), 0 1rpx 3rpx rgba(0, 0, 0, 0.3);
 }
 
 /* 响应式设计 */
