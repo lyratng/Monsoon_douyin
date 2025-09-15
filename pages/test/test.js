@@ -140,9 +140,33 @@ Page({
       }
       
       if (userProfile.color_analysis) {
-        this.setData({
-          colorAnalysisResult: userProfile.color_analysis
-        });
+        // 🔍 断点13：检查用户档案中的color_analysis是否与本地存储一致
+        console.log('🎯 【断点13 - 数据一致性检查】');
+        console.log('  本地存储的colorAnalysisResult:', this.data.colorAnalysisResult);
+        console.log('  用户档案中的color_analysis:', userProfile.color_analysis);
+        
+        // 如果本地存储中已经有数据，优先使用本地存储的（更新鲜）
+        if (!this.data.colorAnalysisResult) {
+          console.log('  使用用户档案中的color_analysis数据');
+          this.setData({
+            colorAnalysisResult: userProfile.color_analysis
+          });
+        } else {
+          console.log('  保持使用本地存储的数据（更新鲜）');
+          // 检查数据是否一致，如果不一致则修复用户档案
+          if (this.data.colorAnalysisResult.season_12 !== userProfile.color_analysis.season_12) {
+            console.warn('⚠️ 数据不一致！本地存储:', this.data.colorAnalysisResult.season_12, 
+                        ', 用户档案:', userProfile.color_analysis.season_12);
+            console.log('🔧 自动修复用户档案中的错误数据...');
+            
+            // 用本地存储的正确数据更新用户档案
+            const app = getApp();
+            app.updateUserProfile({
+              color_analysis: this.data.colorAnalysisResult
+            });
+            console.log('✅ 用户档案已修复为:', this.data.colorAnalysisResult.season_12);
+          }
+        }
       }
       
     } catch (error) {
@@ -179,8 +203,24 @@ Page({
         color_analysis: this.data.colorAnalysisResult
       };
       
+      // 🔍 断点3：保存用户档案前的数据检查
+      console.log('🎯 【断点3 - 保存用户档案前】');
+      console.log('  即将保存的color_analysis:', this.data.colorAnalysisResult);
+      if (this.data.colorAnalysisResult) {
+        console.log('  即将保存的季型 (season_12):', this.data.colorAnalysisResult.season_12);
+      }
+      console.log('  完整updates对象:', JSON.stringify(updates, null, 2));
+      
       app.updateUserProfile(updates);
       console.log('步骤数据已保存');
+      
+      // 🔍 断点4：保存用户档案后的验证
+      const savedProfile = app.getUserProfile();
+      console.log('🎯 【断点4 - 保存用户档案后验证】');
+      console.log('  保存后的color_analysis:', savedProfile.color_analysis);
+      if (savedProfile.color_analysis) {
+        console.log('  保存后的季型 (season_12):', savedProfile.color_analysis.season_12);
+      }
       
     } catch (error) {
       console.error('保存步骤数据失败:', error);
@@ -358,6 +398,10 @@ Page({
           colorAnalysisResult: result
         });
         
+        // 🔍 断点2：测试页面接收到图像分析结果
+        console.log('🎯 【断点2 - 测试页面接收图像分析结果】');
+        console.log('  接收到的季型 (season_12):', result.season_12);
+        console.log('  完整结果:', JSON.stringify(result, null, 2));
         console.log('图像分析完成（后台）:', result);
         
         // 保存到本地存储，确保数据不丢失
@@ -613,12 +657,31 @@ Page({
     const app = getApp();
     const userProfile = app.getUserProfile();
     
+    // 🔍 断点5：生成风格报告前的用户档案检查
+    console.log('🎯 【断点5 - 生成风格报告前】');
+    console.log('  获取到的完整用户档案:', JSON.stringify(userProfile, null, 2));
+    console.log('  color_analysis:', userProfile.color_analysis);
+    if (userProfile.color_analysis) {
+      console.log('  传入报告生成的季型 (season_12):', userProfile.color_analysis.season_12);
+    }
+    
     api.generateStyleReport(userProfile)
       .then(function(styleReport) {
+        // 🔍 断点10：风格报告生成完成
+        console.log('🎯 【断点10 - 风格报告生成完成】');
+        console.log('  生成的报告季型名称:', styleReport['季型名称']);
+        console.log('  完整生成的报告:', JSON.stringify(styleReport, null, 2));
+        
         // 保存生成的报告到用户档案
         app.updateUserProfile({
           style_report: styleReport
         });
+        
+        // 🔍 断点11：报告保存后的最终验证
+        const finalProfile = app.getUserProfile();
+        console.log('🎯 【断点11 - 报告保存后最终验证】');
+        console.log('  最终档案中的季型名称:', finalProfile.style_report ? finalProfile.style_report['季型名称'] : '无');
+        console.log('  最终档案中的color_analysis季型:', finalProfile.color_analysis ? finalProfile.color_analysis.season_12 : '无');
         
         tt.hideLoading();
         tt.redirectTo({

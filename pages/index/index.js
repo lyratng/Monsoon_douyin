@@ -165,6 +165,14 @@ Page({
     tt.navigateTo({
       url: '/pages/debug/debug'
     });
+  },
+
+  // 打开GPT-5测试页面
+  openGPT5Test: function() {
+    console.log('点击了GPT-5测试按钮');
+    tt.navigateTo({
+      url: '/pages/gpt5-test/gpt5-test'
+    });
   }
 });
 

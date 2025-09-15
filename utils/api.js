@@ -1,11 +1,80 @@
 // API配置和调用工具
 const ENV_CONFIG = require('../config/env');
 
+// 🔧 根据任务类型获取适合的模型
+function getModelForTask(taskType) {
+  switch(taskType) {
+    case 'vision':
+      return ENV_CONFIG.VISION_MODEL; // GPT-4o for image recognition
+    case 'text':
+      return ENV_CONFIG.TEXT_MODEL;   // GPT-5-Chat for text generation
+    default:
+      return ENV_CONFIG.TEXT_MODEL;   // 默认使用文本模型
+  }
+}
+
+// 🔧 根据任务类型获取优化的参数
+function getConfigForTask(taskType) {
+  switch(taskType) {
+    case 'vision':
+      return {
+        max_tokens: 1000,
+        temperature: 0.1
+      };
+    case 'text':
+      return {
+        max_tokens: 1500,
+        temperature: 1.0,
+        include_reasoning: false
+      };
+    default:
+      return {
+        max_tokens: 1000,
+        temperature: 0.1
+      };
+  }
+}
+
+// 🧹 清理GPT-5-Chat返回的Markdown格式JSON
+function cleanMarkdownJSON(content) {
+  if (!content) return content;
+  
+  console.log('🧹 开始清理Markdown JSON格式');
+  console.log('  原始内容预览:', content.substring(0, 100) + '...');
+  
+  // 移除markdown代码块标记
+  let cleaned = content
+    .replace(/```json\s*/gi, '')  // 移除开始的```json
+    .replace(/```\s*$/gi, '')     // 移除结尾的```
+    .replace(/^\s*```.*$/gm, '')  // 移除任何其他```行
+    .trim();
+  
+  // 如果开头有其他文本，尝试找到JSON开始的位置
+  const jsonStart = cleaned.indexOf('{');
+  if (jsonStart > 0) {
+    cleaned = cleaned.substring(jsonStart);
+  }
+  
+  // 如果结尾有其他文本，尝试找到JSON结束的位置
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (lastBrace > 0 && lastBrace < cleaned.length - 1) {
+    cleaned = cleaned.substring(0, lastBrace + 1);
+  }
+  
+  console.log('  清理后内容预览:', cleaned.substring(0, 100) + '...');
+  return cleaned;
+}
+
 const CONFIG = {
   // 从环境配置文件获取
   OPENAI_API_KEY: ENV_CONFIG.OPENAI_API_KEY,
   OPENAI_BASE_URL: ENV_CONFIG.OPENAI_BASE_URL,
-  GPT_MODEL: ENV_CONFIG.GPT_MODEL,
+  // 🖼️ 图像识别模型
+  VISION_MODEL: ENV_CONFIG.VISION_MODEL,
+  // 📝 文本生成模型  
+  TEXT_MODEL: ENV_CONFIG.TEXT_MODEL,
+  // 兼容旧代码
+  GPT_MODEL: ENV_CONFIG.TEXT_MODEL, // 默认使用文本模型
   TIMEOUT: ENV_CONFIG.TIMEOUT,
   
   // 调试配置
@@ -204,37 +273,37 @@ async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
 
 【12季型判定准则（内用）】
 - 冷轴（夏/冬）  
-  - 低对比+低饱和 → 软夏 Soft Summer  
+  - 低对比+低饱和 → 柔夏 Soft Summer  
   - 低对比+浅明度 → 浅夏 Light Summer  
-  - 纯冷+中对比中低饱和 → 真夏 Cool Summer  
+  - 纯冷+中对比中低饱和 → 冷夏 Cool Summer  
   - 高对比+高饱和 → 亮冬 Bright Winter  
   - 很深+高对比 → 深冬 Deep Winter  
-  - 纯冷+高对比 → 真冬 Cool Winter
+  - 纯冷+高对比 → 冷冬 Cool Winter
 - 暖轴（春/秋）  
   - 高饱和+明亮 → 亮春 Bright Spring  
   - 浅明度+轻快 → 浅春 Light Spring  
-  - 纯暖+中对比 → 真春 Warm Spring  
-  - 低饱和+柔和 → 软秋 Soft Autumn  
+  - 纯暖+中对比 → 暖春 Warm Spring  
+  - 低饱和+柔和 → 柔秋 Soft Autumn  
   - 很深+朴厚 → 深秋 Deep Autumn  
-  - 纯暖+中深+浓郁 → 真秋 Warm Autumn
+  - 纯暖+中深+浓郁 → 暖秋 Warm Autumn
 
 【12季型 → PCCS色调映射（用于产出，仅给代号，不给色名）】
 - 亮春：v / s / b / lt（少量 p）
 - 浅春：lt / p / b（少量 s）
-- 真春：s / b / v（少量 lt）
-- 软秋：sf / g / d / llg（基底少量 dp）
+- 暖春：s / b / v（少量 lt）
+- 柔秋：sf / g / d / llg（基底少量 dp）
 - 深秋：dp / dk / dkg / d（点缀 sf）
-- 真秋：d / dp / g / sf
+- 暖秋：d / dp / g / sf
 - 亮冬：v / s / b（中性底可少量 dk）
 - 深冬：dk / dp / s（点缀 v）
-- 真冬：s / v / dk
+- 冷冬：s / v / dk
 - 浅夏：lt / p / llg（少量 sf）
-- 真夏：llg / sf / p / g
-- 软夏：sf / g / llg / p / lt（基底克制用 dp/dkg）
+- 冷夏：llg / sf / p / g
+- 柔夏：sf / g / llg / p / lt（基底克制用 dp/dkg）
 
 【输出格式（严格遵守；只输出此JSON；中文值；不得包含颜色名、解释、十六进制）】
 {
-  "season_12": "<从['Bright Spring','Light Spring','Warm Spring','Soft Autumn','Deep Autumn','Warm Autumn','Bright Winter','Deep Winter','Cool Winter','Light Summer','Cool Summer','Soft Summer']中任选其一>",
+  "season_12": "<从['Bright Spring','Light Spring','Warm Spring','Soft Autumn','Deep Autumn','Warm Autumn','Bright Winter','Deep Winter','Cool Winter','Light Summer','Cool Summer','Soft Summer']中选择其一>",
   "axes": {
     "depth": "<'浅' | '中等' | '中等偏深' | '深'>",
     "contrast": "<'低' | '中' | '高'>",
@@ -290,8 +359,41 @@ async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
       }
     });
 
+    // 🔍 调试：检查完整API响应
+    console.log('🎯 【调试 - 完整API响应】');
+    console.log('  状态码:', res.statusCode);
+    console.log('  响应数据结构:', res.data);
+    console.log('  choices存在:', !!res.data.choices);
+    console.log('  choices长度:', res.data.choices ? res.data.choices.length : 0);
+    
+    if (!res.data.choices || res.data.choices.length === 0) {
+      throw new Error('API响应中没有choices数据');
+    }
+    
+    if (!res.data.choices[0].message) {
+      throw new Error('API响应中没有message数据');
+    }
+    
     const content = res.data.choices[0].message.content;
+    
+    // 🔍 调试：检查内容
+    console.log('🎯 【调试 - 响应内容检查】');
+    console.log('  内容类型:', typeof content);
+    console.log('  内容长度:', content ? content.length : 0);
+    console.log('  内容是否为空:', !content || content.trim() === '');
+    
+    if (!content || content.trim() === '') {
+      throw new Error('API返回的内容为空');
+    }
+    
     const result = JSON.parse(content);
+    
+    // 🔍 断点1：图像分析API返回结果
+    console.log('🎯 【断点1 - 图像分析API返回】');
+    console.log('  原始API响应内容:', content);
+    console.log('  解析后季型 (season_12):', result.season_12);
+    console.log('  完整结果对象:', JSON.stringify(result, null, 2));
+    
     return result;
   } catch (error) {
     console.error('OpenAI API调用失败:', error);
@@ -400,8 +502,22 @@ function generateStyleReport(userProfile) {
       return;
     }
 
-    // 构建prompt（这里需要根据需求文档的prompt）
-    const prompt = buildStyleReportPrompt(userProfile);
+  // 🔍 断点6：风格报告生成API开始
+  console.log('🎯 【断点6 - 风格报告生成API开始】');
+  console.log('  接收到的用户档案:', JSON.stringify(userProfile, null, 2));
+  if (userProfile.color_analysis) {
+    console.log('  接收到的季型 (season_12):', userProfile.color_analysis.season_12);
+  }
+  
+  // 构建prompt（这里需要根据需求文档的prompt）
+  const prompt = buildStyleReportPrompt(userProfile);
+  
+  // 🔍 断点7：生成的prompt检查
+  console.log('🎯 【断点7 - 生成的prompt检查】');
+  console.log('  完整prompt长度:', prompt.length);
+  // 提取包含季型信息的部分
+  const seasonLine = prompt.split('\n').find(line => line.includes('用户的季型是'));
+  console.log('  prompt中的季型行:', seasonLine);
     
     // 使用带重试的API请求
     apiRequestWithRetry({
@@ -415,20 +531,62 @@ function generateStyleReport(userProfile) {
       },
       timeout: CONFIG.TIMEOUT,
       data: {
-        model: CONFIG.GPT_MODEL,
+        model: getModelForTask('text'), // 📝 风格报告使用GPT-5-Chat
         messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant specialized in fashion and style analysis."
+          },
           {
             role: "user",
             content: prompt
           }
         ],
-        max_tokens: 2000,
-        temperature: 0.3
+        max_tokens: 1500,
+        temperature: 1.0,
+        include_reasoning: false
       }
     }).then((res) => {
       try {
+        // 🔍 调试：检查风格报告API响应
+        console.log('🎯 【调试 - 风格报告API响应】');
+        console.log('  状态码:', res.statusCode);
+        console.log('  响应数据结构:', res.data);
+        console.log('  choices存在:', !!res.data.choices);
+        console.log('  choices长度:', res.data.choices ? res.data.choices.length : 0);
+        
+        if (!res.data.choices || res.data.choices.length === 0) {
+          throw new Error('风格报告API响应中没有choices数据');
+        }
+        
+        if (!res.data.choices[0].message) {
+          throw new Error('风格报告API响应中没有message数据');
+        }
+        
         const content = res.data.choices[0].message.content;
-        const result = JSON.parse(content);
+        
+        // 🔍 断点8：风格报告API原始返回
+        console.log('🎯 【断点8 - 风格报告API原始返回】');
+        console.log('  API原始响应内容:', content);
+        console.log('  内容类型:', typeof content);
+        console.log('  内容长度:', content ? content.length : 0);
+        console.log('  内容是否为空:', !content || content.trim() === '');
+        
+        if (!content || content.trim() === '') {
+          throw new Error('风格报告API返回的内容为空');
+        }
+        
+        // 🧹 清理GPT-5-Chat的Markdown格式
+        const cleanedContent = cleanMarkdownJSON(content);
+        console.log('🎯 【清理后的JSON内容】:', cleanedContent.substring(0, 200) + '...');
+        
+        const result = JSON.parse(cleanedContent);
+        
+        // 🔍 断点9：风格报告解析后的结果
+        console.log('🎯 【断点9 - 风格报告解析后结果】');
+        console.log('  解析后的季型名称:', result['季型名称']);
+        console.log('  完整解析结果:', JSON.stringify(result, null, 2));
+        
         resolve(result);
       } catch (error) {
         console.error('解析API响应失败:', error);
@@ -474,20 +632,28 @@ function buildStyleReportPrompt(userProfile) {
   
   const prompt = `你是专业的造型师和风格指导师。请你根据以下规则，为一位希望找到个人风格、前来咨询的${userProfile.basic_info.gender === 'male' ? '男性' : '女性'}用户提供专业、系统、可靠的建议。输出必须符合结构化要求，并严格按照给定格式生成。
 
+【重要】季型定义（严格遵守，不得更改）：
+- Warm Spring = 暖春型：纯暖+中对比
+- Warm Autumn = 暖秋型：纯暖+中深+浓郁
+- Cool Summer = 冷夏型：纯冷+中等对比
+- 其他季型也必须严格按照英文名称对应中文名称，不得混淆
+
 ---
 
 1. 色彩部分
 
-用户的季型是：${userProfile.color_analysis.season_12}
+用户的季型是：${userProfile.color_analysis.season_12}（请严格保持此季型不变，不得转换为其他季型）
 此季型适合的颜色特征：${getSeasonDescription(userProfile.color_analysis.season_12)}
 用户个人偏好颜色：${userProfile.preferences.favorite_colors.join('、')}
 
 请以季型适合的颜色为主导，以用户偏好为辅助，生成 **12 种推荐颜色**。
+用户的色相偏好决定哪几个颜色会出现在前面，用户不偏好但从色调上适合他的颜色会排在后面。比如用户选择喜欢蓝、绿，如果他适合铅灰色系，那么先推荐雾蓝、鼠尾草绿，再推荐雾粉、薰衣草紫等。最终保证各种色相（红橙黄绿青蓝紫）都覆盖到。
 要求每种颜色包含：美化后的颜色名称（避免"浅绿""深红"等生硬表达）和对应的 Hex 值。
 
 - 原则1：优先推荐兼顾季型与用户偏好的颜色。
 - 原则2：颜色命名需优雅且准确，如"勃艮第红""鼠尾草绿"，保持美感与专业性。
 - 原则3：黑/白/灰类颜色若不适合季型，不应直接推荐；但可通过调整使其符合季型特征。
+- 原则4：黑、白、灰每一项最多出现一种，比如雾灰和温暖灰只能出现一种，选择最适合用户的那一种推荐。
 
 ---
 
@@ -498,7 +664,7 @@ function buildStyleReportPrompt(userProfile) {
 第二特征：${typeToPromptMap[secondType]}
 
 【任务要求】：
-结合用户的首要+第二气质特征，从以下材质库中筛选出 **6-8 种适合材质**，并覆盖春夏秋冬不同季节，既包含轻薄面料也包含厚重面料。输出时，每个材质需包含字段：name（材质名称）+ why（推荐理由，1-2 句话，解释其与用户气质和使用场景的契合点）。
+结合用户的首要+第二气质特征，从以下材质库中筛选出 ** 8 种适合材质**，并覆盖春夏秋冬不同季节，每个季节对应两种材质，既包含轻薄面料也包含厚重面料。输出时，每个材质需包含字段：name（材质名称）+ why（推荐理由，1-2 句话，解释其与用户气质和使用场景的契合点）。
 
 【材质库】：纯棉（府绸、卡其、哔叽、牛仔布、灯芯绒、罗纹布、珠地布、毛巾布、抓绒）、麻（亚麻布）、真丝、莫代尔、锦纶、人丝、竹纤维、醋酸、莱赛尔、涤纶、腈纶、人棉、氨纶、粘纤、山羊绒、马海毛、精纺毛织物、粗纺毛织物、长毛绒、缎、棉麻混纺、涤麻混纺、羊毛、皮革（羊皮、牛皮等）
 
@@ -527,7 +693,7 @@ function buildStyleReportPrompt(userProfile) {
 5. 输出格式（必须严格遵守）
 
 {
-  "季型名称": "${getSeasonChineseName(userProfile.color_analysis.season_12)}",
+  "季型名称": "${getSeasonChineseName(userProfile.color_analysis.season_12)}"（注意：必须与输入的${userProfile.color_analysis.season_12}完全对应，不得更改季型），
   "适合颜色的简短描述": "",
   "能量类型名称": "${energyType}",
   "能量匹配的风格简短描述": "",
@@ -583,16 +749,16 @@ function getSeasonChineseName(season) {
   const names = {
     'Bright Spring': '亮春型',
     'Light Spring': '浅春型', 
-    'Warm Spring': '真春型',
-    'Soft Autumn': '软秋型',
+    'Warm Spring': '暖春型',
+    'Soft Autumn': '柔秋型',
     'Deep Autumn': '深秋型',
-    'Warm Autumn': '真秋型',
+    'Warm Autumn': '暖秋型',
     'Bright Winter': '亮冬型',
     'Deep Winter': '深冬型',
-    'Cool Winter': '真冬型',
+    'Cool Winter': '冷冬型',
     'Light Summer': '浅夏型',
-    'Cool Summer': '真夏型',
-    'Soft Summer': '软夏型'
+    'Cool Summer': '冷夏型',
+    'Soft Summer': '柔夏型'
   };
   return names[season] || '冷夏型';
 }
@@ -620,7 +786,7 @@ async function extractClothingInfo(base64Image) {
     throw new Error('API Key未配置');
   }
 
-  const prompt = `请判断图中物体，如果不是衣服，请直接输出"图片非衣物，请重新上传"，跳过以下所有步骤，break.
+  const prompt = `衣服包括上衣、下装、连衣裙、鞋、包、配饰等。请判断图中物体，如果不是衣服，请直接输出"图片非衣物，请重新上传"，跳过以下所有步骤，break.
 如果图中是一件衣物（可能是上衣、下装、鞋、配饰等），请你仔细分析，提取出如下信息，按照如下json格式输出。
 如果图中有多件衣物，取最主要的占据面积最大的那件来进行同样分析。
 

@@ -1,0 +1,281 @@
+/* GPT-5 API 测试页面样式 */
+
+.container {
+  padding: 40rpx;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60rpx;
+}
+
+.title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20rpx;
+}
+
+.subtitle {
+  font-size: 28rpx;
+  color: #7f8c8d;
+  line-height: 1.5;
+}
+
+.api-info {
+  background: rgba(255,255,255,0.9);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.1);
+}
+
+.api-info-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20rpx;
+}
+
+.api-info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15rpx;
+  font-size: 28rpx;
+}
+
+.api-info-label {
+  color: #7f8c8d;
+}
+
+.api-info-value {
+  color: #2c3e50;
+  font-family: monospace;
+}
+
+.controls {
+  margin-bottom: 40rpx;
+}
+
+.control-btn {
+  width: 100%;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25rpx;
+  padding: 25rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+
+.control-btn.secondary {
+  background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+}
+
+.test-list {
+  margin-bottom: 40rpx;
+}
+
+.test-item {
+  background: rgba(255,255,255,0.9);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.1);
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.test-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.test-btn {
+  background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  border: none;
+  border-radius: 15rpx;
+  padding: 15rpx 30rpx;
+  font-size: 24rpx;
+}
+
+.test-btn:disabled {
+  background: #bdc3c7;
+}
+
+.test-description {
+  font-size: 26rpx;
+  color: #7f8c8d;
+  margin-bottom: 15rpx;
+  line-height: 1.5;
+}
+
+.test-config {
+  font-size: 24rpx;
+  color: #95a5a6;
+  font-family: monospace;
+  background: #ecf0f1;
+  padding: 15rpx;
+  border-radius: 10rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 40rpx;
+  color: #7f8c8d;
+}
+
+.results-section {
+  margin-top: 40rpx;
+}
+
+.results-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.result-item {
+  background: rgba(255,255,255,0.9);
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 30rpx rgba(0,0,0,0.1);
+  border-left: 8rpx solid #4facfe;
+}
+
+.result-item.error {
+  border-left-color: #e74c3c;
+}
+
+.result-item.success {
+  border-left-color: #27ae60;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.result-name {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.result-status {
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  color: white;
+}
+
+.result-status.success {
+  background: #27ae60;
+}
+
+.result-status.error {
+  background: #e74c3c;
+}
+
+.result-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+  font-size: 24rpx;
+  color: #7f8c8d;
+}
+
+.result-content {
+  background: #ecf0f1;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 15rpx;
+}
+
+.result-content-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 10rpx;
+}
+
+.result-content-text {
+  font-size: 24rpx;
+  color: #34495e;
+  font-family: monospace;
+  word-break: break-all;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.copy-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 10rpx;
+  padding: 10rpx 20rpx;
+  font-size: 22rpx;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80rpx 40rpx;
+  color: #7f8c8d;
+}
+
+.empty-icon {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+/* 动画效果 */
+.test-item {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.result-item {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -1,0 +1,121 @@
+<!-- GPT-5 API 测试页面 -->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <view class="title">🧪 GPT-5 API 测试</view>
+    <view class="subtitle">诊断GPT-5 API兼容性和性能问题</view>
+  </view>
+
+  <!-- API信息显示 -->
+  <view class="api-info">
+    <view class="api-info-title">📡 当前API配置</view>
+    <view class="api-info-item">
+      <text class="api-info-label">模型:</text>
+      <text class="api-info-value">openai/gpt-5</text>
+    </view>
+    <view class="api-info-item">
+      <text class="api-info-label">API Key:</text>
+      <text class="api-info-value">{{apiKey}}</text>
+    </view>
+    <view class="api-info-item">
+      <text class="api-info-label">Provider:</text>
+      <text class="api-info-value">OpenRouter</text>
+    </view>
+  </view>
+
+  <!-- 控制按钮 -->
+  <view class="controls">
+    <button class="control-btn" bindtap="runAllTests" disabled="{{isLoading}}">
+      {{isLoading ? '测试进行中...' : '🚀 运行所有测试'}}
+    </button>
+    <button class="control-btn secondary" bindtap="clearResults">
+      🗑️ 清除测试结果
+    </button>
+  </view>
+
+  <!-- 单独测试列表 -->
+  <view class="test-list">
+    <view class="test-item" tt:for="{{tests}}" tt:key="id">
+      <view class="test-header">
+        <view class="test-name">{{item.name}}</view>
+        <button 
+          class="test-btn" 
+          bindtap="runTest" 
+          data-test-id="{{item.id}}"
+          disabled="{{isLoading || currentTest === item.id}}"
+        >
+          {{currentTest === item.id ? '运行中...' : '测试'}}
+        </button>
+      </view>
+      <view class="test-description">{{item.description}}</view>
+      <view class="test-config">
+        Prompt: {{item.prompt}}
+        Config: {{item.config}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 测试结果 -->
+  <view class="results-section" tt:if="{{testResults.length > 0}}">
+    <view class="results-title">📊 测试结果</view>
+    
+    <view class="result-item {{item.status}}" tt:for="{{testResults}}" tt:key="id" tt:for-index="index">
+      <view class="result-header">
+        <view class="result-name">{{item.name}}</view>
+        <view class="result-status {{item.status}}">
+          {{item.status === 'success' ? '✅ 成功' : '❌ 失败'}}
+        </view>
+      </view>
+      
+      <view class="result-meta">
+        <text>⏱️ {{item.duration}}ms</text>
+        <text>🕒 {{item.timestamp}}</text>
+        <button class="copy-btn" bindtap="copyResult" data-index="{{index}}">
+          📋 复制
+        </button>
+      </view>
+
+      <!-- 成功结果 -->
+      <view tt:if="{{item.status === 'success'}}">
+        <view class="result-content">
+          <view class="result-content-title">📝 响应内容:</view>
+          <view class="result-content-text">{{item.response.content}}</view>
+        </view>
+        
+        <view class="result-content" tt:if="{{item.response.usage}}">
+          <view class="result-content-title">📊 Token使用:</view>
+          <view class="result-content-text">{{item.response.usage}}</view>
+        </view>
+      </view>
+
+      <!-- 错误结果 -->
+      <view tt:if="{{item.status === 'error'}}">
+        <view class="result-content">
+          <view class="result-content-title">❌ 错误信息:</view>
+          <view class="result-content-text">{{item.error}}</view>
+        </view>
+      </view>
+
+      <!-- 请求配置 -->
+      <view class="result-content">
+        <view class="result-content-title">⚙️ 测试配置:</view>
+        <view class="result-content-text">Prompt: {{item.prompt}}
+Config: {{item.config}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" tt:if="{{testResults.length === 0}}">
+    <view class="empty-icon">🔬</view>
+    <view class="empty-text">还没有测试结果
+点击上方按钮开始测试GPT-5 API</view>
+  </view>
+
+  <!-- 返回按钮 -->
+  <view style="margin-top: 60rpx; text-align: center;">
+    <button class="control-btn" bindtap="goHome">
+      🏠 返回主页
+    </button>
+  </view>
+</view>

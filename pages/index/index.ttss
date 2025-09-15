@@ -88,24 +88,24 @@
   left: 0 !important;
   right: 0 !important;
   width: 100vw !important;
-  height: 60vh !important; /* 从50vh增加到60vh */
+  height: 60vh !important; /* 恢复固定高度 */
   z-index: 9999;
-  overflow: hidden;
+  overflow: hidden; /* 恢复hidden */
   transform: translateY(-44px); /* 强制向上偏移，覆盖状态栏 */
 }
 
 .main-photo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  object-fit: cover; /* 恢复cover模式 */
+  object-position: top center; /* 恢复top center */
   display: block;
 }
 
 /* 浮动内容区域 */
 .floating-content {
   position: fixed;
-  top: calc(60vh - 130rpx); /* 从-160rpx调整到-130rpx，整体向下平移30rpx */
+  top: calc(60vh - 130rpx); /* 恢复原来的位置计算 */
   left: 0;
   right: 0;
   height: auto; /* 改为自动高度 */
@@ -215,6 +215,20 @@
   transform: scale(0.95);
 }
 
+.simple-btn.debug {
+  background: rgba(255, 193, 7, 0.9);
+  border: 2rpx solid rgba(255, 193, 7, 0.6);
+  color: rgba(0, 0, 0, 0.8);
+  font-size: 26rpx;
+  margin-top: 20rpx;
+  width: 200rpx;
+}
+
+.simple-btn.debug:active {
+  background: rgba(255, 193, 7, 1);
+  transform: scale(0.95);
+}
+
 /* 首次用户页面 */
 .first-time-container {
   display: flex;
@@ -294,6 +308,31 @@
   color: #FFFFFF;
   transform: scale(0.98);
   box-shadow: 0 16rpx 48rpx rgba(44, 44, 44, 0.2);
+}
+
+.debug-btn {
+  width: 280rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 193, 7, 0.9);
+  color: rgba(0, 0, 0, 0.8);
+  border: 2rpx solid rgba(255, 193, 7, 0.6);
+  font-size: 26rpx;
+  font-weight: 500;
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(255, 193, 7, 0.3);
+}
+
+.debug-btn::after {
+  border: none;
+}
+
+.debug-btn:active {
+  background: rgba(255, 193, 7, 1);
+  transform: scale(0.95);
 }
 
 /* 已有报告页面 */

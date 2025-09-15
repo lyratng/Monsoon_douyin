@@ -60,6 +60,12 @@ Page({
         return;
       }
 
+      // 🔍 断点12：报告页面最终显示
+      console.log('🎯 【断点12 - 报告页面最终显示】');
+      console.log('  报告页面显示的季型名称:', styleReport['季型名称']);
+      console.log('  报告页面的color_analysis季型:', userProfile.color_analysis ? userProfile.color_analysis.season_12 : '无');
+      console.log('  报告页面完整styleReport:', JSON.stringify(styleReport, null, 2));
+      
       this.setData({
         userProfile: userProfile,
         styleReport: styleReport,

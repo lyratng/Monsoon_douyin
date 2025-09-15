@@ -1,7 +1,7 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/guide/guide", 
+    "pages/guide/guide",
     "pages/test/test",
     "pages/report/report",
     "pages/chat/chat",
@@ -9,7 +9,8 @@
     "pages/item-result/item-result",
     "pages/item-history/item-history",
     "pages/debug/debug",
-    "pages/api-test/api-test"
+    "pages/api-test/api-test",
+    "pages/gpt5-test/gpt5-test"
   ],
   "window": {
     "backgroundTextStyle": "dark",
