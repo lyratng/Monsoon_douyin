@@ -43,8 +43,13 @@ Page({
         ]
       }
     ],
-    animatedLines: [],
-    showStartButton: false
+    // 为每个页面单独存储动画状态
+    page1Lines: [],
+    page2Lines: [],
+    page3Lines: [],
+    showStartButton: false,
+    // 动画定时器管理
+    animationTimers: []
   },
 
   onLoad() {
@@ -52,56 +57,76 @@ Page({
     this.startAnimation();
   },
 
+  // 清除所有动画定时器
+  clearAllTimers() {
+    this.data.animationTimers.forEach(timer => {
+      clearTimeout(timer);
+    });
+    this.setData({
+      animationTimers: []
+    });
+  },
+
   // 开始动画
   startAnimation() {
-    // 防止重复动画
-    if (this.data.isAnimating) {
-      console.log('动画正在进行中，跳过重复触发');
-      return;
-    }
+    // 清除之前的定时器
+    this.clearAllTimers();
     
     const currentPageData = this.data.guidePages[this.data.currentPage - 1];
     const lines = currentPageData.content.filter(line => line.trim() !== ''); // 过滤空行
     
     console.log(`第${this.data.currentPage}页开始动画，共${lines.length}行`);
     
-    // 设置动画状态和清空之前的动画内容
+    // 清空所有页面的动画内容和按钮
     this.setData({
       isAnimating: true,
-      animatedLines: [],
+      page1Lines: [],
+      page2Lines: [],
+      page3Lines: [],
       showStartButton: false
     });
 
-    // 一次性设置所有行，使用纯CSS动画控制时序
+    // 一次性设置当前页面的所有行
     const animatedLines = lines.map((line, index) => ({
       text: line,
       index: index
     }));
     
+    // 根据当前页面设置对应的数据
+    const pageKey = `page${this.data.currentPage}Lines`;
     this.setData({
-      animatedLines: animatedLines
+      [pageKey]: animatedLines
     });
     
     console.log(`第${this.data.currentPage}页所有行已设置，共${lines.length}行`);
 
     // 如果是最后一页，让开始按钮跟随最后一行文字一起升起
     if (this.data.currentPage === 3) {
-      setTimeout(() => {
+      const buttonTimer = setTimeout(() => {
         console.log('显示开始按钮');
         this.setData({
           showStartButton: true
         });
       }, (lines.length - 1) * 300); // 与最后一行文字同时开始动画
+      
+      // 保存定时器引用
+      this.setData({
+        animationTimers: [...this.data.animationTimers, buttonTimer]
+      });
     }
     
     // 动画完成后的回调
-    setTimeout(() => {
+    const completeTimer = setTimeout(() => {
       console.log(`第${this.data.currentPage}页动画完成，停留在当前页面`);
       this.setData({
         isAnimating: false
       });
-      // 不做任何页面切换操作，让用户手动滑动
     }, lines.length * 300 + 1000);
+    
+    // 保存定时器引用
+    this.setData({
+      animationTimers: [...this.data.animationTimers, completeTimer]
+    });
   },
 
   // 下一页
@@ -141,12 +166,22 @@ Page({
     // 只有在用户手动滑动时才更新页面
     if (source === 'touch' || source === '' || source === undefined) {
       if (current !== this.data.currentPage) {
+        // 立即清除当前的动画定时器
+        this.clearAllTimers();
+        
         this.setData({
           currentPage: current
         });
+        
+        // 启动新页面的动画
         this.startAnimation();
       }
     }
+  },
+
+  // 页面卸载时清理定时器
+  onUnload() {
+    this.clearAllTimers();
   },
 
   // 页面分享

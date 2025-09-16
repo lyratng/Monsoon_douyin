@@ -12,16 +12,9 @@
     <view class="upload-section">
       <view class="upload-container" bindtap="uploadImage">
         <view class="upload-box">
-          <!-- 未上传时显示轮播背景和上传提示 -->
-          <view wx:if="{{!uploadedImage}}">
-            <!-- 轮播背景图片 -->
-            <view class="carousel-bg bg-1 {{currentBgIndex === 0 ? 'active' : ''}}"></view>
-            <view class="carousel-bg bg-2 {{currentBgIndex === 1 ? 'active' : ''}}"></view>
-            <view class="carousel-bg bg-3 {{currentBgIndex === 2 ? 'active' : ''}}"></view>
-            
-            <view class="upload-icon">
-              <text class="icon-text">+</text>
-            </view>
+          <!-- 未上传时显示上传提示 -->
+          <view wx:if="{{!uploadedImage}}" class="upload-icon">
+            <text class="icon-text">+</text>
           </view>
           
           <!-- 已上传时显示图片 -->
@@ -48,7 +41,15 @@
           bindtap="selectSample"
           data-sample="{{item}}"
         >
-          <image class="sample-image" src="{{item.path}}" mode="aspectFit" />
+          <image 
+            class="sample-image" 
+            src="{{item.path}}" 
+            mode="aspectFit"
+            show-menu-by-longpress="{{false}}"
+            binderror="onImageError"
+            bindload="onImageLoad"
+            data-item="{{item}}"
+          />
           <view wx:if="{{selectedSample && selectedSample.id === item.id}}" class="selected-check">
             <text class="check-icon">✓</text>
           </view>
@@ -89,7 +90,7 @@
       <image 
         wx:for="{{backgroundImages}}" 
         wx:key="*this"
-        class="carousel-bg-loading {{index === currentBgIndex ? 'active' : ''}}"
+        class="carousel-bg-loading {{index === currentBgIndex ? 'current' : ''}}"
         src="{{item}}"
         mode="aspectFill"
       />

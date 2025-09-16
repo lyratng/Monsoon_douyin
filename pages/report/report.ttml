@@ -1,15 +1,5 @@
 <!-- 个人风格报告页面 -->
 <view class="report-container">
-  <!-- 导航栏 -->
-  <view class="nav-bar">
-    <button class="nav-back-btn" bindtap="goToHome">
-      <text class="back-icon">←</text>
-      <text class="back-text">返回主页</text>
-    </button>
-    <text class="nav-title">个人风格报告</text>
-    <view class="nav-placeholder"></view>
-  </view>
-
   <!-- 加载状态 -->
   <view wx:if="{{loading}}" class="loading-container">
     <view class="loading-spinner"></view>
@@ -47,12 +37,29 @@
       <text class="card-title">推荐材质</text>
       <!-- 田字格季节选择 -->
       <view class="season-grid">
-        <view wx:for="{{['春', '夏', '秋', '冬']}}" wx:key="season" 
-              class="season-card {{selectedSeason === item ? 'selected' : ''}}" 
+        <!-- 春季 -->
+        <view class="season-card {{selectedSeason === '春' ? 'selected' : ''}}" 
               bindtap="selectSeason" 
-              data-season="{{item}}">
-          <image class="season-bg-image" src="/assets/images/seasons/{{item}}.jpg" mode="aspectFill" />
-          <!-- 移除season-overlay和season-label，只保留纯图片 -->
+              data-season="春">
+          <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/spring.jpg" mode="aspectFill" />
+        </view>
+        <!-- 夏季 -->
+        <view class="season-card {{selectedSeason === '夏' ? 'selected' : ''}}" 
+              bindtap="selectSeason" 
+              data-season="夏">
+          <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/summer.jpg" mode="aspectFill" />
+        </view>
+        <!-- 秋季 -->
+        <view class="season-card {{selectedSeason === '秋' ? 'selected' : ''}}" 
+              bindtap="selectSeason" 
+              data-season="秋">
+          <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/autumn.jpg" mode="aspectFill" />
+        </view>
+        <!-- 冬季 -->
+        <view class="season-card {{selectedSeason === '冬' ? 'selected' : ''}}" 
+              bindtap="selectSeason" 
+              data-season="冬">
+          <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/winter.jpg" mode="aspectFill" />
         </view>
       </view>
     </view>
@@ -60,8 +67,6 @@
     <!-- 材质详情弹窗 -->
     <view wx:if="{{showMaterialModal}}" class="material-modal" bindtap="closeMaterialModal">
       <view class="modal-content {{modalAnimationClass}}" catchtap="stopPropagation">
-        <!-- 关闭按钮 -->
-        <view class="modal-close" bindtap="closeMaterialModal">×</view>
         <!-- 季节标题 -->
         <view class="modal-season-header">
           <view class="season-line"></view>
@@ -82,7 +87,6 @@
       <text class="card-title">推荐风格</text>
       <view class="style-suggestions">
         <view wx:for="{{styleReport['推荐的风格列表']}}" wx:key="index" class="suggestion-item">
-          <text class="suggestion-icon">✨</text>
           <text class="suggestion-text">{{item}}</text>
         </view>
       </view>
@@ -91,14 +95,33 @@
     <!-- 场合穿搭 -->
     <view class="report-card fade-in">
       <text class="card-title">场合穿搭</text>
-      <view class="occasion-list">
-        <view wx:for="{{styleReport['场合推荐']}}" wx:key="occasion" class="occasion-group">
-          <view class="occasion-header">
-            <text class="occasion-name">{{item.name}}</text>
-            <text class="occasion-notes">{{item.notes}}</text>
-          </view>
-          <view class="outfits-grid">
-            <view wx:for="{{item.outfits}}" wx:key="outfit" class="outfit-card">
+      <!-- 场合按钮网格 -->
+      <view class="occasion-buttons">
+        <view wx:for="{{styleReport['场合推荐']}}" wx:key="occasion" class="occasion-button" 
+              bindtap="selectOccasion" 
+              data-occasion="{{item.name}}">
+          <image class="occasion-bg-image" 
+                 src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/occasions/{{occasionMap[item.name] || 'daily'}}.jpg" 
+                 mode="aspectFill" />
+        </view>
+      </view>
+    </view>
+
+    <!-- 场合详情弹窗 -->
+    <view wx:if="{{showOccasionModal}}" class="occasion-modal" bindtap="closeOccasionModal">
+      <view class="modal-content {{occasionModalAnimationClass}}" catchtap="stopPropagation">
+        <!-- 场合标题 -->
+        <view class="modal-occasion-header">
+          <view class="occasion-line"></view>
+          <text class="modal-occasion-name">{{selectedOccasion}}</text>
+        </view>
+        <!-- 场合详情内容 -->
+        <view class="modal-occasion-content" wx:for="{{styleReport['场合推荐']}}" wx:key="occasion" wx:if="{{item.name === selectedOccasion}}">
+          <!-- 场合描述 -->
+          <text class="modal-occasion-notes">{{item.notes}}</text>
+          <!-- 穿搭推荐 -->
+          <view class="modal-outfits-grid">
+            <view wx:for="{{item.outfits}}" wx:key="outfit" class="modal-outfit-card">
               <view class="outfit-row">
                 <text class="outfit-label">上装：</text>
                 <text class="outfit-value">{{item.top}}</text>

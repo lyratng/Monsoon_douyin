@@ -23,7 +23,7 @@ function getConfigForTask(taskType) {
       };
     case 'text':
       return {
-        max_tokens: 1500,
+        max_tokens: 4000,
         temperature: 1.0,
         include_reasoning: false
       };
@@ -41,6 +41,7 @@ function cleanMarkdownJSON(content) {
   
   console.log('🧹 开始清理Markdown JSON格式');
   console.log('  原始内容预览:', content.substring(0, 100) + '...');
+  console.log('  原始内容结尾:', content.substring(content.length - 100));
   
   // 移除markdown代码块标记
   let cleaned = content
@@ -55,14 +56,91 @@ function cleanMarkdownJSON(content) {
     cleaned = cleaned.substring(jsonStart);
   }
   
-  // 如果结尾有其他文本，尝试找到JSON结束的位置
-  const lastBrace = cleaned.lastIndexOf('}');
-  if (lastBrace > 0 && lastBrace < cleaned.length - 1) {
-    cleaned = cleaned.substring(0, lastBrace + 1);
+  // 修复被截断的JSON - 检查是否有完整的结尾大括号
+  const openBraces = (cleaned.match(/\{/g) || []).length;
+  const closeBraces = (cleaned.match(/\}/g) || []).length;
+  
+  console.log('  开括号数量:', openBraces, '闭括号数量:', closeBraces);
+  
+  if (openBraces > closeBraces) {
+    console.log('  🔧 检测到JSON被截断，尝试修复...');
+    
+    // 查找最后一个有效的完整对象结束位置
+    let fixedContent = cleaned;
+    
+    // 查找最后一个完整的数组或对象
+    const lastCompleteItem = findLastCompleteItem(cleaned);
+    if (lastCompleteItem) {
+      fixedContent = lastCompleteItem;
+      console.log('  ✅ 找到最后一个完整项目，已修复');
+    } else {
+      // 如果找不到完整项目，尝试基本修复
+      // 移除最后一个不完整的字段
+      fixedContent = cleaned.replace(/,\s*"[^"]*":\s*"[^"]*$/, '');
+      // 确保有足够的闭括号
+      const missingBraces = openBraces - closeBraces;
+      for (let i = 0; i < missingBraces; i++) {
+        fixedContent += '}';
+      }
+      console.log('  ⚠️ 使用基本修复方法');
+    }
+    
+    cleaned = fixedContent;
   }
   
   console.log('  清理后内容预览:', cleaned.substring(0, 100) + '...');
+  console.log('  清理后内容结尾:', cleaned.substring(cleaned.length - 100));
   return cleaned;
+}
+
+// 辅助函数：查找最后一个完整的JSON项目
+function findLastCompleteItem(jsonStr) {
+  try {
+    // 尝试找到最后一个完整的对象或数组
+    let braceCount = 0;
+    let inString = false;
+    let escape = false;
+    let lastValidPos = -1;
+    
+    for (let i = 0; i < jsonStr.length; i++) {
+      const char = jsonStr[i];
+      
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      
+      if (char === '\\') {
+        escape = true;
+        continue;
+      }
+      
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+      
+      if (!inString) {
+        if (char === '{' || char === '[') {
+          braceCount++;
+        } else if (char === '}' || char === ']') {
+          braceCount--;
+          if (braceCount === 0) {
+            lastValidPos = i + 1;
+          }
+        }
+      }
+    }
+    
+    if (lastValidPos > 0) {
+      return jsonStr.substring(0, lastValidPos);
+    }
+    
+    return null;
+  } catch (error) {
+    console.log('  修复JSON时出错:', error.message);
+    return null;
+  }
 }
 
 const CONFIG = {
@@ -320,7 +398,8 @@ async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
 }
 
 【其他约束】
-- 仅输出一次JSON，不加任何多余文字或换行说明。
+- 仅输出一次纯JSON，不加任何多余文字、换行说明、markdown代码块标记（如\`\`\`json）。
+- 直接输出JSON对象，不要包装在代码块中。
 - 若输入主色调给定，则以其为最高优先级；否则按照片相对关系自判。
 - 若证据冲突，优先保证"季型-色调映射"一致性（宁可收紧到更保守的色调集合）。`;
 
@@ -386,7 +465,18 @@ async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
       throw new Error('API返回的内容为空');
     }
     
-    const result = JSON.parse(content);
+    // 🧹 清理可能的markdown格式
+    let cleanedContent = content.trim();
+    if (cleanedContent.startsWith('```json')) {
+      cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedContent.startsWith('```')) {
+      cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    cleanedContent = cleanedContent.trim();
+    
+    console.log('🧹 图像分析清理后内容:', cleanedContent.substring(0, 200) + '...');
+    
+    const result = JSON.parse(cleanedContent);
     
     // 🔍 断点1：图像分析API返回结果
     console.log('🎯 【断点1 - 图像分析API返回】');
@@ -542,7 +632,7 @@ function generateStyleReport(userProfile) {
             content: prompt
           }
         ],
-        max_tokens: 1500,
+        max_tokens: 4000,
         temperature: 1.0,
         include_reasoning: false
       }
@@ -654,6 +744,8 @@ function buildStyleReportPrompt(userProfile) {
 - 原则2：颜色命名需优雅且准确，如"勃艮第红""鼠尾草绿"，保持美感与专业性。
 - 原则3：黑/白/灰类颜色若不适合季型，不应直接推荐；但可通过调整使其符合季型特征。
 - 原则4：黑、白、灰每一项最多出现一种，比如雾灰和温暖灰只能出现一种，选择最适合用户的那一种推荐。
+- 原则5：保证「红橙黄绿蓝紫」所有色相都覆盖到。
+- 原则6：颜色名字不超过5个字，不要出现括号。
 
 ---
 
@@ -665,16 +757,92 @@ function buildStyleReportPrompt(userProfile) {
 
 【任务要求】：
 结合用户的首要+第二气质特征，从以下材质库中筛选出 ** 8 种适合材质**，并覆盖春夏秋冬不同季节，每个季节对应两种材质，既包含轻薄面料也包含厚重面料。输出时，每个材质需包含字段：name（材质名称）+ why（推荐理由，1-2 句话，解释其与用户气质和使用场景的契合点）。
+【软性规则】注意，要价格均衡，尽量做到3件高价材质，5件平价材质。
+- 高价材质：真丝、山羊绒、马海毛、精纺毛织物、粗纺毛织物（高端呢料、大衣面料）、皮革（羊皮、牛皮等天然皮革）、缎（尤其真丝缎）、莱赛尔（高端品牌定价较高）、醋酸、长毛绒（高档工艺 / 真毛替代品部分价位较高）
+- 平价材质：纯棉类：府绸、卡其、哔叽、牛仔布、灯芯绒、罗纹布、珠地布、毛巾布、抓绒；麻（亚麻布）；莫代尔；锦纶；涤纶；腈纶；人丝/人棉/粘纤；竹纤维氨纶；）羽绒；棉麻混纺；涤麻混纺；羊毛（
 
-【材质库】：纯棉（府绸、卡其、哔叽、牛仔布、灯芯绒、罗纹布、珠地布、毛巾布、抓绒）、麻（亚麻布）、真丝、莫代尔、锦纶、人丝、竹纤维、醋酸、莱赛尔、涤纶、腈纶、人棉、氨纶、粘纤、山羊绒、马海毛、精纺毛织物、粗纺毛织物、长毛绒、缎、棉麻混纺、涤麻混纺、羊毛、皮革（羊皮、牛皮等）
+【材质和气质/能量类型对应参考】：
+
+以下材质库包含每种材质的特征分类、常见用途和适合季节，请结合用户气质特征进行匹配：
+
+**轻流动特质材质**：
+- 真丝（Silk）：轻流动/柔软圆润，丝衬衫、连衣裙、丝巾，春夏
+- 亚麻布（Linen）：轻流动/挺阔结构感，夏季衬衫、裙装，夏
+- 人丝（Rayon/Viscose）：轻流动/柔软圆润，连衣裙、衬衫，春夏
+- 醋酸（Acetate）：柔软圆润/轻流动，衬里、连衣裙、衬衫，春夏
+- 莱赛尔（Lyocell/Tencel）：柔软圆润/轻流动，裙装、衬衫、裤装，春夏秋
+- 人棉（Viscose Rayon）：轻流动/柔软圆润，裙装、衬衫、裤装，春夏
+- 粘纤（Viscose）：轻流动/柔软圆润，连衣裙、衬衫，春夏
+- 缎（Satin）：轻流动/柔软圆润，礼服、裙装、衬衫，春夏
+- 棉麻混纺：柔软圆润/轻流动，夏季衬衫、裙装，春夏
+- 涤麻混纺：挺阔结构感/轻流动，西装套装、衬衫，春秋
+- 锦纶（Nylon）：挺阔结构感/轻流动，风衣、泳衣、运动装，春夏秋
+- 羽绒（Down）：轻流动/厚重质感，羽绒服、棉被，冬
+
+**柔软圆润特质材质**：
+- 莫代尔（Modal）：柔软圆润/轻流动，内衣、T恤、家居服，春夏
+- 竹纤维（Bamboo Fiber）：柔软圆润/轻流动，内衣、T恤、家居服，夏
+- 罗纹布（Rib Knit）：柔软圆润/合身结构感，T恤、针织衫、打底，四季
+- 毛巾布（Terry Cloth）：柔软圆润，运动服、卫衣、家居服，春夏
+- 山羊绒（Cashmere）：柔软圆润/厚重质感，高档毛衣、大衣，秋冬
+- 氨纶（Spandex/Elastane）：合身结构感/柔软圆润，紧身裤、瑜伽服、泳衣，四季（贴身类）
+
+**挺阔结构感特质材质**：
+- 府绸（Cotton Poplin）：挺阔结构感/柔软圆润，衬衫、连衣裙，春夏
+- 珠地布（Piqué）：挺阔结构感/柔软圆润，Polo衫，春夏
+- 涤纶（Polyester）：挺阔结构感/柔软圆润，衬衫、运动服、西装，四季
+- 卡其布（Cotton Twill）：挺阔结构感/厚重质感，工装裤、外套，春秋
+- 哔叽（Serge）：挺阔结构感/厚重质感，制服、西装裤，秋冬
+- 精纺毛织物（Worsted Wool）：挺阔结构感/厚重质感，西装、正装裤，秋冬
+- 牛仔布（Denim）：厚重质感/挺阔结构感，牛仔裤、夹克、裙装，四季（尤春秋）
+- 皮革（羊皮、牛皮等）：厚重质感/挺阔结构感，皮夹克、皮裤、鞋包，秋冬
+
+**厚重质感特质材质**：
+- 灯芯绒（Corduroy）：厚重质感/柔软圆润，裤装、外套、裙装，秋冬
+- 抓绒（Fleece）：厚重质感/柔软圆润，卫衣、运动外套，秋冬
+- 腈纶（Acrylic）：厚重质感/柔软圆润，针织衫、毛衣、围巾，秋冬
+- 马海毛（Mohair）：厚重质感/柔软圆润，毛衣、大衣，秋冬
+- 粗纺毛织物（Woolen）：厚重质感/柔软圆润，大衣、呢料外套，秋冬
+- 长毛绒（Faux Fur/羊羔毛）：厚重质感/柔软圆润，外套、夹克，秋冬
+- 羊毛（Wool）：厚重质感/柔软圆润，毛衣、大衣、针织品，秋冬
 
 ---
 
 3. 风格部分
 
-结合用户气质，从以下风格库中推荐 **4-6 种风格**，要求符合用户适合的配色与用户性格气质。
-
-【风格库】：简约基础、街头潮流、名媛淑女、摩登复古、日系、韩系、时髦前卫、甜美少女、自然文艺、乡村巴恩风、迪木尔风、霓彩风、莫瑞系、静奢老钱风、无性别廓形、可露丽风、美拉德风、都市游牧风、末日废土风、机车工装风、多巴胺风、Y2K千禧风、新中式、常春藤学院风、Clean Fit、Blokecore、City Walk 风、假日南法风、松弛文艺、千金玛德琳、牛仔丹宁风、都市运动风、大女人风、新复古潮流、高智感穿搭、美式复古、英伦风、波西米亚、民族风、巴洛克、未来主义、极简主义、解构主义、嘻哈风、朋克风、甜酷风、嬉皮风
+结合用户气质，从以下风格库中推荐 ** 6 种风格**，要求符合用户适合的配色与用户性格气质。
+【设定】：a代表灵动飘逸型人，b代表松弛流动型人，c代表锐利效率型人，d代表沉稳坚实型人。
+【风格对应关系】：
+	•	简约基础 (Minimal)：b, d
+	•	街头潮流 (Streetwear)：a, c
+	•	名媛淑女 (Elegant Lady)：b, d
+	•	摩登复古 (Modern Vintage)：b, d
+	•	日系 (Japanese)：a, b
+	•	韩系 (K-style)：a, b, d
+	•	时髦前卫 (Avant-garde)：a, c, d
+	•	甜美少女 (Sweet)：a, b
+	•	自然文艺 (Artsy)：a, b
+	•	乡村巴恩风 (Barn)：b, c
+	•	静奢老钱风 (Old Money)：b, d
+	•	无性别廓形 (Gender-neutral)：c, d
+	•	美拉德风 (Maillard)：b, c, d
+	•	都市游牧风 (Urban Nomad)：a, c
+	•	机车工装风 (Workwear)：c, d
+	•	多巴胺风 (Dopamine)：a
+	•	Y2K 千禧风 (Y2K Aesthetic)：a, c
+	•	新中式 (Neo-Chinese)：b, d
+	•	常春藤学院风 (Ivy)：d, b
+	•	Clean Fit (Sharp Minimal)：d, b
+	•	假日南法风 (French Riviera)：a, b
+	•	千金玛德琳 (Madeleine Girl)：a, b
+	•	牛仔丹宁风 (Denim)：a, c
+	•	都市运动风 (Athleisure)：a, c
+	•	大女人风 (Power Dressing)：c, d
+	•	高智感穿搭 (Intellectual Chic)：d
+	•	美式复古 (Americana Vintage)：c, b
+	•	英伦风 (British Classic)：d, b
+	•	极简主义 (Minimalism)：b, d
+	•	甜酷风 (Sweet-Cool)：a, c
 
 ---
 
@@ -693,7 +861,7 @@ function buildStyleReportPrompt(userProfile) {
 5. 输出格式（必须严格遵守）
 
 {
-  "季型名称": "${getSeasonChineseName(userProfile.color_analysis.season_12)}"（注意：必须与输入的${userProfile.color_analysis.season_12}完全对应，不得更改季型），
+  "季型名称": "${getSeasonChineseName(userProfile.color_analysis.season_12)}"（注意：仅中文；必须与输入的${userProfile.color_analysis.season_12}完全对应，不得更改季型），
   "适合颜色的简短描述": "",
   "能量类型名称": "${energyType}",
   "能量匹配的风格简短描述": "",
@@ -706,7 +874,7 @@ function buildStyleReportPrompt(userProfile) {
     "秋": [{ "name": "", "why": "" }],
     "冬": [{ "name": "", "why": "" }]
   },
-  "推荐的风格列表": ["", "", ""],
+  "推荐的风格列表": ["中文（对应英文）", "", ""],
   "场合推荐": [
     {
       "name": "",

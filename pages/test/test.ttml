@@ -274,7 +274,7 @@
   </view>
 
   <!-- 第8-15页：心理测试 -->
-  <view wx:elif="{{currentStep >= 8 && currentStep <= 15}}" class="step-content fade-in">
+  <view wx:elif="{{currentStep >= 8 && currentStep <= 15}}" class="step-content {{stepAnimationClass || 'fade-in'}}">
     <view class="step-title">心理测试</view>
     <!-- 根据步骤显示不同问题 -->
     <include src="./psychology-questions.ttml" />
@@ -297,9 +297,11 @@
       </view>
     </view>
     
-    <view class="mbti-uncertain">
+    <view class="mbti-uncertain" bindtap="onMbtiUncertain">
       <view class="radio-item">
-        <view class="radio-circle"></view>
+        <view class="radio-circle">
+          <view wx:if="{{mbtiType === '不确定'}}" class="radio-dot"></view>
+        </view>
         <text>不确定</text>
       </view>
     </view>
@@ -321,5 +323,26 @@
     >
       {{currentStep === totalSteps ? '生成报告' : '下一步'}}
     </button>
+  </view>
+
+  <!-- 报告生成加载遮罩 -->
+  <view wx:if="{{isLoading}}" class="analysis-loading">
+    <view class="loading-modal">
+      <!-- 上半部分：图片区域 -->
+      <view class="image-section">
+        <image 
+          wx:for="{{backgroundImages}}" 
+          wx:key="*this"
+          class="carousel-bg-loading {{index === currentBgIndex ? 'current' : ''}}"
+          src="{{item}}"
+          mode="aspectFit"
+        />
+      </view>
+      
+      <!-- 下半部分：文字区域 -->
+      <view class="loading-content">
+        <text class="loading-text">个人风格报告生成中...</text>
+      </view>
+    </view>
   </view>
 </view>

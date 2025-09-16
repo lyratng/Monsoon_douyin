@@ -76,39 +76,9 @@
   transform: scale(0.98);
 }
 
-/* 轮播背景图片 */
-.carousel-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-radius: 18rpx;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-  z-index: 0;
-}
+/* 移除了上传框的轮播背景样式，轮播只在加载时使用 */
 
-.carousel-bg.active {
-  opacity: 1;
-}
-
-.carousel-bg.bg-1 {
-  background-image: url('../../assets/images/backgrounds/carousel/bg-1.jpg');
-}
-
-.carousel-bg.bg-2 {
-  background-image: url('../../assets/images/backgrounds/carousel/bg-2.jpg');
-}
-
-.carousel-bg.bg-3 {
-  background-image: url('../../assets/images/backgrounds/carousel/bg-3.jpg');
-}
-
-/* 加载弹窗的轮播背景 */
+/* 加载弹窗的轮播背景 - 渐隐渐现效果 */
 .carousel-bg-loading {
   position: absolute;
   top: 0;
@@ -117,12 +87,14 @@
   height: 480rpx;
   border-radius: 36rpx 36rpx 0 0;
   opacity: 0;
-  transition: opacity 1s ease-in-out;
-  z-index: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1;
 }
 
-.carousel-bg-loading.active {
+/* 当前显示的图片 */
+.carousel-bg-loading.current {
   opacity: 1;
+  z-index: 2;
 }
 
 /* 加载弹窗内容容器 */
@@ -141,22 +113,9 @@
   border-radius: 0 0 36rpx 36rpx;
 }
 
-/* 为背景图片添加半透明遮罩，确保文字清晰可见 */
-.upload-box::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 18rpx;
-  z-index: 1;
-}
+/* 移除了遮罩样式，因为不再有轮播背景 */
 
 .upload-icon {
-  position: relative;
-  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;

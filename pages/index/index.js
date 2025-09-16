@@ -5,11 +5,17 @@ Page({
     userProfile: null,
     seasonType: '',
     energyType: '',
-    showInitial: false
+    showInitial: false,
+    statusBarHeight: 0,
+    navigationHeight: 0,
+    capsuleInfo: null
   },
 
   onLoad: function(options) {
     console.log('个人风格报告页面加载');
+    
+    // 获取系统信息以处理状态栏和胶囊位置
+    this.getSystemInfo();
     
     // 检查是否需要显示极简初始页面
     if (options && options.showInitial === 'true') {
@@ -19,6 +25,36 @@ Page({
       });
     } else {
       this.checkUserReport();
+    }
+  },
+
+  // 获取系统信息，用于全屏显示
+  getSystemInfo: function() {
+    try {
+      // 获取系统信息
+      const systemInfo = tt.getSystemInfoSync();
+      console.log('系统信息:', systemInfo);
+      
+      // 获取胶囊按钮位置信息（抖音小程序特有）
+      let capsuleInfo = null;
+      try {
+        capsuleInfo = tt.getCustomButtonBoundingClientRect && tt.getCustomButtonBoundingClientRect();
+        console.log('胶囊信息:', capsuleInfo);
+      } catch (e) {
+        console.log('获取胶囊信息失败，可能是开发工具环境:', e);
+      }
+      
+      this.setData({
+        statusBarHeight: systemInfo.statusBarHeight || 0,
+        navigationHeight: (capsuleInfo ? capsuleInfo.height + (capsuleInfo.top - systemInfo.statusBarHeight) * 2 : 0),
+        capsuleInfo: capsuleInfo
+      });
+      
+      console.log('状态栏高度:', this.data.statusBarHeight);
+      console.log('导航栏高度:', this.data.navigationHeight);
+      
+    } catch (error) {
+      console.error('获取系统信息失败:', error);
     }
   },
 
@@ -167,12 +203,14 @@ Page({
     });
   },
 
-  // 打开GPT-5测试页面
+  // GPT-5测试功能已注释 - 参考GPT5_TEST.md文档恢复
+  /* 
   openGPT5Test: function() {
     console.log('点击了GPT-5测试按钮');
     tt.navigateTo({
       url: '/pages/gpt5-test/gpt5-test'
     });
   }
+  */
 });
 

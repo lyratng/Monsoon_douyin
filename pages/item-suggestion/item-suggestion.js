@@ -1,6 +1,8 @@
 // pages/item-suggestion/item-suggestion.js
 const app = getApp();
 const api = require('../../utils/api.js');
+const cdnConfig = require('../../config/cdn.js');
+const simpleImageLoader = require('../../utils/simpleImageLoader.js');
 
 Page({
   /**
@@ -15,10 +17,12 @@ Page({
     analysisHistory: [],
     currentBgIndex: 0,
     backgroundImages: [
-      '/assets/images/backgrounds/carousel/bg-1.jpg',
-      '/assets/images/backgrounds/carousel/bg-2.jpg',
-      '/assets/images/backgrounds/carousel/bg-3.jpg'
-    ]
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-1.jpg',
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-2.jpg',
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-3.jpg'
+    ],
+    imageLoadingStates: {}, // 跟踪每张图片的加载状态
+    loadingProgress: 0 // 整体加载进度
   },
 
   /**
@@ -26,11 +30,10 @@ Page({
    */
   onLoad(options) {
     this.initPage();
-    // 确保第一张图片立即显示
+    // 初始化背景索引，但不启动轮播
     this.setData({
       currentBgIndex: 0
     });
-    this.startBackgroundCarousel();
   },
 
   /**
@@ -38,6 +41,8 @@ Page({
    */
   onUnload() {
     this.stopBackgroundCarousel();
+    // 清理图片加载器状态
+    simpleImageLoader.reset();
   },
 
   /**
@@ -60,22 +65,28 @@ Page({
   },
 
   /**
-   * 加载样例图片
+   * 加载样例图片 - 简化版本
    */
   loadSampleImages() {
-    // 加载20张样例图片 - 使用正确的路径格式（必须以/开头）
+    console.log('[页面] 开始加载样例图片');
+    
     const sampleImages = [];
-    for (let i = 1; i <= 20; i++) {
+    
+    for (let i = 1; i <= 40; i++) {
+      const cdnUrl = cdnConfig.getSampleClothesUrl(i);
+      
       sampleImages.push({
         id: i,
         name: `样例${i}`,
-        path: `/assets/images/sample-clothes/sample-${i}.jpg`
+        path: cdnUrl // 直接使用CDN URL，无本地兜底
       });
     }
     
     this.setData({
       sampleImages: sampleImages
     });
+
+    console.log('[页面] 样例图片数据已设置，共', sampleImages.length, '张');
   },
 
   /**
@@ -83,10 +94,33 @@ Page({
    */
   selectSample(e) {
     const sample = e.currentTarget.dataset.sample;
+    console.log('🔍 [DEBUG] 选择样例图片:', sample);
+    console.log('🔍 [DEBUG] 样例图片路径:', sample.path);
+    console.log('🔍 [DEBUG] 样例图片ID:', sample.id);
     this.setData({
       selectedSample: sample,
       uploadedImage: null
     });
+  },
+
+  /**
+   * 图片加载错误处理 - 已移除本地兜底逻辑
+   */
+  onImageError(e) {
+    const item = e.currentTarget.dataset.item;
+    
+    console.warn(`[页面] CDN图片加载失败 ${item.id}:`, item.path);
+    console.log(`[页面] 无本地兜底，请检查CDN配置或网络连接`);
+    
+    // 不再进行本地兜底，只记录错误
+  },
+
+  /**
+   * 图片加载成功处理
+   */
+  onImageLoad(e) {
+    const item = e.currentTarget.dataset.item;
+    console.log(`[页面] 图片加载成功 ${item.id}:`, item.path.includes('aliyuncs.com') ? 'CDN' : '本地');
   },
 
   /**
@@ -143,14 +177,22 @@ Page({
    * 开始分析
    */
   async startAnalysis() {
+    console.log('🚀 [DEBUG] 开始分析按钮被点击');
     const image = this.data.selectedSample || this.data.uploadedImage;
+    console.log('🔍 [DEBUG] 当前选中的图片:', image);
+    console.log('🔍 [DEBUG] selectedSample:', this.data.selectedSample);
+    console.log('🔍 [DEBUG] uploadedImage:', this.data.uploadedImage);
+    
     if (!image) {
+      console.log('❌ [DEBUG] 没有选择图片');
       tt.showToast({
         title: '请先选择或上传图片',
         icon: 'none'
       });
       return;
     }
+    
+    console.log('✅ [DEBUG] 图片检查通过，图片路径:', image.path);
 
     // 检查用户是否完成测试
     const userProfile = this.data.userProfile;
@@ -175,15 +217,24 @@ Page({
       isAnalyzing: true
     });
 
+    // 开始分析时启动背景轮播
+    this.startBackgroundCarousel();
+
     try {
-      console.log('🎯 开始单品分析流程');
+      console.log('🎯 [DEBUG] 开始单品分析流程');
       
       // 第一步：将图片转换为base64
+      console.log('📷 [DEBUG] 第一步：开始转换图片为base64');
+      console.log('📷 [DEBUG] 图片路径类型:', typeof image.path);
+      console.log('📷 [DEBUG] 图片路径值:', image.path);
+      
       const base64Image = await this.convertImageToBase64(image.path);
+      console.log('✅ [DEBUG] 图片转换成功，base64长度:', base64Image.length);
       
       // 第二步：第一层API - 衣物信息提取
-      console.log('📋 第一层：衣物信息提取');
+      console.log('📋 [DEBUG] 第二步：第一层API - 衣物信息提取');
       const clothingInfo = await api.extractClothingInfo(base64Image);
+      console.log('✅ [DEBUG] 衣物信息提取完成:', clothingInfo);
       
       // 检查是否为衣物
       if (!clothingInfo.isClothing) {
@@ -220,6 +271,9 @@ Page({
         isAnalyzing: false
       });
       
+      // 停止背景轮播
+      this.stopBackgroundCarousel();
+      
       // 跳转到结果页面
       tt.navigateTo({
         url: '/pages/item-result/item-result'
@@ -230,6 +284,9 @@ Page({
       this.setData({
         isAnalyzing: false
       });
+      
+      // 停止背景轮播
+      this.stopBackgroundCarousel();
       
       let errorMessage = '分析失败，请重试';
       if (error.message.includes('API Key')) {
@@ -251,17 +308,67 @@ Page({
    */
   convertImageToBase64(imagePath) {
     return new Promise((resolve, reject) => {
-      tt.getFileSystemManager().readFile({
-        filePath: imagePath,
-        encoding: 'base64',
-        success: (res) => {
-          resolve(res.data);
-        },
-        fail: (error) => {
-          console.error('图片转base64失败:', error);
-          reject(new Error('图片处理失败'));
-        }
-      });
+      console.log('🔧 [DEBUG] convertImageToBase64 函数开始');
+      console.log('🔧 [DEBUG] 传入的路径:', imagePath);
+      console.log('🔧 [DEBUG] 路径类型:', typeof imagePath);
+      console.log('🔧 [DEBUG] 是否以http开头:', imagePath.startsWith('http'));
+      
+      // 判断是否为网络URL
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        console.log('🌐 [DEBUG] 检测到网络URL，开始下载...');
+        // 网络图片：先下载到本地，再转换
+        tt.downloadFile({
+          url: imagePath,
+          success: (res) => {
+            console.log('✅ [DEBUG] 图片下载成功，临时路径:', res.tempFilePath);
+            const tempFilePath = res.tempFilePath;
+            // 读取下载的临时文件
+            tt.getFileSystemManager().readFile({
+              filePath: tempFilePath,
+              encoding: 'base64',
+              success: (readRes) => {
+                console.log('✅ [DEBUG] 文件读取成功，数据长度:', readRes.data.length);
+                resolve(readRes.data);
+              },
+              fail: (readError) => {
+                console.error('❌ [DEBUG] 读取下载文件失败:', readError);
+                console.error('❌ [DEBUG] 读取错误详情:', JSON.stringify(readError));
+                reject(new Error('图片处理失败'));
+              }
+            });
+          },
+          fail: (downloadError) => {
+            console.error('❌ [DEBUG] 下载图片失败:', downloadError);
+            console.error('❌ [DEBUG] 下载错误详情:', JSON.stringify(downloadError));
+            
+            // 检查具体的错误类型
+            if (downloadError.errNo === 21100) {
+              console.error('💡 [DEBUG] 域名白名单问题，请在抖音开发者平台配置域名白名单');
+              reject(new Error('域名未在白名单中，请稍后重试'));
+            } else {
+              console.error('💡 [DEBUG] 其他下载错误，可能是网络问题');
+              reject(new Error('图片下载失败，请检查网络连接'));
+            }
+          }
+        });
+      } else {
+        console.log('📁 [DEBUG] 检测到本地路径，直接读取...');
+        // 本地图片：直接读取
+        tt.getFileSystemManager().readFile({
+          filePath: imagePath,
+          encoding: 'base64',
+          success: (res) => {
+            console.log('✅ [DEBUG] 文件读取成功，数据长度:', res.data.length);
+            resolve(res.data);
+          },
+          fail: (error) => {
+            console.error('❌ [DEBUG] 图片转base64失败:', error);
+            console.error('❌ [DEBUG] 错误详情:', JSON.stringify(error));
+            console.error('❌ [DEBUG] 失败的文件路径:', imagePath);
+            reject(new Error('图片处理失败'));
+          }
+        });
+      }
     });
   },
 
@@ -377,19 +484,20 @@ Page({
   },
 
   /**
-   * 开始背景轮播
+   * 开始背景轮播 - 简单滑动切换模式
    */
   startBackgroundCarousel() {
     console.log('开始背景轮播，图片数量:', this.data.backgroundImages.length);
     console.log('背景图片路径:', this.data.backgroundImages);
     
+    // 每2秒切换到下一张图片
     this.backgroundTimer = setInterval(() => {
       const nextIndex = (this.data.currentBgIndex + 1) % this.data.backgroundImages.length;
       console.log('切换到背景图片索引:', nextIndex);
       this.setData({
         currentBgIndex: nextIndex
       });
-    }, 5000); // 每5秒切换一次
+    }, 2000); // 每2秒切换一次
   },
 
   /**

@@ -4,6 +4,15 @@ Page({
     currentStep: 1,
     totalSteps: 16,
     isLoading: false,
+    stepAnimationClass: '', // 控制页面动画：'fade-in' | 'fade-out' | ''
+    
+    // 加载轮播相关
+    currentBgIndex: 0,
+    backgroundImages: [
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-1.jpg',
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-2.jpg',
+      'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/backgrounds/carousel/bg-3.jpg'
+    ],
     
     // 基本信息（第1页）
     gender: '',
@@ -31,6 +40,7 @@ Page({
       c: 0, // 棱角力量型
       d: 0  // 静止笔直型
     },
+    psychologyAnswers: [], // 心理测试选择记录，8个问题对应8个答案
     mbtiType: '',
     
     // 颜色选项
@@ -68,7 +78,8 @@ Page({
   onLoad: function(options) {
     const step = parseInt(options.step) || 1;
     this.setData({
-      currentStep: step
+      currentStep: step,
+      stepAnimationClass: '' // 重置动画状态，确保新页面正常显示fade-in
     });
     
     // 从本地存储恢复进度
@@ -565,6 +576,12 @@ Page({
   // 心理测试
   onPersonalityChoice: function(e) {
     const choice = e.currentTarget.dataset.choice;
+    const currentQuestionIndex = this.data.currentStep - 8; // 第8步开始是第0个问题
+    
+    // 更新选择记录
+    const answers = this.data.psychologyAnswers || [];
+    answers[currentQuestionIndex] = choice;
+    
     const scores = {
       a: this.data.personalityScores.a,
       b: this.data.personalityScores.b,
@@ -589,14 +606,25 @@ Page({
     }
     
     this.setData({
+      psychologyAnswers: answers,
       personalityScores: scores
     });
     
-    // 自动进入下一步
+    // 丝滑过渡：先显示选择反馈，然后退出动画，最后跳转
     var self = this;
+    
+    // 第一阶段：短暂显示选择状态 (300ms)
     setTimeout(function() {
-      self.nextStep();
-    }, 500);
+      // 第二阶段：开始退出动画
+      self.setData({
+        stepAnimationClass: 'fade-out'
+      });
+      
+      // 第三阶段：动画完成后跳转 (400ms fadeOut动画时长)
+      setTimeout(function() {
+        self.nextStep();
+      }, 400);
+    }, 300);
   },
 
   // MBTI选择
@@ -641,14 +669,23 @@ Page({
     });
   },
 
+  // MBTI不确定选项
+  onMbtiUncertain: function() {
+    console.log('选择了MBTI不确定选项');
+    this.setData({
+      mbtiType: '不确定',
+      // 不确定时保持原有分数不变
+      personalityScores: this.data.personalityScores
+    });
+  },
+
   // 生成报告
   generateReport: function() {
     var self = this;
     this.setData({ isLoading: true });
     
-    tt.showLoading({
-      title: '生成报告中...'
-    });
+    // 开始背景轮播
+    this.startBackgroundCarousel();
     
     // 保存最终数据
     this.saveStepData();
@@ -683,14 +720,20 @@ Page({
         console.log('  最终档案中的季型名称:', finalProfile.style_report ? finalProfile.style_report['季型名称'] : '无');
         console.log('  最终档案中的color_analysis季型:', finalProfile.color_analysis ? finalProfile.color_analysis.season_12 : '无');
         
-        tt.hideLoading();
+        // 停止背景轮播
+        self.stopBackgroundCarousel();
+        self.setData({ isLoading: false });
+        
         tt.redirectTo({
           url: '/pages/report/report?generate=true'
         });
       })
       .catch(function(error) {
         console.error('报告生成失败:', error);
-        tt.hideLoading();
+        
+        // 停止背景轮播
+        self.stopBackgroundCarousel();
+        self.setData({ isLoading: false });
         
         tt.showModal({
           title: '报告生成失败',
@@ -747,5 +790,31 @@ Page({
         }
       ]
     };
+  },
+
+  /**
+   * 开始背景轮播
+   */
+  startBackgroundCarousel: function() {
+    console.log('开始背景轮播，图片数量:', this.data.backgroundImages.length);
+    
+    // 每2秒切换到下一张图片
+    this.backgroundTimer = setInterval(() => {
+      const nextIndex = (this.data.currentBgIndex + 1) % this.data.backgroundImages.length;
+      console.log('切换到背景图片索引:', nextIndex);
+      this.setData({
+        currentBgIndex: nextIndex
+      });
+    }, 2000); // 每2秒切换一次
+  },
+
+  /**
+   * 停止背景轮播
+   */
+  stopBackgroundCarousel: function() {
+    if (this.backgroundTimer) {
+      clearInterval(this.backgroundTimer);
+      this.backgroundTimer = null;
+    }
   }
 });

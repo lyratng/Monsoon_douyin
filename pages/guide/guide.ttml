@@ -15,13 +15,13 @@
         <view class="content-area-with-image">
           <!-- 左侧抽象图案 -->
           <view class="image-container">
-            <image class="abstract-pattern" src="/assets/images/guide/abstract-pattern.jpg" mode="aspectFill"></image>
+            <image class="abstract-pattern" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/abstract-pattern.png" mode="aspectFill"></image>
           </view>
           
           <!-- 右侧文字区域 -->
           <view class="text-container-right">
             <view 
-              wx:for="{{currentPage === 1 ? animatedLines : []}}" 
+              wx:for="{{page1Lines}}" 
               wx:key="index" 
               class="guide-line fade-in-line right-align"
               style="animation-delay: {{index * 0.3}}s;"
@@ -40,7 +40,7 @@
           <!-- 左侧文字区域 -->
           <view class="text-container-left">
             <view 
-              wx:for="{{currentPage === 2 ? animatedLines : []}}" 
+              wx:for="{{page2Lines}}" 
               wx:key="index" 
               class="guide-line fade-in-line left-align"
               style="animation-delay: {{index * 0.3}}s;"
@@ -51,7 +51,7 @@
           
           <!-- 右侧心脏图案 -->
           <view class="image-container-right">
-            <image class="heart-pattern" src="/assets/images/guide/heart-pattern.jpg" mode="aspectFill"></image>
+            <image class="heart-pattern" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/heart-pattern.png" mode="aspectFill"></image>
           </view>
         </view>
       </view>
@@ -65,7 +65,7 @@
           <view class="upper-section">
             <view class="text-container-page3">
               <view 
-                wx:for="{{currentPage === 3 ? animatedLines : []}}" 
+                wx:for="{{page3Lines}}" 
                 wx:key="index" 
                 class="guide-line fade-in-line"
                 style="animation-delay: {{index * 0.3}}s;"
@@ -85,7 +85,7 @@
           <!-- 下半部分：正方形图片区域 -->
           <view class="lower-section">
             <view class="square-image-container">
-              <image class="guide-square-image" src="/assets/images/guide/guide-square.jpg" mode="aspectFill"></image>
+              <image class="guide-square-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/guide-square.png" mode="aspectFill"></image>
             </view>
           </view>
         </view>

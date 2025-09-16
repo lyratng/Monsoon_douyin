@@ -12,7 +12,34 @@ Page({
     // 材质弹窗相关
     showMaterialModal: false,
     selectedSeason: '',
-    modalAnimationClass: ''
+    modalAnimationClass: '',
+    // 场合弹窗相关
+    showOccasionModal: false,
+    selectedOccasion: '',
+    occasionModalAnimationClass: '',
+    // 季节映射：中文季节名 -> 英文文件名
+    seasonMap: {
+      '春': 'spring',
+      '夏': 'summer', 
+      '秋': 'autumn',
+      '冬': 'winter'
+    },
+    // 场合映射：中文场合名 -> 英文文件名
+    occasionMap: {
+      '通勤工作': 'work',
+      '运动健身': 'workout',
+      '玩乐聚会': 'party',
+      '日常通用': 'daily',
+      '周末休闲': 'weekends',
+      '海滩度假': 'beach'
+    },
+    // 季节数据：包含中文名和图片路径
+    seasons: [
+      { name: '春', image: 'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/spring.jpg' },
+      { name: '夏', image: 'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/summer.jpg' },
+      { name: '秋', image: 'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/autumn.jpg' },
+      { name: '冬', image: 'https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/winter.jpg' }
+    ]
   },
 
   /**
@@ -349,6 +376,56 @@ Page({
         showMaterialModal: false,
         selectedSeason: '',
         modalAnimationClass: ''
+      });
+    }, 300);
+  },
+
+  /**
+   * 返回主页
+   */
+  backToHome() {
+    console.log('点击返回主页按钮');
+    tt.switchTab({
+      url: '/pages/index/index'
+    });
+  },
+
+  /**
+   * 导航栏返回主页（已移除，保留兼容性）
+   */
+  goToHome() {
+    console.log('点击导航栏返回按钮');
+    tt.switchTab({
+      url: '/pages/index/index'
+    });
+  },
+
+  /**
+   * 选择场合
+   */
+  selectOccasion(e) {
+    const occasion = e.currentTarget.dataset.occasion;
+    this.setData({
+      selectedOccasion: occasion,
+      showOccasionModal: true,
+      occasionModalAnimationClass: 'modal-slide-in'
+    });
+  },
+
+  /**
+   * 关闭场合弹窗
+   */
+  closeOccasionModal() {
+    this.setData({
+      occasionModalAnimationClass: 'modal-slide-out'
+    });
+    
+    // 延迟隐藏弹窗，等待动画完成
+    setTimeout(() => {
+      this.setData({
+        showOccasionModal: false,
+        selectedOccasion: '',
+        occasionModalAnimationClass: ''
       });
     }, 300);
   },
