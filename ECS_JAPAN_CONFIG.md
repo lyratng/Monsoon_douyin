@@ -204,10 +204,12 @@ SSL证书: /etc/letsencrypt/live/api.radiance.asia/
 ### 环境变量
 ```bash
 # /home/ecs-user/monsoon-api/.env
-OPENAI_API_KEY=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
+OPENAI_API_KEY=sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 PORT=3000
 NODE_ENV=production
 ```
+
+> **注意**: API Key已隐藏，实际部署时请使用真实的OpenRouter API Key。
 
 ### 服务端口
 ```
@@ -227,7 +229,7 @@ GPT-5 API: https://api.radiance.asia/api/chat/completions
 ```javascript
 // config/env.js - 当前配置
 const ENV_CONFIG = {
-  OPENAI_API_KEY: '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',
+  OPENAI_API_KEY: 'sk-or-v1-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // 🔒 已隐藏
   OPENAI_BASE_URL: 'https://api.radiance.asia/api', // ✅ 已配置
   VISION_MODEL: 'openai/gpt-4o',
   TEXT_MODEL: 'openai/gpt-5-chat',
@@ -235,6 +237,8 @@ const ENV_CONFIG = {
   // ...
 };
 ```
+
+> **安全提示**: API Key不应暴露在文档中，实际配置请参考 `config/env.js` 文件。
 
 ### 抖音小程序白名单（已添加）
 ```
