@@ -319,8 +319,7 @@
   box-shadow: 0 16rpx 48rpx rgba(44, 44, 44, 0.2);
 }
 
-/* GPT-5测试按钮样式已注释 - 参考GPT5_TEST.md文档恢复 */
-/*
+/* GPT-5测试按钮样式 */
 .debug-btn {
   width: 280rpx;
   height: 72rpx;
@@ -345,7 +344,6 @@
   background: rgba(255, 193, 7, 1);
   transform: scale(0.95);
 }
-*/
 
 /* 已有报告页面 */
 /* 已有报告的用户页面 - 旧版本（已禁用）*/

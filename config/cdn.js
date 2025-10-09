@@ -9,7 +9,9 @@ module.exports = {
     BACKGROUNDS: '/backgrounds/carousel',
     GUIDE: '/guide',
     SEASONS: '/seasons',
-    TEST: '/test'
+    TEST: '/test',
+    OCCASIONS: '/occasions',
+    STYLES: '/assets/images/styles'
   },
   
   // 缓存配置

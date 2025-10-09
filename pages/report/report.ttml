@@ -86,9 +86,24 @@
     <view class="report-card fade-in">
       <text class="card-title">推荐风格</text>
       <view class="style-suggestions">
-        <view wx:for="{{styleReport['推荐的风格列表']}}" wx:key="index" class="suggestion-item">
+        <view wx:for="{{styleReport['推荐的风格列表']}}" wx:key="index" 
+              class="suggestion-item suggestion-button"
+              bindtap="selectStyle"
+              data-style="{{item}}">
           <text class="suggestion-text">{{item}}</text>
         </view>
+      </view>
+    </view>
+
+    <!-- 风格详情弹窗 -->
+    <view wx:if="{{showStyleModal}}" class="style-modal" bindtap="closeStyleModal">
+      <view class="modal-content style-modal-content {{styleModalAnimationClass}}" catchtap="stopPropagation">
+        <!-- 风格图片（根据性别动态加载） -->
+        <image class="style-image" 
+               src="{{selectedStyleImageUrl}}" 
+               mode="aspectFill"
+               bindload="onStyleImageLoad"
+               binderror="onStyleImageError" />
       </view>
     </view>
 

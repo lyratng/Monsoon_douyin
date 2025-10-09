@@ -203,14 +203,12 @@ Page({
     });
   },
 
-  // GPT-5测试功能已注释 - 参考GPT5_TEST.md文档恢复
-  /* 
+  // GPT-5测试功能
   openGPT5Test: function() {
     console.log('点击了GPT-5测试按钮');
     tt.navigateTo({
       url: '/pages/gpt5-test/gpt5-test'
     });
   }
-  */
 });
 

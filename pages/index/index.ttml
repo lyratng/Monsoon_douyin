@@ -27,8 +27,7 @@
       
       <view class="simple-actions">
         <button class="simple-btn primary" bindtap="startTest">开启风格之旅</button>
-        <!-- GPT-5测试功能已注释 - 参考GPT5_TEST.md文档恢复 -->
-        <!-- <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button> -->
+        <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
       </view>
     </view>
   </view>
@@ -51,8 +50,7 @@
       <view class="simple-actions">
         <button class="simple-btn primary" bindtap="viewReport">查看风格报告</button>
         <button class="simple-btn secondary" bindtap="retakeTest">重新测试</button>
-        <!-- GPT-5测试功能已注释 - 参考GPT5_TEST.md文档恢复 -->
-        <!-- <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button> -->
+        <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
       </view>
     </view>
   </view>

@@ -9,7 +9,8 @@
     "pages/item-result/item-result",
     "pages/item-history/item-history",
     "pages/debug/debug",
-    "pages/api-test/api-test"
+    "pages/api-test/api-test",
+    "pages/gpt5-test/gpt5-test"
   ],
   "window": {
     "backgroundTextStyle": "dark",

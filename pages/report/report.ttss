@@ -272,6 +272,16 @@
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
 }
 
+.suggestion-button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.suggestion-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.12);
+}
+
 .suggestion-text {
   font-size: 36rpx;
   font-weight: 300;
@@ -585,6 +595,41 @@
   letter-spacing: 0.5rpx;
   line-height: 1.6;
   flex: 1;
+}
+
+/* 风格弹窗 */
+.style-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.style-modal-content {
+  background: #FFFFFF;
+  border-radius: 20rpx;
+  width: 480rpx;
+  height: 720rpx;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.2);
+  transform-origin: center;
+  padding: 0;
+}
+
+.style-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 /* 个性化建议 */
