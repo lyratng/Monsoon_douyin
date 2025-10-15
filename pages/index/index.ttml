@@ -2,12 +2,13 @@
   <!-- 极简初始页面 -->
   <view wx:if="{{showInitial}}" class="initial-container">
     <view class="initial-hero">
-      <text class="initial-title">季风</text>
+      <text class="initial-title" bindtap="handleTitleClick">季风</text>
       <text class="initial-subtitle">AI穿搭风格诊断</text>
     </view>
     
     <view class="initial-actions">
       <button class="initial-btn" bindtap="startTest">开启风格之旅</button>
+      <button wx:if="{{showGPT5Test}}" class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
     </view>
   </view>
 
@@ -21,13 +22,13 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero-first">
-        <text class="simple-title">季风</text>
+        <text class="simple-title" bindtap="handleTitleClick">季风</text>
         <text class="simple-subtitle">你的穿搭风格顾问</text>
       </view>
       
       <view class="simple-actions">
         <button class="simple-btn primary" bindtap="startTest">开启风格之旅</button>
-        <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
+        <button wx:if="{{showGPT5Test}}" class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
       </view>
     </view>
   </view>
@@ -42,7 +43,7 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero">
-        <text class="simple-title">季风</text>
+        <text class="simple-title" bindtap="handleTitleClick">季风</text>
         <text class="simple-subtitle">你的穿搭风格顾问</text>
         <text class="simple-description">你的专属风格报告已生成</text>
       </view>
@@ -50,7 +51,7 @@
       <view class="simple-actions">
         <button class="simple-btn primary" bindtap="viewReport">查看风格报告</button>
         <button class="simple-btn secondary" bindtap="retakeTest">重新测试</button>
-        <button class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
+        <button wx:if="{{showGPT5Test}}" class="simple-btn debug" bindtap="openGPT5Test">🧪 GPT-5测试</button>
       </view>
     </view>
   </view>

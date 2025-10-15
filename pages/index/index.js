@@ -8,7 +8,10 @@ Page({
     showInitial: false,
     statusBarHeight: 0,
     navigationHeight: 0,
-    capsuleInfo: null
+    capsuleInfo: null,
+    showGPT5Test: false, // 控制GPT5测试按钮显示
+    titleClickCount: 0, // 标题点击次数
+    firstClickTime: 0 // 第一次点击的时间戳
   },
 
   onLoad: function(options) {
@@ -59,6 +62,13 @@ Page({
   },
 
   onShow: function() {
+    // 重置GPT5测试按钮状态（从其他页面返回时隐藏）
+    this.setData({
+      showGPT5Test: false,
+      titleClickCount: 0,
+      firstClickTime: 0
+    });
+    
     // 检查是否从报告页面返回，如果是则显示极简页面
     const app = getApp();
     if (app.globalData && app.globalData.showInitialPage) {
@@ -71,6 +81,15 @@ Page({
     } else if (!this.data.showInitial) {
       this.checkUserReport();
     }
+  },
+
+  onHide: function() {
+    // 离开页面时重置GPT5测试按钮状态
+    this.setData({
+      showGPT5Test: false,
+      titleClickCount: 0,
+      firstClickTime: 0
+    });
   },
 
   // 检查用户是否已有报告
@@ -201,6 +220,54 @@ Page({
     tt.navigateTo({
       url: '/pages/debug/debug'
     });
+  },
+
+  // 点击"季风"标题的处理函数
+  handleTitleClick: function() {
+    const currentTime = Date.now();
+    const clickCount = this.data.titleClickCount;
+    const firstClickTime = this.data.firstClickTime;
+    
+    // 如果是第一次点击，记录时间戳
+    if (clickCount === 0) {
+      this.setData({
+        titleClickCount: 1,
+        firstClickTime: currentTime
+      });
+      console.log('第1次点击标题');
+    } else {
+      // 检查是否在3秒内
+      const timeDiff = currentTime - firstClickTime;
+      
+      if (timeDiff > 3000) {
+        // 超过3秒，重置计数
+        this.setData({
+          titleClickCount: 1,
+          firstClickTime: currentTime
+        });
+        console.log('超过3秒，重新计数 - 第1次点击标题');
+      } else {
+        // 在3秒内，增加计数
+        const newCount = clickCount + 1;
+        this.setData({
+          titleClickCount: newCount
+        });
+        console.log('第' + newCount + '次点击标题');
+        
+        // 如果点击了3次，显示GPT5测试按钮
+        if (newCount >= 3) {
+          this.setData({
+            showGPT5Test: true
+          });
+          console.log('✨ 已解锁GPT-5测试功能！');
+          tt.showToast({
+            title: '✨ 已解锁测试功能',
+            icon: 'none',
+            duration: 1500
+          });
+        }
+      }
+    }
   },
 
   // GPT-5测试功能
