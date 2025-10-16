@@ -282,7 +282,7 @@ Page({
 
     // 为模拟报告设置默认性别
     const mockUserProfile = { 
-      name: "季风用户",
+      name: "寓言用户",
       basic_info: {
         gender: 'female' // 模拟数据默认女性
       }
@@ -326,7 +326,8 @@ Page({
       性别后缀: genderSuffix
     });
     
-    return `https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/styles/${styleKey}-${genderSuffix}.jpg`;
+    // 使用阿里云OSS图片处理：质量75% + WebP格式，压缩约70%
+    return `https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/styles/${styleKey}-${genderSuffix}.jpg?x-oss-process=image/quality,q_75/format,webp`;
   },
 
   /**

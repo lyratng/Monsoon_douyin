@@ -222,7 +222,7 @@ Page({
     });
   },
 
-  // 点击"季风"标题的处理函数
+  // 点击"衣索寓言"标题的处理函数
   handleTitleClick: function() {
     const currentTime = Date.now();
     const clickCount = this.data.titleClickCount;

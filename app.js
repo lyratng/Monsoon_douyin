@@ -1,7 +1,7 @@
-// 季风 - AI穿搭小程序
+// 衣索寓言 - AI穿搭小程序
 App({
   onLaunch: function(options) {
-    console.log('季风小程序启动', options);
+    console.log('衣索寓言小程序启动', options);
     
     // 初始化用户档案系统
     this.initUserProfile();
@@ -11,15 +11,15 @@ App({
   },
 
   onShow: function(options) {
-    console.log('季风小程序显示', options);
+    console.log('衣索寓言小程序显示', options);
   },
 
   onHide: function() {
-    console.log('季风小程序隐藏');
+    console.log('衣索寓言小程序隐藏');
   },
 
   onError: function(msg) {
-    console.error('季风小程序错误', msg);
+    console.error('衣索寓言小程序错误', msg);
   },
 
   // 初始化用户档案

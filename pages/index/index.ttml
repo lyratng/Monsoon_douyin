@@ -2,7 +2,7 @@
   <!-- 极简初始页面 -->
   <view wx:if="{{showInitial}}" class="initial-container">
     <view class="initial-hero">
-      <text class="initial-title" bindtap="handleTitleClick">季风</text>
+      <text class="initial-title" bindtap="handleTitleClick">衣索寓言</text>
       <text class="initial-subtitle">AI穿搭风格诊断</text>
     </view>
     
@@ -22,8 +22,8 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero-first">
-        <text class="simple-title" bindtap="handleTitleClick">季风</text>
-        <text class="simple-subtitle">你的穿搭风格顾问</text>
+        <text class="simple-title" bindtap="handleTitleClick">衣索寓言</text>
+        <text class="simple-subtitle">每一件衣服，都是一则寓言。</text>
       </view>
       
       <view class="simple-actions">
@@ -43,8 +43,8 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero">
-        <text class="simple-title" bindtap="handleTitleClick">季风</text>
-        <text class="simple-subtitle">你的穿搭风格顾问</text>
+        <text class="simple-title" bindtap="handleTitleClick">衣索寓言</text>
+        <text class="simple-subtitle">「衣有语，织为言」</text>
         <text class="simple-description">你的专属风格报告已生成</text>
       </view>
       
