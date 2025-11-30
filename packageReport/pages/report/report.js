@@ -10,6 +10,7 @@ Page({
     styleReport: null,
     loading: true,
     userGender: '', // 用户性别：'male' 或 'female'
+    avatarImage: '', // AI生成的专属形象图片路径
     preloadedImages: {}, // 存储预加载的图片本地路径 {风格名: 本地路径}
     // 材质弹窗相关
     showMaterialModal: false,
@@ -135,11 +136,47 @@ Page({
       console.log('🎯 【断点12 - 报告页面最终显示】');
       console.log('  报告页面显示的季型名称:', styleReport['季型名称']);
       console.log('  报告页面的color_analysis季型:', userProfile.color_analysis ? userProfile.color_analysis.season_12 : '无');
-      console.log('  报告页面完整styleReport:', JSON.stringify(styleReport, null, 2));
+      
+      // 检查 userProfile 的所有键
+      console.log('📋 userProfile 的所有键:', Object.keys(userProfile));
+      console.log('📋 是否包含 avatar_image:', 'avatar_image' in userProfile);
       
       // 获取用户性别
       const userGender = (userProfile.basic_info && userProfile.basic_info.gender) || 'female'; // 默认为 female
       console.log('  用户性别:', userGender);
+      
+      // 获取AI生成的专属形象图片
+      let avatarImage = userProfile.avatar_image || '';
+      
+      // 如果使用了分片存储，需要重组
+      if (avatarImage === 'CHUNKED' && userProfile.avatar_chunks) {
+        console.log('🎨 检测到分片存储，开始重组图片，片数:', userProfile.avatar_chunks);
+        const chunks = [];
+        for (let i = 0; i < userProfile.avatar_chunks; i++) {
+          try {
+            const chunk = tt.getStorageSync(`avatar_chunk_${i}`);
+            if (chunk) {
+              chunks.push(chunk);
+            } else {
+              console.error(`片段${i}不存在`);
+            }
+          } catch (error) {
+            console.error(`读取片段${i}失败:`, error);
+          }
+        }
+        avatarImage = chunks.join('');
+        console.log('🎨 图片重组完成，总长度:', avatarImage.length);
+      }
+      
+      console.log('🖼️ ===== Avatar 图片信息 =====');
+      console.log('  专属形象图片:', avatarImage ? '✅ 已生成' : '❌ 未生成');
+      console.log('  专属形象图片类型:', typeof avatarImage);
+      console.log('  专属形象图片长度:', avatarImage ? avatarImage.length : 0);
+      if (avatarImage) {
+        console.log('  前100字符:', avatarImage.substring(0, 100));
+        console.log('  后50字符:', avatarImage.substring(avatarImage.length - 50));
+      }
+      console.log('🖼️ ========================');
       
       const beforeSetData = Date.now();
       
@@ -147,6 +184,7 @@ Page({
         userProfile: userProfile,
         styleReport: styleReport,
         userGender: userGender,
+        avatarImage: avatarImage,
         loading: false
       }, () => {
         const afterSetData = Date.now();
@@ -292,6 +330,7 @@ Page({
       userProfile: mockUserProfile,
       styleReport: mockReport,
       userGender: 'female',
+      avatarImage: '', // 模拟数据没有生成图片
       loading: false
     }, () => {
       // 模拟报告生成后也预加载图片
@@ -801,6 +840,29 @@ Page({
    */
   stopPropagation() {
     // 阻止点击卡片内容时关闭弹窗
+  },
+
+  /**
+   * Avatar图片加载成功
+   */
+  onAvatarImageLoad(e) {
+    console.log('✅ Avatar图片加载成功');
+    console.log('   图片尺寸:', e.detail.width, 'x', e.detail.height);
+  },
+
+  /**
+   * Avatar图片加载失败
+   */
+  onAvatarImageError(e) {
+    console.error('❌ Avatar图片加载失败');
+    console.error('   错误详情:', e.detail);
+    console.error('   图片路径:', this.data.avatarImage);
+    
+    tt.showToast({
+      title: '专属形象图片加载失败',
+      icon: 'none',
+      duration: 2000
+    });
   },
 
   /**

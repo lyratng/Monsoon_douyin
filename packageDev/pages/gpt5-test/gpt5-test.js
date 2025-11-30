@@ -1,5 +1,5 @@
 // GPT-5 API 测试页面
-const api = require('../../utils/api');
+const api = require('../../../utils/api');
 
 Page({
   data: {
@@ -87,7 +87,7 @@ Page({
   onLoad() {
     console.log('GPT-5 测试页面加载');
     // 获取当前API配置
-    const ENV_CONFIG = require('../../config/env');
+    const ENV_CONFIG = require('../../../config/env');
     this.setData({
       apiKey: ENV_CONFIG.OPENAI_API_KEY ? ENV_CONFIG.OPENAI_API_KEY.substring(0, 20) + '...' : '未配置'
     });
@@ -155,7 +155,7 @@ Page({
 
   // 调用GPT API（支持不同模型）
   async callGPT5API(prompt, config, customModel = null) {
-    const ENV_CONFIG = require('../../config/env');
+    const ENV_CONFIG = require('../../../config/env');
     const model = customModel || ENV_CONFIG.GPT_MODEL;
     
     console.log('🚀 调用GPT API');

@@ -125,7 +125,7 @@ Page({
   viewReport: function() {
     if (this.data.hasReport) {
       tt.navigateTo({
-        url: '/pages/report/report'
+        url: '/packageReport/pages/report/report'
       });
     } else {
       this.startTest();
@@ -135,7 +135,7 @@ Page({
   // 查看模拟报告
   viewMockReport: function() {
     tt.navigateTo({
-      url: '/pages/report/report'
+      url: '/packageReport/pages/report/report'
     });
   },
 
@@ -218,7 +218,7 @@ Page({
   // 跳转到调试页面
   goToDebug: function() {
     tt.navigateTo({
-      url: '/pages/debug/debug'
+      url: '/packageDev/pages/debug/debug'
     });
   },
 
@@ -274,7 +274,7 @@ Page({
   openGPT5Test: function() {
     console.log('点击了GPT-5测试按钮');
     tt.navigateTo({
-      url: '/pages/gpt5-test/gpt5-test'
+      url: '/packageDev/pages/gpt5-test/gpt5-test'
     });
   }
 });

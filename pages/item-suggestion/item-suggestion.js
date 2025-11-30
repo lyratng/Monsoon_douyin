@@ -276,7 +276,7 @@ Page({
       
       // 跳转到结果页面
       tt.navigateTo({
-        url: '/pages/item-result/item-result'
+        url: '/packageTools/pages/item-result/item-result'
       });
       
     } catch (error) {

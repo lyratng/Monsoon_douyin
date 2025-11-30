@@ -112,6 +112,8 @@ App({
         personality_test: currentProfile.personality_test || {},
         preferences: currentProfile.preferences || {},
         style_report: currentProfile.style_report,
+        avatar_image: currentProfile.avatar_image || '',
+        avatar_chunks: currentProfile.avatar_chunks || 0,
         conversation_memory: currentProfile.conversation_memory || {},
         version: currentProfile.version || "1.0",
         test_count: currentProfile.test_count || 0
@@ -133,6 +135,35 @@ App({
       }
       if (updates.style_report) {
         updatedProfile.style_report = updates.style_report;
+      }
+      if (updates.avatar_image) {
+        // 如果图片太大，使用分片存储
+        const avatarData = updates.avatar_image;
+        if (avatarData.length > 900000) { // 900KB阈值
+          console.log('🎨 Avatar图片较大，使用分片存储, 大小:', avatarData.length);
+          // 分片大小：每片900KB
+          const chunkSize = 900000;
+          const chunks = [];
+          for (let i = 0; i < avatarData.length; i += chunkSize) {
+            chunks.push(avatarData.substring(i, i + chunkSize));
+          }
+          console.log('🎨 分为', chunks.length, '片存储');
+          
+          // 保存每一片
+          for (let i = 0; i < chunks.length; i++) {
+            try {
+              tt.setStorageSync(`avatar_chunk_${i}`, chunks[i]);
+            } catch (error) {
+              console.error(`保存avatar片段${i}失败:`, error);
+            }
+          }
+          
+          // 在userProfile中只保存元信息
+          updatedProfile.avatar_image = 'CHUNKED';
+          updatedProfile.avatar_chunks = chunks.length;
+        } else {
+          updatedProfile.avatar_image = updates.avatar_image;
+        }
       }
       if (updates.conversation_memory) {
         updatedProfile.conversation_memory = Object.assign(updatedProfile.conversation_memory, updates.conversation_memory);

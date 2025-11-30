@@ -4,6 +4,7 @@ Page({
     currentStep: 1,
     totalSteps: 16,
     isLoading: false,
+    loadingText: '正在生成您的专属风格报告...', // 加载文字
     stepAnimationClass: '', // 控制页面动画：'fade-in' | 'fade-out' | ''
     
     // 加载轮播相关
@@ -368,22 +369,51 @@ Page({
     var self = this;
     tt.chooseImage({
       count: 1,
-      sizeType: ['compressed'],
+      sizeType: ['compressed'], // 先进行系统压缩
       sourceType: ['album', 'camera'],
       success: function(res) {
         const imagePath = res.tempFilePaths[0];
-        self.setData({
-          uploadedImage: imagePath
-        });
         
-        // 立即显示上传成功，用户可以进入下一步
-        tt.showToast({
-          title: '照片上传成功',
-          icon: 'success'
-        });
+        console.log('📸 原始图片路径:', imagePath);
         
-        // 在后台开始分析（不阻塞用户操作）
-        self.analyzeImageInBackground(imagePath);
+        // 进一步压缩图片以避免413错误
+        tt.compressImage({
+          src: imagePath,
+          quality: 60, // 压缩质量60%，大幅减小体积
+          success: function(compressRes) {
+            const compressedPath = compressRes.tempFilePath;
+            console.log('✅ 图片压缩成功');
+            console.log('   压缩后路径:', compressedPath);
+            
+            self.setData({
+              uploadedImage: compressedPath
+            });
+            
+            // 立即显示上传成功，用户可以进入下一步
+            tt.showToast({
+              title: '照片上传成功',
+              icon: 'success'
+            });
+            
+            // 在后台开始分析（不阻塞用户操作）
+            self.analyzeImageInBackground(compressedPath);
+          },
+          fail: function(compressError) {
+            // 如果压缩失败，使用原图
+            console.warn('⚠️ 图片压缩失败，使用原图:', compressError);
+            
+            self.setData({
+              uploadedImage: imagePath
+            });
+            
+            tt.showToast({
+              title: '照片上传成功',
+              icon: 'success'
+            });
+            
+            self.analyzeImageInBackground(imagePath);
+          }
+        });
       },
       fail: function(error) {
         console.error('选择图片失败:', error);
@@ -682,7 +712,10 @@ Page({
   // 生成报告
   generateReport: function() {
     var self = this;
-    this.setData({ isLoading: true });
+    this.setData({ 
+      isLoading: true,
+      loadingText: '正在生成您的专属风格报告...'
+    });
     
     // 开始背景轮播
     this.startBackgroundCarousel();
@@ -720,12 +753,45 @@ Page({
         console.log('  最终档案中的季型名称:', finalProfile.style_report ? finalProfile.style_report['季型名称'] : '无');
         console.log('  最终档案中的color_analysis季型:', finalProfile.color_analysis ? finalProfile.color_analysis.season_12 : '无');
         
+        // 阶段2：生成专属形象图片
+        console.log('🎨 开始生成专属形象...');
+        self.setData({ 
+          loadingText: '正在生成您的专属形象...'
+        });
+        
+        // 生成Avatar图片
+        return api.generateAvatar(userProfile, styleReport)
+          .then(function(avatarBase64) {
+            console.log('🎨 Avatar生成成功，base64长度:', avatarBase64 ? avatarBase64.length : 0);
+            
+            // 直接保存base64 data URI到userProfile（不需要文件系统权限）
+            const dataUri = `data:image/png;base64,${avatarBase64}`;
+            
+            console.log('🎨 保存data URI到userProfile，长度:', dataUri.length);
+            
+            // 保存data URI到userProfile
+            app.updateUserProfile({
+              avatar_image: dataUri
+            });
+            
+            console.log('✅ Avatar data URI已保存到userProfile');
+            
+            return Promise.resolve();
+          })
+          .catch(function(error) {
+            console.error('❌ Avatar生成失败，继续显示报告（不包含图片）:', error);
+            console.error('   错误详情:', JSON.stringify(error));
+            // 失败时不阻塞流程，继续跳转
+            return Promise.resolve();
+          });
+      })
+      .then(function() {
         // 停止背景轮播
         self.stopBackgroundCarousel();
         self.setData({ isLoading: false });
         
         tt.redirectTo({
-          url: '/pages/report/report?generate=true'
+          url: '/packageReport/pages/report/report?generate=true'
         });
       })
       .catch(function(error) {
@@ -747,7 +813,7 @@ Page({
               });
               
               tt.redirectTo({
-                url: '/pages/report/report?generate=true'
+                url: '/packageReport/pages/report/report?generate=true'
               });
             }
           }

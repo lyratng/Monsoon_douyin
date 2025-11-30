@@ -8,6 +8,11 @@
 
   <!-- 报告内容 -->
   <view wx:else class="report-content">
+    <!-- AI生成的专属形象图片 -->
+    <view wx:if="{{avatarImage}}" class="avatar-image-section fade-in">
+      <image class="avatar-image" src="{{avatarImage}}" mode="widthFix" binderror="onAvatarImageError" bindload="onAvatarImageLoad" />
+    </view>
+
     <!-- 头部结果 -->
     <view class="report-header fade-in">
       <!-- 第一行：季型名称和能量类型名称并排显示 -->
@@ -42,24 +47,40 @@
               bindtap="selectSeason" 
               data-season="春">
           <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/spring.jpg" mode="aspectFill" />
+          <view class="season-overlay">
+            <text class="season-icon">+</text>
+            <text class="season-label">春</text>
+          </view>
         </view>
         <!-- 夏季 -->
         <view class="season-card {{selectedSeason === '夏' ? 'selected' : ''}}" 
               bindtap="selectSeason" 
               data-season="夏">
           <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/summer.jpg" mode="aspectFill" />
+          <view class="season-overlay">
+            <text class="season-icon">+</text>
+            <text class="season-label">夏</text>
+          </view>
         </view>
         <!-- 秋季 -->
         <view class="season-card {{selectedSeason === '秋' ? 'selected' : ''}}" 
               bindtap="selectSeason" 
               data-season="秋">
           <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/autumn.jpg" mode="aspectFill" />
+          <view class="season-overlay">
+            <text class="season-icon">+</text>
+            <text class="season-label">秋</text>
+          </view>
         </view>
         <!-- 冬季 -->
         <view class="season-card {{selectedSeason === '冬' ? 'selected' : ''}}" 
               bindtap="selectSeason" 
               data-season="冬">
           <image class="season-bg-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/winter.jpg" mode="aspectFill" />
+          <view class="season-overlay">
+            <text class="season-icon">+</text>
+            <text class="season-label">冬</text>
+          </view>
         </view>
       </view>
     </view>
@@ -91,6 +112,7 @@
               bindtap="selectStyle"
               data-style="{{item}}">
           <text class="suggestion-text">{{item}}</text>
+          <text class="suggestion-arrow">→</text>
         </view>
       </view>
     </view>
@@ -118,6 +140,10 @@
           <image class="occasion-bg-image" 
                  src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/occasions/{{occasionMap[item.name] || 'daily'}}.jpg" 
                  mode="aspectFill" />
+          <view class="occasion-overlay">
+            <text class="occasion-label">{{item.name}}</text>
+            <text class="occasion-arrow">→</text>
+          </view>
         </view>
       </view>
     </view>

@@ -1,5 +1,5 @@
 // 调试页面 - 用于测试API调用
-const { analyzeImage, generateStyleReport } = require('../../utils/api');
+const { analyzeImage, generateStyleReport } = require('../../../utils/api');
 
 Page({
   data: {
@@ -42,7 +42,7 @@ Page({
     this.addLog('开始测试API Key配置...');
     
     try {
-      const ENV_CONFIG = require('../../config/env');
+      const ENV_CONFIG = require('../../../config/env');
       
       if (!ENV_CONFIG.OPENAI_API_KEY) {
         this.addLog('❌ API Key未配置');
@@ -71,7 +71,7 @@ Page({
       url: 'https://api.openai.com/v1/models',
       method: 'GET',
       header: {
-        'Authorization': `Bearer ${require('../../config/env').OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${require('../../../config/env').OPENAI_API_KEY}`,
         'Content-Type': 'application/json'
       },
       success: (res) => {
@@ -103,7 +103,7 @@ Page({
         this.addLog('📡 调用图像分析API...');
         
         // 检查API配置
-        const ENV_CONFIG = require('../../config/env');
+        const ENV_CONFIG = require('../../../config/env');
         this.addLog(`🔧 使用模拟数据: ${ENV_CONFIG.USE_MOCK_DATA}`);
         
         if (ENV_CONFIG.USE_MOCK_DATA) {

@@ -1228,11 +1228,138 @@ ${JSON.stringify(clothingInfo, null, 2)}
   }
 }
 
+/**
+ * Generate avatar image using Gemini 2.5 Flash Image
+ * @param {Object} userProfile - User profile data
+ * @param {Object} styleReport - Generated style report
+ * @returns {Promise<string>} Base64 PNG image data
+ */
+async function generateAvatar(userProfile, styleReport) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  // Build the English prompt
+  const gender = userProfile.basic_info.gender === 'male' ? 'male' : 'female';
+  const age = userProfile.basic_info.age || 25;
+  const height = userProfile.basic_info.height || 165;
+  const weight = userProfile.basic_info.weight || 60;
+  
+  // Extract season info with both English and Chinese
+  const season_12 = userProfile.color_analysis.season_12 || 'Cool Summer';
+  const seasonChinese = styleReport['季型名称'] || '冷夏型';
+  const seasonInfo = `${season_12} ${seasonChinese}`;
+  
+  // Extract personality info
+  const personalityType = styleReport['能量类型名称'] || '自洽自律型';
+  const personalityDesc = styleReport['能量匹配的风格简短描述'] || '';
+
+  const prompt = `Generate a 768x1024px vertical image of a ${gender} figurine (age ${age}, ${height}cm, ${weight}kg) on a PURE WHITE BACKGROUND.
+
+BACKGROUND: Solid white #FFFFFF, completely flat, no gradients, no shadows, no effects. Just plain white.
+
+SUBJECT:
+- Full body standing pose, natural and relaxed
+- Realistic figurine/desk toy style with 3D look
+- Season: ${seasonInfo} → Spring=warm fresh colors, Summer=cool flowing colors, Autumn=khaki earth tones, Winter=high contrast cool colors
+- Personality: ${personalityType} (${personalityDesc}) → Clothing fit matches personality (relaxed=loose soft, sharp=structured angular)
+
+Keep file under 800KB.`;
+
+  console.log('🎨 [Avatar Generation] Starting avatar generation...');
+  console.log('🎨 [Avatar Generation] Gender:', gender);
+  console.log('🎨 [Avatar Generation] Season:', seasonInfo);
+  console.log('🎨 [Avatar Generation] Personality:', personalityType);
+
+  try {
+    const res = await apiRequestWithRetry({
+      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://monsoon-douyin.app',
+        'X-Title': 'Monsoon AI Fashion Assistant'
+      },
+      timeout: 60000, // 60秒超时，图片生成可能需要较长时间
+      data: {
+        model: 'google/gemini-2.5-flash-image-preview',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7
+      }
+    });
+
+    console.log('🎨 [Avatar Generation] API response received');
+    console.log('🎨 [Avatar Generation] Response status:', res.statusCode);
+
+    if (!res.data.choices || res.data.choices.length === 0) {
+      throw new Error('Avatar generation API returned no choices');
+    }
+
+    const message = res.data.choices[0].message;
+    console.log('🎨 [Avatar Generation] Message keys:', Object.keys(message));
+    
+    // Gemini 2.5 Flash Image returns data in message.images array
+    if (!message.images || message.images.length === 0) {
+      throw new Error('Avatar generation returned no images');
+    }
+    
+    const imageData = message.images[0];
+    console.log('🎨 [Avatar Generation] Image data keys:', Object.keys(imageData));
+    
+    // Get the data URI from image_url.url
+    const dataUri = imageData.image_url && imageData.image_url.url;
+    
+    if (!dataUri) {
+      throw new Error('Avatar generation: image_url.url not found');
+    }
+    
+    console.log('🎨 [Avatar Generation] Data URI length:', dataUri.length);
+    console.log('🎨 [Avatar Generation] Is data URI:', dataUri.startsWith('data:'));
+    
+    // Extract base64 data from data URI
+    // Format: data:image/png;base64,iVBORw0K...
+    let base64Data = dataUri;
+    
+    if (dataUri.startsWith('data:image/')) {
+      const commaIndex = dataUri.indexOf(',');
+      if (commaIndex > -1) {
+        base64Data = dataUri.substring(commaIndex + 1);
+        console.log('🎨 [Avatar Generation] Extracted base64 from data URI');
+      }
+    }
+    
+    // Clean up whitespace and newlines
+    base64Data = base64Data.replace(/\s/g, '');
+
+    console.log('🎨 [Avatar Generation] Final base64 length:', base64Data.length);
+    console.log('🎨 [Avatar Generation] First 50 chars:', base64Data.substring(0, 50));
+    console.log('🎨 [Avatar Generation] Last 50 chars:', base64Data.substring(base64Data.length - 50));
+    
+    if (base64Data.length < 100) {
+      throw new Error('Avatar generation returned data that is too short: ' + base64Data);
+    }
+    
+    return base64Data;
+  } catch (error) {
+    console.error('🎨 [Avatar Generation] Failed:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   analyzeImage,
   generateStyleReport,
   extractClothingInfo,
   analyzeSuitability,
+  generateAvatar,
   getApiKey,
   setApiKey,
   CONFIG

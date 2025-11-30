@@ -1,17 +1,51 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/guide/guide",
-    "pages/test/test",
-    "pages/report/report",
     "pages/chat/chat",
     "pages/item-suggestion/item-suggestion",
-    "pages/item-result/item-result",
-    "pages/item-history/item-history",
-    "pages/debug/debug",
-    "pages/api-test/api-test",
-    "pages/gpt5-test/gpt5-test"
+    "pages/guide/guide",
+    "pages/test/test"
   ],
+  "subpackages": [
+    {
+      "root": "packageReport",
+      "name": "report",
+      "pages": [
+        "pages/report/report"
+      ]
+    },
+    {
+      "root": "packageTools",
+      "name": "tools",
+      "pages": [
+        "pages/item-result/item-result",
+        "pages/item-history/item-history"
+      ]
+    },
+    {
+      "root": "packageDev",
+      "name": "dev",
+      "pages": [
+        "pages/debug/debug",
+        "pages/api-test/api-test",
+        "pages/gpt5-test/gpt5-test"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/test/test": {
+      "network": "all",
+      "packages": [
+        "report"
+      ]
+    },
+    "pages/item-suggestion/item-suggestion": {
+      "network": "all",
+      "packages": [
+        "tools"
+      ]
+    }
+  },
   "window": {
     "backgroundTextStyle": "dark",
     "navigationBarBackgroundColor": "#F5F5F0",
@@ -66,8 +100,8 @@
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/abstract-pattern.png",
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/heart-pattern.png",
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/guide/guide-square.png",
-    "/assets/images/test/wrist-warm.jpg",
-    "/assets/images/test/wrist-cool.jpg",
+    "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/test/wrist-warm.jpg",
+    "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/test/wrist-cool.jpg",
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/spring.jpg",
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/summer.jpg",
     "https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/seasons/autumn.jpg",

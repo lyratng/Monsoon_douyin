@@ -35,8 +35,8 @@
       <view class="form-label">你的年龄？ <text class="value-display">{{age}}岁</text></view>
       <slider 
         class="custom-slider"
-        min="18" 
-        max="50" 
+        min="10" 
+        max="70" 
         value="{{age}}"
         bindchange="onAgeChange"
         show-value="false"
@@ -50,8 +50,8 @@
       <view class="form-label">你的身高？ <text class="value-display">{{height}}cm</text></view>
       <slider 
         class="custom-slider"
-        min="150" 
-        max="200" 
+        min="100" 
+        max="240" 
         value="{{height}}"
         bindchange="onHeightChange"
         show-value="false"
@@ -65,8 +65,8 @@
       <view class="form-label">你的体重？ <text class="value-display">{{weight}}kg</text></view>
       <slider 
         class="custom-slider"
-        min="40" 
-        max="150" 
+        min="20" 
+        max="200" 
         value="{{weight}}"
         bindchange="onWeightChange"
         show-value="false"
@@ -87,7 +87,7 @@
         data-color="warm"
         bindtap="onWristColorChange"
       >
-        <image class="wrist-image" src="/assets/images/test/wrist-warm.jpg" mode="aspectFill"></image>
+        <image class="wrist-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/test/wrist-warm.jpg" mode="aspectFill"></image>
         <text class="wrist-label">主要绿色</text>
       </view>
       
@@ -96,7 +96,7 @@
         data-color="cool"
         bindtap="onWristColorChange"
       >
-        <image class="wrist-image" src="/assets/images/test/wrist-cool.jpg" mode="aspectFill"></image>
+        <image class="wrist-image" src="https://monsoon.oss-cn-beijing.aliyuncs.com/assets/images/test/wrist-cool.jpg" mode="aspectFill"></image>
         <text class="wrist-label">主要蓝紫色</text>
       </view>
     </view>
@@ -341,7 +341,7 @@
       
       <!-- 下半部分：文字区域 -->
       <view class="loading-content">
-        <text class="loading-text">个人风格报告生成中...</text>
+        <text class="loading-text">{{loadingText}}</text>
       </view>
     </view>
   </view>
