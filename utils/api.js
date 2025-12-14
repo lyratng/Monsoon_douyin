@@ -3,7 +3,7 @@ const ENV_CONFIG = require('../config/env');
 
 // 🔧 根据任务类型获取适合的模型
 function getModelForTask(taskType) {
-  switch(taskType) {
+  switch (taskType) {
     case 'vision':
       return ENV_CONFIG.VISION_MODEL; // GPT-4o for image recognition
     case 'text':
@@ -15,7 +15,7 @@ function getModelForTask(taskType) {
 
 // 🔧 根据任务类型获取优化的参数
 function getConfigForTask(taskType) {
-  switch(taskType) {
+  switch (taskType) {
     case 'vision':
       return {
         max_tokens: 1000,
@@ -38,36 +38,36 @@ function getConfigForTask(taskType) {
 // 🧹 清理GPT-5-Chat返回的Markdown格式JSON
 function cleanMarkdownJSON(content) {
   if (!content) return content;
-  
+
   console.log('🧹 开始清理Markdown JSON格式');
   console.log('  原始内容预览:', content.substring(0, 100) + '...');
   console.log('  原始内容结尾:', content.substring(content.length - 100));
-  
+
   // 移除markdown代码块标记
   let cleaned = content
     .replace(/```json\s*/gi, '')  // 移除开始的```json
     .replace(/```\s*$/gi, '')     // 移除结尾的```
     .replace(/^\s*```.*$/gm, '')  // 移除任何其他```行
     .trim();
-  
+
   // 如果开头有其他文本，尝试找到JSON开始的位置
   const jsonStart = cleaned.indexOf('{');
   if (jsonStart > 0) {
     cleaned = cleaned.substring(jsonStart);
   }
-  
+
   // 修复被截断的JSON - 检查是否有完整的结尾大括号
   const openBraces = (cleaned.match(/\{/g) || []).length;
   const closeBraces = (cleaned.match(/\}/g) || []).length;
-  
+
   console.log('  开括号数量:', openBraces, '闭括号数量:', closeBraces);
-  
+
   if (openBraces > closeBraces) {
     console.log('  🔧 检测到JSON被截断，尝试修复...');
-    
+
     // 查找最后一个有效的完整对象结束位置
     let fixedContent = cleaned;
-    
+
     // 查找最后一个完整的数组或对象
     const lastCompleteItem = findLastCompleteItem(cleaned);
     if (lastCompleteItem) {
@@ -84,10 +84,10 @@ function cleanMarkdownJSON(content) {
       }
       console.log('  ⚠️ 使用基本修复方法');
     }
-    
+
     cleaned = fixedContent;
   }
-  
+
   console.log('  清理后内容预览:', cleaned.substring(0, 100) + '...');
   console.log('  清理后内容结尾:', cleaned.substring(cleaned.length - 100));
   return cleaned;
@@ -101,25 +101,25 @@ function findLastCompleteItem(jsonStr) {
     let inString = false;
     let escape = false;
     let lastValidPos = -1;
-    
+
     for (let i = 0; i < jsonStr.length; i++) {
       const char = jsonStr[i];
-      
+
       if (escape) {
         escape = false;
         continue;
       }
-      
+
       if (char === '\\') {
         escape = true;
         continue;
       }
-      
+
       if (char === '"') {
         inString = !inString;
         continue;
       }
-      
+
       if (!inString) {
         if (char === '{' || char === '[') {
           braceCount++;
@@ -131,11 +131,11 @@ function findLastCompleteItem(jsonStr) {
         }
       }
     }
-    
+
     if (lastValidPos > 0) {
       return jsonStr.substring(0, lastValidPos);
     }
-    
+
     return null;
   } catch (error) {
     console.log('  修复JSON时出错:', error.message);
@@ -151,14 +151,16 @@ const CONFIG = {
   VISION_MODEL: ENV_CONFIG.VISION_MODEL,
   // 📝 文本生成模型  
   TEXT_MODEL: ENV_CONFIG.TEXT_MODEL,
+  // 🎨 图片生成模型
+  IMAGE_GEN_MODEL: ENV_CONFIG.IMAGE_GEN_MODEL,
   // 兼容旧代码
   GPT_MODEL: ENV_CONFIG.TEXT_MODEL, // 默认使用文本模型
   TIMEOUT: ENV_CONFIG.TIMEOUT,
-  
+
   // 调试配置
   DEBUG: ENV_CONFIG.DEBUG,
   USE_MOCK_DATA: ENV_CONFIG.USE_MOCK_DATA,
-  
+
   // 速率限制配置
   RATE_LIMIT_DELAY: 1000, // 请求间隔1秒
   MAX_RETRIES: 3, // 最大重试次数
@@ -177,7 +179,7 @@ function rateLimit() {
   return new Promise((resolve) => {
     const now = Date.now();
     const timeSinceLastCall = now - lastApiCallTime;
-    
+
     if (timeSinceLastCall < CONFIG.RATE_LIMIT_DELAY) {
       const delay = CONFIG.RATE_LIMIT_DELAY - timeSinceLastCall;
       setTimeout(resolve, delay);
@@ -197,23 +199,14 @@ function apiRequestWithRetry(options, retryCount = 0) {
   return new Promise((resolve, reject) => {
     tt.request({
       ...options,
-      success: async (res) => {
-        if (res.statusCode === 429) {
-          if (retryCount < CONFIG.MAX_RETRIES) {
-            console.log(`API频率限制，第${retryCount + 1}次重试...`);
-            await new Promise(r => setTimeout(r, CONFIG.RETRY_DELAY * (retryCount + 1)));
-            try {
-              const result = await apiRequestWithRetry(options, retryCount + 1);
-              resolve(result);
-            } catch (error) {
-              reject(error);
-            }
-          } else {
-            reject(new Error('API请求频率超限，请稍后再试'));
-          }
-        } else if (res.statusCode === 200) {
+      success: (res) => {
+        if (res.statusCode === 200) {
           resolve(res);
         } else {
+          console.error('❌ [API Error] 请求失败详情:');
+          console.error('  状态码:', res.statusCode);
+          console.error('  URL:', options.url);
+          console.error('  错误数据:', JSON.stringify(res.data));
           reject(new Error(`API请求失败: ${res.statusCode}`));
         }
       },
@@ -270,7 +263,7 @@ function analyzeImage(imagePath, wristColor) {
       reject(new Error('API Key未配置'));
       return;
     }
-    
+
     // 如果启用模拟数据，直接返回模拟结果
     if (CONFIG.USE_MOCK_DATA) {
       console.log('使用模拟数据进行图像分析');
@@ -279,7 +272,7 @@ function analyzeImage(imagePath, wristColor) {
           season_12: "Cool Summer",
           axes: {
             depth: "浅",
-            contrast: "低", 
+            contrast: "低",
             edge: "柔",
             temperature: "冷",
             chroma: "低"
@@ -298,15 +291,36 @@ function analyzeImage(imagePath, wristColor) {
 
     // 读取图片文件
     const fs = tt.getFileSystemManager();
-    
+
     fs.readFile({
       filePath: imagePath,
       encoding: 'base64',
       success: (res) => {
         const base64Image = res.data;
-        
-        // 调用OpenAI API
-        callOpenAIVisionAPI(base64Image, wristColor, apiKey)
+
+        // 构建prompt
+        const prompt = `请分析这张手腕照片，判断血管颜色偏向。用户自己判断的结果是：${wristColor === 'warm' ? '暖色调（偏绿）' : '冷色调（偏蓝紫）'}。
+
+请你作为专业的色彩分析师，基于图片进行12季型色彩分析，返回JSON格式结果，包含以下字段：
+{
+  "season_12": "季型名称（如Cool Summer, Warm Spring等）",
+  "axes": {
+    "depth": "深/浅",
+    "contrast": "高/低",
+    "edge": "清晰/柔和",
+    "temperature": "冷/暖",
+    "chroma": "高/低"
+  },
+  "pccs_tones": {
+    "primary": ["主要色调代码"],
+    "secondary": ["次要色调代码"],
+    "base_deep_neutrals": ["基础深色中性色代码"],
+    "avoid": ["应避免的色调代码"]
+  }
+}`;
+
+        // 调用Volcengine Vision API
+        callVolcengineVisionAPI(base64Image, prompt, apiKey)
           .then(resolve)
           .catch(reject);
       },
@@ -319,174 +333,113 @@ function analyzeImage(imagePath, wristColor) {
 }
 
 /**
- * 调用OpenAI Vision API
+ * 调用Volcengine Vision API
  * @param {string} base64Image - base64编码的图片
- * @param {string} wristColor - 手腕血管颜色
+ * @param {string} promptText - 提示词
  * @param {string} apiKey - API密钥
  * @returns {Promise} API响应
  */
-async function callOpenAIVisionAPI(base64Image, wristColor, apiKey) {
+async function callVolcengineVisionAPI(base64Image, promptText, apiKey) {
   // 速率限制
   await rateLimit();
   lastApiCallTime = Date.now();
-  
-  const colorTempMap = {
-    'warm': '暖',
-    'cool': '冷'
-  };
-  
-  const prompt = `输入：
-1) 一张正脸自然光照片（无遮挡、无滤镜）；
-2) 一行文字：主色调=${colorTempMap[wristColor]}。
-
-请仅基于可见证据完成：五维评估 → 12季型映射 → PCCS色调建议。
-严格按指定JSON输出，禁止输出颜色名列表、十六进制、解释或过程文字。
-
-【评估维度（先内判，不写入解释）】
-- 冷/暖（底色）：已给出。
-- 深/浅（value depth）：比较"头发/虹膜"相对"肤色"的明度；发眼显著更深→偏深；三者都浅→偏浅。
-- 浓/淡（对比度）：观察发-肤-眼白的明度差；黑白分明→浓；差值不大→淡。
-- 柔/锐（轮廓与边缘）：脸部转折是否尖刻、五官边缘是否硬朗、眼白是否强亮；圆润模糊→柔；棱角清晰→锐。
-- 饱和度/清透度（chroma）：整体是否像加了灰滤镜（低饱和）或宝石般清透（高饱和）。
-
-【12季型判定准则（内用）】
-- 冷轴（夏/冬）  
-  - 低对比+低饱和 → 柔夏 Soft Summer  
-  - 低对比+浅明度 → 浅夏 Light Summer  
-  - 纯冷+中对比中低饱和 → 冷夏 Cool Summer  
-  - 高对比+高饱和 → 亮冬 Bright Winter  
-  - 很深+高对比 → 深冬 Deep Winter  
-  - 纯冷+高对比 → 冷冬 Cool Winter
-- 暖轴（春/秋）  
-  - 高饱和+明亮 → 亮春 Bright Spring  
-  - 浅明度+轻快 → 浅春 Light Spring  
-  - 纯暖+中对比 → 暖春 Warm Spring  
-  - 低饱和+柔和 → 柔秋 Soft Autumn  
-  - 很深+朴厚 → 深秋 Deep Autumn  
-  - 纯暖+中深+浓郁 → 暖秋 Warm Autumn
-
-【12季型 → PCCS色调映射（用于产出，仅给代号，不给色名）】
-- 亮春：v / s / b / lt（少量 p）
-- 浅春：lt / p / b（少量 s）
-- 暖春：s / b / v（少量 lt）
-- 柔秋：sf / g / d / llg（基底少量 dp）
-- 深秋：dp / dk / dkg / d（点缀 sf）
-- 暖秋：d / dp / g / sf
-- 亮冬：v / s / b（中性底可少量 dk）
-- 深冬：dk / dp / s（点缀 v）
-- 冷冬：s / v / dk
-- 浅夏：lt / p / llg（少量 sf）
-- 冷夏：llg / sf / p / g
-- 柔夏：sf / g / llg / p / lt（基底克制用 dp/dkg）
-
-【输出格式（严格遵守；只输出此JSON；中文值；不得包含颜色名、解释、十六进制）】
-{
-  "season_12": "<从['Bright Spring','Light Spring','Warm Spring','Soft Autumn','Deep Autumn','Warm Autumn','Bright Winter','Deep Winter','Cool Winter','Light Summer','Cool Summer','Soft Summer']中选择其一>",
-  "axes": {
-    "depth": "<'浅' | '中等' | '中等偏深' | '深'>",
-    "contrast": "<'低' | '中' | '高'>",
-    "edge": "<'柔' | '中性' | '锐'>",
-    "temperature": "<'冷' | '中性偏冷' | '中性偏暖' | '暖'>",
-    "chroma": "<'低' | '中' | '高'>"
-  },
-  "pccs_tones": {
-    "primary": ["<主推PCCS代号，如'sf','g','llg'>"],
-    "secondary": ["<次级代号，如'p','lt','b'等>"],
-    "base_deep_neutrals": ["<可用基底深色代号，如'dp','dkg','dk'>"],
-    "avoid": ["<需避免的代号，如'v','s','b','dk'>"]
-  }
-}
-
-【其他约束】
-- 仅输出一次纯JSON，不加任何多余文字、换行说明、markdown代码块标记（如\`\`\`json）。
-- 直接输出JSON对象，不要包装在代码块中。
-- 若输入主色调给定，则以其为最高优先级；否则按照片相对关系自判。
-- 若证据冲突，优先保证"季型-色调映射"一致性（宁可收紧到更保守的色调集合）。`;
 
   try {
+    const requestPayload = {
+      model: CONFIG.VISION_MODEL,
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_image",
+              image_url: `data:image/jpeg;base64,${base64Image}`
+            },
+            {
+              type: "input_text",
+              text: promptText
+            }
+          ]
+        }
+      ]
+    };
+
+    console.log('🚀 [Vision API] 请求详情:');
+    console.log('  URL:', `${CONFIG.OPENAI_BASE_URL}/responses`);
+    console.log('  Model:', CONFIG.VISION_MODEL);
+    console.log('  Prompt长度:', promptText ? promptText.length : 'undefined');
+    console.log('  Base64图片长度:', base64Image ? base64Image.length : 'undefined');
+    console.log('  完整Payload:', JSON.stringify(requestPayload).substring(0, 500) + '...');
+
     const res = await apiRequestWithRetry({
-      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      url: `${CONFIG.OPENAI_BASE_URL}/responses`,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://monsoon-douyin.app', // OpenRouter所需
-        'X-Title': 'Monsoon AI Fashion Assistant' // OpenRouter所需
+        'Authorization': `Bearer ${apiKey}`
       },
       timeout: CONFIG.TIMEOUT,
-      data: {
-        model: CONFIG.GPT_MODEL,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64Image}`
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.1
-      }
+      data: requestPayload
     });
 
     // 🔍 调试：检查完整API响应
-    console.log('🎯 【调试 - 完整API响应】');
+    console.log('🎯 【调试 - Vision API响应】');
     console.log('  状态码:', res.statusCode);
-    console.log('  响应数据结构:', res.data);
-    console.log('  choices存在:', !!res.data.choices);
-    console.log('  choices长度:', res.data.choices ? res.data.choices.length : 0);
-    
-    if (!res.data.choices || res.data.choices.length === 0) {
-      throw new Error('API响应中没有choices数据');
+
+    if (res.statusCode !== 200) {
+      throw new Error(`Vision API请求失败: ${res.statusCode}`);
     }
-    
-    if (!res.data.choices[0].message) {
-      throw new Error('API响应中没有message数据');
+
+    // Volcengine Vision 响应结构可能不同，这里假设它返回 choices[0].message.content
+    // 如果是 /responses 接口，通常返回结构如下：
+    // { choices: [{ message: { content: "..." } }] }
+    // 或者直接是 { output: { text: "..." } } ? 
+    // 根据OpenAI兼容性，通常是choices。但/responses是自定义端点。
+    // 让我们打印出来看看，但为了代码健壮性，我们先尝试按OpenAI格式解析，如果不行再调整。
+    // 用户提供的curl示例没有显示响应，但通常Volcengine的 /responses 接口返回结构可能类似：
+    // { choices: [{ message: { content: "..." } }] }
+
+    console.log('  响应数据:', JSON.stringify(res.data, null, 2));
+
+    let content = '';
+
+    // 1. 标准OpenAI格式
+    if (res.data.choices && res.data.choices.length > 0 && res.data.choices[0].message) {
+      content = res.data.choices[0].message.content;
     }
-    
-    const content = res.data.choices[0].message.content;
-    
-    // 🔍 调试：检查内容
-    console.log('🎯 【调试 - 响应内容检查】');
-    console.log('  内容类型:', typeof content);
-    console.log('  内容长度:', content ? content.length : 0);
-    console.log('  内容是否为空:', !content || content.trim() === '');
-    
-    if (!content || content.trim() === '') {
-      throw new Error('API返回的内容为空');
+    // 2. Volcengine Vision格式 (output数组结构)
+    else if (res.data.output && Array.isArray(res.data.output)) {
+      // 寻找 type: "message" 的项
+      const messageItem = res.data.output.find(item => item.type === 'message');
+      if (messageItem && messageItem.content && Array.isArray(messageItem.content)) {
+        // 寻找 type: "output_text" 的项
+        const textItem = messageItem.content.find(c => c.type === 'output_text');
+        if (textItem) {
+          content = textItem.text;
+        }
+      }
+      // 如果没找到message，尝试直接找text (兼容性)
+      if (!content && res.data.output.text) {
+        content = res.data.output.text;
+      }
     }
-    
+
+    if (!content) {
+      // 尝试其他可能的字段
+      throw new Error('无法解析Vision API响应结构: ' + JSON.stringify(res.data));
+    }
+
     // 🧹 清理可能的markdown格式
-    let cleanedContent = content.trim();
-    if (cleanedContent.startsWith('```json')) {
-      cleanedContent = cleanedContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (cleanedContent.startsWith('```')) {
-      cleanedContent = cleanedContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    cleanedContent = cleanedContent.trim();
-    
-    console.log('🧹 图像分析清理后内容:', cleanedContent.substring(0, 200) + '...');
-    
+    console.log('🔍 Vision API原始返回内容:', content);
+    let cleanedContent = cleanMarkdownJSON(content);
+
+    console.log('🧹 Vision分析清理后内容:', cleanedContent.substring(0, 200) + '...');
+
     const result = JSON.parse(cleanedContent);
-    
-    // 🔍 断点1：图像分析API返回结果
-    console.log('🎯 【断点1 - 图像分析API返回】');
-    console.log('  原始API响应内容:', content);
-    console.log('  解析后季型 (season_12):', result.season_12);
-    console.log('  完整结果对象:', JSON.stringify(result, null, 2));
-    
     return result;
+
   } catch (error) {
-    console.error('OpenAI API调用失败:', error);
+    console.error('Volcengine Vision API调用失败:', error);
     throw error;
   }
 }
@@ -592,23 +545,31 @@ function generateStyleReport(userProfile) {
       return;
     }
 
-  // 🔍 断点6：风格报告生成API开始
-  console.log('🎯 【断点6 - 风格报告生成API开始】');
-  console.log('  接收到的用户档案:', JSON.stringify(userProfile, null, 2));
-  if (userProfile.color_analysis) {
-    console.log('  接收到的季型 (season_12):', userProfile.color_analysis.season_12);
-  }
-  
-  // 构建prompt（这里需要根据需求文档的prompt）
-  const prompt = buildStyleReportPrompt(userProfile);
-  
-  // 🔍 断点7：生成的prompt检查
-  console.log('🎯 【断点7 - 生成的prompt检查】');
-  console.log('  完整prompt长度:', prompt.length);
-  // 提取包含季型信息的部分
-  const seasonLine = prompt.split('\n').find(line => line.includes('用户的季型是'));
-  console.log('  prompt中的季型行:', seasonLine);
-    
+    // 🔍 断点6：风格报告生成API开始
+    console.log('🎯 【断点6 - 风格报告生成API开始】');
+    console.log('  接收到的用户档案:', JSON.stringify(userProfile, null, 2));
+    if (userProfile.color_analysis) {
+      console.log('  接收到的季型 (season_12):', userProfile.color_analysis.season_12);
+    }
+
+    // 验证必要数据是否存在
+    if (!userProfile.color_analysis || !userProfile.color_analysis.season_12) {
+      console.error('❌ 用户档案缺少色彩分析数据 (color_analysis)');
+      console.error('  当前 color_analysis:', userProfile.color_analysis);
+      reject(new Error('缺少色彩分析数据，请确保已完成照片分析步骤'));
+      return;
+    }
+
+    // 构建prompt（这里需要根据需求文档的prompt）
+    const prompt = buildStyleReportPrompt(userProfile);
+
+    // 🔍 断点7：生成的prompt检查
+    console.log('🎯 【断点7 - 生成的prompt检查】');
+    console.log('  完整prompt长度:', prompt.length);
+    // 提取包含季型信息的部分
+    const seasonLine = prompt.split('\n').find(line => line.includes('用户的季型是'));
+    console.log('  prompt中的季型行:', seasonLine);
+
     // 使用带重试的API请求
     apiRequestWithRetry({
       url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
@@ -644,39 +605,39 @@ function generateStyleReport(userProfile) {
         console.log('  响应数据结构:', res.data);
         console.log('  choices存在:', !!res.data.choices);
         console.log('  choices长度:', res.data.choices ? res.data.choices.length : 0);
-        
+
         if (!res.data.choices || res.data.choices.length === 0) {
           throw new Error('风格报告API响应中没有choices数据');
         }
-        
+
         if (!res.data.choices[0].message) {
           throw new Error('风格报告API响应中没有message数据');
         }
-        
+
         const content = res.data.choices[0].message.content;
-        
+
         // 🔍 断点8：风格报告API原始返回
         console.log('🎯 【断点8 - 风格报告API原始返回】');
         console.log('  API原始响应内容:', content);
         console.log('  内容类型:', typeof content);
         console.log('  内容长度:', content ? content.length : 0);
         console.log('  内容是否为空:', !content || content.trim() === '');
-        
+
         if (!content || content.trim() === '') {
           throw new Error('风格报告API返回的内容为空');
         }
-        
+
         // 🧹 清理GPT-5-Chat的Markdown格式
         const cleanedContent = cleanMarkdownJSON(content);
         console.log('🎯 【清理后的JSON内容】:', cleanedContent.substring(0, 200) + '...');
-        
+
         const result = JSON.parse(cleanedContent);
-        
+
         // 🔍 断点9：风格报告解析后的结果
         console.log('🎯 【断点9 - 风格报告解析后结果】');
         console.log('  解析后的季型名称:', result['季型名称']);
         console.log('  完整解析结果:', JSON.stringify(result, null, 2));
-        
+
         resolve(result);
       } catch (error) {
         console.error('解析API响应失败:', error);
@@ -698,7 +659,7 @@ function buildStyleReportPrompt(userProfile) {
   const scores = userProfile.personality_test.scores;
   const sortedScores = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const topTwo = sortedScores.slice(0, 2).map(item => item[0]).join('');
-  
+
   // 能量类型映射
   const pairToNameMap = {
     'ab': '活跃舒展型', 'ac': '活跃激进型', 'ad': '活跃笃定型',
@@ -706,9 +667,9 @@ function buildStyleReportPrompt(userProfile) {
     'ca': '能量锋利型', 'cb': '自律自洽型', 'cd': '锋利笃定型',
     'da': '动静自如型', 'db': '笃定自洽型', 'dc': '笃定锐利型'
   };
-  
+
   const energyType = pairToNameMap[topTwo] || '自洽自律型';
-  
+
   // 气质特征映射
   const typeToPromptMap = {
     'a': '用户是一个轻快、愉悦而俏皮，展现出高度的律动感，高能量的人，适合的衣服具有这些特征：1. 量感轻 2. 自由流动，带有随机元素和印花，营造出一种趣味感 3. 细节设计带有可爱感，比如纽扣、蝴蝶结或荷叶边 4. 搭配组合必须带有新鲜感，包含新的单品与搭配方式，不以同样的方式重复穿着 5. 点缀的亮色 6. 色彩基调：明亮轻盈，带有白色底调',
@@ -716,10 +677,10 @@ function buildStyleReportPrompt(userProfile) {
     'c': '用户是一个这样的人：基调带有棱角，举止充满动感与突兀感，行动上向前推进，带有强烈的力量感，是典型的实干者。适合的衣服具有这些特征：1. 较厚重、有质感的面料 2. 带有原始感、不完美处理的质地 3. 厚实且极具实用性 4. 前卫的细节，造型和轮廓带有棱角与尖点 5. 色彩基调：浓郁，带棕色底调',
     'd': '用户是这样的人：静止、平直而笔直，能量专注、稳定而直接，行事谨慎、善于分析，举止间带有不容忽视的沉稳气场。1. 合身且有结构感的廓形 2. 大胆的色块与高对比度的配色组合 3. 干净、简洁的线条 4. 鲜明独特 5. 精致得体 6. 色彩基调：饱和、纯正的色相'
   };
-  
+
   const firstType = sortedScores[0][0];
   const secondType = sortedScores[1][0];
-  
+
   const prompt = `你是专业的造型师和风格指导师。请你根据以下规则，为一位希望找到个人风格、前来咨询的${userProfile.basic_info.gender === 'male' ? '男性' : '女性'}用户提供专业、系统、可靠的建议。输出必须符合结构化要求，并严格按照给定格式生成。
 
 【重要】季型定义（严格遵守，不得更改）：
@@ -743,6 +704,7 @@ function buildStyleReportPrompt(userProfile) {
 - 原则1：优先推荐兼顾季型与用户偏好的颜色。
 - 原则2：颜色命名需优雅且准确，如"勃艮第红""鼠尾草绿"，保持美感与专业性。
 - 原则3：黑/白/灰类颜色若不适合季型，不应直接推荐；但可通过调整使其符合季型特征。
+- 原则4：适当降低颜色的饱和度，不要出现过于亮眼的荧光色，让整体色调都柔和一点。
 - 原则4：黑、白、灰每一项最多出现一种，比如雾灰和温暖灰只能出现一种，选择最适合用户的那一种推荐。
 - 原则5：保证「红橙黄绿蓝紫」所有色相都覆盖到。
 - 原则6：颜色名字不超过5个字，不要出现括号。
@@ -916,7 +878,7 @@ function getSeasonDescription(season) {
 function getSeasonChineseName(season) {
   const names = {
     'Bright Spring': '亮春型',
-    'Light Spring': '浅春型', 
+    'Light Spring': '浅春型',
     'Warm Spring': '暖春型',
     'Soft Autumn': '柔秋型',
     'Deep Autumn': '深秋型',
@@ -995,77 +957,22 @@ async function extractClothingInfo(base64Image) {
   try {
     console.log('🔍 第一层API：衣物信息提取');
     console.log('  - 图片大小:', base64Image.length, '字符');
-    
-    const res = await apiRequestWithRetry({
-      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
-      method: 'POST',
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://monsoon-douyin.app',
-        'X-Title': 'Monsoon AI Fashion Assistant'
-      },
-      timeout: CONFIG.TIMEOUT,
-      data: {
-        model: CONFIG.GPT_MODEL,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt
-              },
-              {
-                type: "image_url",
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64Image}`
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.1
-      }
-    });
 
-    const rawContent = res.data.choices[0].message.content;
-    console.log('🤖 衣物信息提取原始内容:', rawContent);
-    
-    // 检查是否为非衣物
-    if (rawContent.includes('图片非衣物，请重新上传')) {
-      return {
-        error: '图片非衣物，请重新上传',
-        isClothing: false
-      };
-    }
-    
-    // 清理Markdown代码块标记
-    let content = rawContent.trim();
-    if (content.startsWith('```json')) {
-      content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-    } else if (content.startsWith('```')) {
-      content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
-    }
-    content = content.trim();
-    
-    console.log('🧹 衣物信息清理后内容:', content);
-    
-    // 尝试解析JSON
-    let result;
-    try {
-      result = JSON.parse(content);
+    // 使用Volcengine Vision API
+    const result = await callVolcengineVisionAPI(base64Image, prompt, apiKey);
+
+    // 补充isClothing标记
+    if (result) {
       result.isClothing = true;
-      console.log('✅ 衣物信息JSON解析成功:', result);
-    } catch (parseError) {
-      console.warn('⚠️ JSON解析失败，使用默认结果:', parseError.message);
-      result = {
-        error: 'AI回复格式异常，请重新上传',
-        isClothing: false
-      };
+      // 检查是否为非衣物（虽然callVolcengineVisionAPI内部可能已经处理，但这里为了保持接口一致性）
+      if (JSON.stringify(result).includes('图片非衣物')) {
+        return {
+          error: '图片非衣物，请重新上传',
+          isClothing: false
+        };
+      }
     }
-    
+
     return result;
   } catch (error) {
     console.error('衣物信息提取失败:', error);
@@ -1156,7 +1063,7 @@ ${JSON.stringify(clothingInfo, null, 2)}
 
   try {
     console.log('🔍 第二层API：适配度分析');
-    
+
     const res = await apiRequestWithRetry({
       url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
       method: 'POST',
@@ -1182,7 +1089,7 @@ ${JSON.stringify(clothingInfo, null, 2)}
 
     const rawContent = res.data.choices[0].message.content;
     console.log('🤖 适配度分析原始内容:', rawContent);
-    
+
     // 清理Markdown代码块标记
     let content = rawContent.trim();
     if (content.startsWith('```json')) {
@@ -1191,9 +1098,9 @@ ${JSON.stringify(clothingInfo, null, 2)}
       content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
     }
     content = content.trim();
-    
+
     console.log('🧹 适配度分析清理后内容:', content);
-    
+
     // 尝试解析JSON
     let result;
     try {
@@ -1220,7 +1127,7 @@ ${JSON.stringify(clothingInfo, null, 2)}
         }
       };
     }
-    
+
     return result;
   } catch (error) {
     console.error('适配度分析失败:', error);
@@ -1229,7 +1136,7 @@ ${JSON.stringify(clothingInfo, null, 2)}
 }
 
 /**
- * Generate avatar image using Gemini 2.5 Flash Image
+ * Generate avatar image using Volcengine Image Gen
  * @param {Object} userProfile - User profile data
  * @param {Object} styleReport - Generated style report
  * @returns {Promise<string>} Base64 PNG image data
@@ -1245,23 +1152,24 @@ async function generateAvatar(userProfile, styleReport) {
   const age = userProfile.basic_info.age || 25;
   const height = userProfile.basic_info.height || 165;
   const weight = userProfile.basic_info.weight || 60;
-  
+
   // Extract season info with both English and Chinese
   const season_12 = userProfile.color_analysis.season_12 || 'Cool Summer';
   const seasonChinese = styleReport['季型名称'] || '冷夏型';
   const seasonInfo = `${season_12} ${seasonChinese}`;
-  
+
   // Extract personality info
   const personalityType = styleReport['能量类型名称'] || '自洽自律型';
   const personalityDesc = styleReport['能量匹配的风格简短描述'] || '';
 
   const prompt = `Generate a 768x1024px vertical image of a ${gender} figurine (age ${age}, ${height}cm, ${weight}kg) on a PURE WHITE BACKGROUND.
 
-BACKGROUND: Solid white #FFFFFF, completely flat, no gradients, no shadows, no effects. Just plain white.
+BACKGROUND: 纯白色背景，无杂质!!!!!
+Solid white #FFFFFF, completely flat, no gradients, no shadows, no effects. Just plain white.
 
 SUBJECT:
-- Full body standing pose, natural and relaxed
-- Realistic figurine/desk toy style with 3D look
+- Full body standing pose, natural and relaxed 在纯白色背景中
+- Realistic figurine/desk toy style with 3D look（手办的画风，人物有立体感和光滑感，但不要卡通，要真实的人物比例和画风；穿衣也符合现实中真实的衣服穿搭，不要过度死板和不真实）
 - Season: ${seasonInfo} → Spring=warm fresh colors, Summer=cool flowing colors, Autumn=khaki earth tones, Winter=high contrast cool colors
 - Personality: ${personalityType} (${personalityDesc}) → Clothing fit matches personality (relaxed=loose soft, sharp=structured angular)
 
@@ -1269,89 +1177,288 @@ Keep file under 800KB.`;
 
   console.log('🎨 [Avatar Generation] Starting avatar generation...');
   console.log('🎨 [Avatar Generation] Gender:', gender);
-  console.log('🎨 [Avatar Generation] Season:', seasonInfo);
-  console.log('🎨 [Avatar Generation] Personality:', personalityType);
 
   try {
     const res = await apiRequestWithRetry({
-      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      url: `${CONFIG.OPENAI_BASE_URL}/images/generations`,
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'HTTP-Referer': 'https://monsoon-douyin.app',
-        'X-Title': 'Monsoon AI Fashion Assistant'
+        'Authorization': `Bearer ${apiKey}`
       },
-      timeout: 60000, // 60秒超时，图片生成可能需要较长时间
+      timeout: 60000,
       data: {
-        model: 'google/gemini-2.5-flash-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        max_tokens: 1000,
-        temperature: 0.7
+        model: CONFIG.IMAGE_GEN_MODEL,
+        prompt: prompt,
+        sequential_image_generation: "disabled",
+        response_format: "url",
+        size: "2K", // Volcengine specific
+        stream: false,
+        watermark: true
       }
     });
 
     console.log('🎨 [Avatar Generation] API response received');
-    console.log('🎨 [Avatar Generation] Response status:', res.statusCode);
 
-    if (!res.data.choices || res.data.choices.length === 0) {
-      throw new Error('Avatar generation API returned no choices');
+    if (!res.data.data || res.data.data.length === 0) {
+      throw new Error('Avatar generation API returned no data');
     }
 
-    const message = res.data.choices[0].message;
-    console.log('🎨 [Avatar Generation] Message keys:', Object.keys(message));
-    
-    // Gemini 2.5 Flash Image returns data in message.images array
-    if (!message.images || message.images.length === 0) {
-      throw new Error('Avatar generation returned no images');
-    }
-    
-    const imageData = message.images[0];
-    console.log('🎨 [Avatar Generation] Image data keys:', Object.keys(imageData));
-    
-    // Get the data URI from image_url.url
-    const dataUri = imageData.image_url && imageData.image_url.url;
-    
-    if (!dataUri) {
-      throw new Error('Avatar generation: image_url.url not found');
-    }
-    
-    console.log('🎨 [Avatar Generation] Data URI length:', dataUri.length);
-    console.log('🎨 [Avatar Generation] Is data URI:', dataUri.startsWith('data:'));
-    
-    // Extract base64 data from data URI
-    // Format: data:image/png;base64,iVBORw0K...
-    let base64Data = dataUri;
-    
-    if (dataUri.startsWith('data:image/')) {
-      const commaIndex = dataUri.indexOf(',');
-      if (commaIndex > -1) {
-        base64Data = dataUri.substring(commaIndex + 1);
-        console.log('🎨 [Avatar Generation] Extracted base64 from data URI');
-      }
-    }
-    
-    // Clean up whitespace and newlines
-    base64Data = base64Data.replace(/\s/g, '');
+    const imageUrl = res.data.data[0].url;
+    console.log('🎨 [Avatar Generation] Image URL:', imageUrl);
 
-    console.log('🎨 [Avatar Generation] Final base64 length:', base64Data.length);
-    console.log('🎨 [Avatar Generation] First 50 chars:', base64Data.substring(0, 50));
-    console.log('🎨 [Avatar Generation] Last 50 chars:', base64Data.substring(base64Data.length - 50));
-    
-    if (base64Data.length < 100) {
-      throw new Error('Avatar generation returned data that is too short: ' + base64Data);
+    if (!imageUrl) {
+      throw new Error('Avatar generation: URL not found');
     }
-    
-    return base64Data;
+
+    // Download the image and convert to base64
+    return new Promise((resolve, reject) => {
+      tt.downloadFile({
+        url: imageUrl,
+        success: (downloadRes) => {
+          if (downloadRes.statusCode === 200) {
+            const fs = tt.getFileSystemManager();
+            fs.readFile({
+              filePath: downloadRes.tempFilePath,
+              encoding: 'base64',
+              success: (readRes) => {
+                resolve(readRes.data);
+              },
+              fail: (err) => {
+                reject(new Error('Failed to read downloaded image file: ' + err.errMsg));
+              }
+            });
+          } else {
+            reject(new Error('Failed to download image: ' + downloadRes.statusCode));
+          }
+        },
+        fail: (err) => {
+          reject(new Error('Download request failed: ' + err.errMsg));
+        }
+      });
+    });
+
   } catch (error) {
     console.error('🎨 [Avatar Generation] Failed:', error);
     throw error;
   }
+}
+
+// ========== 内容安全检测 API ==========
+
+// 安全检测后端地址
+const SECURITY_API_BASE = 'https://api.radiance.asia/api/content-security';
+
+// 本地敏感词列表（作为补充检测）
+const LOCAL_SENSITIVE_WORDS = [
+  // 政治类
+  '法轮', '六四', '天安门', '达赖', '藏独', '疆独', '台独', '港独',
+  '习近平', '毛泽东', '反党', '反华', '颠覆', '政变', '游行', '示威',
+  '共产党', '国民党', '民进党', '轮子', '邪教',
+  // 色情类
+  '裸体', '色情', '嫖娼', '卖淫', '性交', '做爱', '约炮', '援交',
+  '黄片', '成人片', '一夜情', 'AV',
+  // 暴力类
+  '杀人', '自杀', '炸弹', '恐怖', '枪支', '贩卖', '走私', '暗杀',
+  '绑架', '投毒', '爆炸', '行刺',
+  // 赌博毒品
+  '赌博', '博彩', '毒品', '吸毒', '大麻', '冰毒', '海洛因', '可卡因',
+  // 其他违规
+  '代孕', '器官买卖', '人口贩卖', '洗钱'
+];
+
+/**
+ * 本地敏感词检测
+ * @param {string} text - 待检测文本
+ * @returns {{safe: boolean, hitWord: string|null}}
+ */
+function localSensitiveCheck(text) {
+  if (!text) return { safe: true, hitWord: null };
+  const lowerText = text.toLowerCase();
+  for (const word of LOCAL_SENSITIVE_WORDS) {
+    if (lowerText.includes(word.toLowerCase())) {
+      console.log('[本地检测] ❌ 命中敏感词:', word);
+      return { safe: false, hitWord: word };
+    }
+  }
+  return { safe: true, hitWord: null };
+}
+
+/**
+ * 文本内容安全检测
+ * @param {string} text - 待检测的文本
+ * @returns {Promise<{safe: boolean, message: string}>}
+ */
+async function checkTextSafety(text) {
+  console.log('========================================');
+  console.log('[文本安全检测] 🔍 开始检测');
+  console.log('[文本安全检测] 📝 文本内容:', text);
+  console.log('========================================');
+  
+  if (!text || text.trim() === '') {
+    return { safe: true, message: '空文本' };
+  }
+  
+  // 第一步：本地敏感词检测（必须通过）
+  console.log('[文本安全检测] 🔒 第一步：本地敏感词检测');
+  const localResult = localSensitiveCheck(text);
+  if (!localResult.safe) {
+    console.log('[文本安全检测] ❌ 本地检测拦截，敏感词:', localResult.hitWord);
+    return { safe: false, message: '您输入的内容包含敏感信息，请修改后重试' };
+  }
+  console.log('[文本安全检测] ✅ 本地检测通过');
+  
+  // 第二步：调用后端API检测
+  console.log('[文本安全检测] 🌐 第二步：调用后端API');
+  
+  return new Promise((resolve, reject) => {
+    tt.request({
+      url: `${SECURITY_API_BASE}/text`,
+      method: 'POST',
+      header: { 'Content-Type': 'application/json' },
+      data: { text: text },
+      timeout: 15000,
+      success: (res) => {
+        console.log('[文本安全检测] 📥 API响应:', JSON.stringify(res.data));
+        
+        if (res.statusCode === 200 && res.data) {
+          if (res.data.safe === true) {
+            console.log('[文本安全检测] ✅ API检测通过');
+            resolve({ safe: true, message: '检测通过' });
+          } else {
+            console.log('[文本安全检测] ❌ API检测拦截');
+            resolve({ safe: false, message: '您输入的内容可能包含敏感信息，请修改后重试' });
+          }
+        } else {
+          // 服务异常时，由于本地检测已通过，可以放行
+          console.log('[文本安全检测] ⚠️ API异常，本地已通过，放行');
+          resolve({ safe: true, message: '检测通过' });
+        }
+      },
+      fail: (error) => {
+        console.error('[文本安全检测] ❌ 网络错误:', error);
+        // 网络错误时，由于本地检测已通过，可以放行
+        resolve({ safe: true, message: '检测通过' });
+      }
+    });
+  });
+}
+
+/**
+ * 图片内容安全检测
+ * @param {string} imageData - 图片的base64数据（不含前缀）
+ * @param {string} imageUrl - 图片URL（与imageData二选一）
+ * @param {boolean} isSampleImage - 是否为预设样例图片（样例图片可跳过检测）
+ * @returns {Promise<{safe: boolean, message: string}>}
+ */
+async function checkImageSafety(imageData, imageUrl, isSampleImage = false) {
+  console.log('========================================');
+  console.log('[图片安全检测] 🔍 开始检测');
+  console.log('[图片安全检测] 📊 数据长度:', imageData ? imageData.length : 0);
+  console.log('[图片安全检测] 🔗 URL:', imageUrl || '无');
+  console.log('[图片安全检测] 📋 是否样例图片:', isSampleImage);
+  console.log('========================================');
+  
+  // 样例图片（预设的安全图片）可以跳过检测
+  if (isSampleImage) {
+    console.log('[图片安全检测] ✅ 样例图片，跳过检测');
+    return { safe: true, message: '样例图片，无需检测' };
+  }
+  
+  if (!imageData && !imageUrl) {
+    return { safe: false, message: '未提供图片数据' };
+  }
+  
+  return new Promise((resolve, reject) => {
+    const requestData = {};
+    if (imageUrl) {
+      requestData.image_url = imageUrl;
+    } else {
+      requestData.image_data = imageData;
+    }
+    
+    tt.request({
+      url: `${SECURITY_API_BASE}/image`,
+      method: 'POST',
+      header: { 'Content-Type': 'application/json' },
+      data: requestData,
+      timeout: 35000,
+      success: (res) => {
+        console.log('[图片安全检测] 📥 API响应:', JSON.stringify(res.data));
+        
+        if (res.statusCode === 200 && res.data) {
+          if (res.data.safe === true) {
+            console.log('[图片安全检测] ✅ 检测通过');
+            resolve({ safe: true, message: '检测通过' });
+          } else if (res.data.safe === false) {
+            // 检查是否是真正的内容违规还是服务错误
+            const msg = (res.data.message || '').toLowerCase();
+            const isRealBlock = msg.includes('block') || msg.includes('porn') || 
+                               msg.includes('violence') || msg.includes('sensitive');
+            
+            if (isRealBlock) {
+              console.log('[图片安全检测] ❌ 内容违规，拦截');
+              resolve({ safe: false, message: '您上传的图片未通过安全检测，请更换图片后重试' });
+            } else {
+              // 服务错误导致的safe:false，对于用户上传的图片需要拒绝
+              console.log('[图片安全检测] ⚠️ 检测服务异常');
+              resolve({ safe: false, message: '图片安全检测服务暂时不可用，请稍后重试' });
+            }
+          } else {
+            console.log('[图片安全检测] ⚠️ 响应格式异常');
+            resolve({ safe: false, message: '图片安全检测服务异常，请稍后重试' });
+          }
+        } else {
+          console.error('[图片安全检测] ❌ 响应状态异常:', res.statusCode);
+          resolve({ safe: false, message: '图片安全检测服务异常，请稍后重试' });
+        }
+      },
+      fail: (error) => {
+        console.error('[图片安全检测] ❌ 网络错误:', error);
+        resolve({ safe: false, message: '网络异常，无法完成图片安全检测，请稍后重试' });
+      }
+    });
+  });
+}
+
+/**
+ * 从文件路径读取图片并进行安全检测
+ * @param {string} filePath - 图片文件路径
+ * @param {boolean} isSampleImage - 是否为预设样例图片
+ * @returns {Promise<{safe: boolean, message: string}>}
+ */
+async function checkImageSafetyFromFile(filePath, isSampleImage = false) {
+  console.log('[安全检测] 从文件路径检测图片:', filePath);
+  console.log('[安全检测] 是否样例图片:', isSampleImage);
+  
+  // 样例图片跳过检测
+  if (isSampleImage) {
+    console.log('[安全检测] ✅ 样例图片，跳过检测');
+    return { safe: true, message: '样例图片，无需检测' };
+  }
+  
+  // 如果是网络URL，直接使用URL检测
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    return checkImageSafety(null, filePath, false);
+  }
+  
+  // 本地文件，读取为base64
+  return new Promise((resolve, reject) => {
+    const fs = tt.getFileSystemManager();
+    fs.readFile({
+      filePath: filePath,
+      encoding: 'base64',
+      success: (res) => {
+        console.log('[安全检测] 图片读取成功，开始检测');
+        checkImageSafety(res.data, null, false).then(resolve).catch(reject);
+      },
+      fail: (error) => {
+        console.error('[安全检测] 读取图片文件失败:', error);
+        // 读取失败时拒绝（严格模式）
+        resolve({ safe: false, message: '图片读取失败，无法完成安全检测' });
+      }
+    });
+  });
 }
 
 module.exports = {
@@ -1362,5 +1469,9 @@ module.exports = {
   generateAvatar,
   getApiKey,
   setApiKey,
-  CONFIG
+  CONFIG,
+  // 内容安全检测
+  checkTextSafety,
+  checkImageSafety,
+  checkImageSafetyFromFile
 };

@@ -11,6 +11,9 @@
     <!-- AI生成的专属形象图片 -->
     <view wx:if="{{avatarImage}}" class="avatar-image-section fade-in">
       <image class="avatar-image" src="{{avatarImage}}" mode="widthFix" binderror="onAvatarImageError" bindload="onAvatarImageLoad" />
+      <view class="avatar-watermark">
+        <text class="watermark-text">AI生成图像</text>
+      </view>
     </view>
 
     <!-- 头部结果 -->
@@ -185,6 +188,11 @@
       </view>
     </view>
 
+    <!-- AI生成标识 - 放在页面最底部 -->
+    <view class="ai-disclaimer-banner">
+      <text class="ai-disclaimer-text">此报告由AI智能分析生成</text>
+    </view>
+
     <!-- 底部空白，为操作栏留出空间 -->
     <view style="height: 160rpx;"></view>
   </view>
@@ -192,7 +200,7 @@
   <!-- 底部操作栏 -->
   <view wx:if="{{!loading}}" class="bottom-actions">
     <button class="action-btn secondary-btn" bindtap="retakeTest">重新测试</button>
-    <button class="action-btn secondary-btn" bindtap="saveAsImage">保存图片</button>
+    <!-- <button class="action-btn secondary-btn" bindtap="saveAsImage">保存图片</button> -->
     <button class="action-btn primary-btn" bindtap="backToHome">返回主页</button>
   </view>
 

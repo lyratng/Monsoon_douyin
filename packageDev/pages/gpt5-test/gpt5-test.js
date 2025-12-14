@@ -7,79 +7,51 @@ Page({
     currentTest: null,
     isLoading: false,
     apiKey: '',
-    
+
     // 测试配置
     tests: [
       {
-        id: 'basic_gpt5',
-        name: 'GPT-5基础测试',
-        description: '使用最佳实践配置的GPT-5基础测试',
-        prompt: 'Give me a whimsical random color name.',
-        config: {
-          max_tokens: 256,
-          temperature: 1.0,
-          include_reasoning: false
-        },
-        model: 'openai/gpt-5'
-      },
-      {
-        id: 'basic_gpt5_chat', 
-        name: 'GPT-5-Chat基础测试',
-        description: '使用对话专用模型GPT-5-Chat',
-        prompt: 'Give me a whimsical random color name.',
-        config: {
-          max_tokens: 256,
-          temperature: 1.0,
-          include_reasoning: false
-        },
-        model: 'openai/gpt-5-chat'
-      },
-      {
-        id: 'json_gpt5',
-        name: 'GPT-5 JSON测试',
-        description: '测试GPT-5的JSON输出能力',
-        prompt: '请输出一个简单的JSON: {"message": "test"}',
-        config: {
-          max_tokens: 256,
-          temperature: 1.0,
-          include_reasoning: false
-        },
-        model: 'openai/gpt-5-chat'
-      },
-      {
-        id: 'reasoning_test',
-        name: 'GPT-5 Reasoning测试',
-        description: '测试include_reasoning参数',
-        prompt: 'Explain why the sky appears blue.',
-        config: {
-          max_tokens: 512,
-          temperature: 1.0,
-          include_reasoning: true
-        },
-        model: 'openai/gpt-5-chat'
-      },
-      {
-        id: 'gpt4_comparison',
-        name: 'GPT-4对比测试',
-        description: '用GPT-4测试相同请求，对比结果',
+        id: 'basic_doubao',
+        name: 'Doubao-1.5-Pro 基础测试',
+        description: '使用Doubao-1.5-Pro模型进行基础测试',
         prompt: 'Give me a whimsical random color name.',
         config: {
           max_tokens: 256,
           temperature: 1.0
         },
-        model: 'openai/gpt-4o'
+        model: 'doubao-1-5-pro-32k-250115'
       },
       {
-        id: 'chinese_test',
-        name: 'GPT-5中文测试',
-        description: '测试GPT-5的中文处理能力',
-        prompt: '请简单介绍一下人工智能，用JSON格式输出：{"title": "", "content": ""}',
+        id: 'json_doubao',
+        name: 'Doubao JSON测试',
+        description: '测试Doubao的JSON输出能力',
+        prompt: '请输出一个简单的JSON: {"message": "test"}',
+        config: {
+          max_tokens: 256,
+          temperature: 1.0
+        },
+        model: 'doubao-1-5-pro-32k-250115'
+      },
+      {
+        id: 'vision_doubao',
+        name: 'Doubao Vision测试',
+        description: '测试Doubao Vision模型 (需在代码中硬编码图片)',
+        prompt: 'What is in this image?',
         config: {
           max_tokens: 512,
-          temperature: 1.0,
-          include_reasoning: false
+          temperature: 0.1
         },
-        model: 'openai/gpt-5-chat'
+        model: 'doubao-seed-1-6-vision-250815'
+      },
+      {
+        id: 'image_gen_doubao',
+        name: 'Doubao Image Gen测试',
+        description: '测试Doubao图片生成',
+        prompt: 'A cute cat',
+        config: {
+          size: "2K"
+        },
+        model: 'doubao-seedream-4-5-251128'
       }
     ]
   },
@@ -97,24 +69,24 @@ Page({
   async runTest(e) {
     const testId = e.currentTarget.dataset.testId;
     const test = this.data.tests.find(t => t.id === testId);
-    
+
     if (!test) return;
-    
-    this.setData({ 
+
+    this.setData({
       isLoading: true,
       currentTest: testId
     });
-    
+
     console.log(`🧪 开始运行测试: ${test.name}`);
     console.log(`📝 Prompt: ${test.prompt}`);
     console.log(`⚙️ 配置:`, test.config);
-    
+
     const startTime = Date.now();
-    
+
     try {
       const result = await this.callGPT5API(test.prompt, test.config, test.model);
       const endTime = Date.now();
-      
+
       const testResult = {
         id: testId,
         name: test.name,
@@ -125,13 +97,13 @@ Page({
         duration: endTime - startTime,
         timestamp: new Date().toLocaleTimeString()
       };
-      
+
       this.addTestResult(testResult);
       console.log(`✅ 测试成功:`, testResult);
-      
+
     } catch (error) {
       const endTime = Date.now();
-      
+
       const testResult = {
         id: testId,
         name: test.name,
@@ -142,12 +114,12 @@ Page({
         duration: endTime - startTime,
         timestamp: new Date().toLocaleTimeString()
       };
-      
+
       this.addTestResult(testResult);
       console.error(`❌ 测试失败:`, testResult);
     }
-    
-    this.setData({ 
+
+    this.setData({
       isLoading: false,
       currentTest: null
     });
@@ -157,35 +129,68 @@ Page({
   async callGPT5API(prompt, config, customModel = null) {
     const ENV_CONFIG = require('../../../config/env');
     const model = customModel || ENV_CONFIG.GPT_MODEL;
-    
+
     console.log('🚀 调用GPT API');
     console.log('📍 URL:', ENV_CONFIG.OPENAI_BASE_URL);
     console.log('🤖 Model:', model);
     console.log('🔑 API Key前缀:', ENV_CONFIG.OPENAI_API_KEY.substring(0, 20) + '...');
-    
-    return new Promise((resolve, reject) => {
-      // 按照最佳实践构建消息，包含system消息
-      const messages = [
-        {
-          role: "system",
-          content: "You are a helpful assistant."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ];
 
-      const requestData = {
-        model: model,
-        messages: messages,
-        ...config
-      };
-      
+    return new Promise((resolve, reject) => {
+      let url, requestData;
+
+      // 判断是否为图片生成模型
+      if (model === ENV_CONFIG.IMAGE_GEN_MODEL) {
+        url = `${ENV_CONFIG.OPENAI_BASE_URL}/images/generations`;
+        requestData = {
+          model: model,
+          prompt: prompt,
+          sequential_image_generation: "disabled",
+          response_format: "url",
+          stream: false,
+          watermark: true,
+          ...config
+        };
+      } else if (model === ENV_CONFIG.VISION_MODEL) {
+        // Vision模型使用 /responses 端点
+        url = `${ENV_CONFIG.OPENAI_BASE_URL}/responses`;
+        requestData = {
+          model: model,
+          input: [
+            {
+              role: "user",
+              content: [
+                // 注意：测试页面这里简化处理，Vision测试需要硬编码图片或上传逻辑
+                // 这里仅作为占位，实际Vision测试可能需要专门的逻辑
+                { type: "input_text", text: prompt }
+              ]
+            }
+          ]
+        };
+      } else {
+        // 默认文本/对话模型
+        url = `${ENV_CONFIG.OPENAI_BASE_URL}/chat/completions`;
+        const messages = [
+          {
+            role: "system",
+            content: "You are a helpful assistant."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ];
+        requestData = {
+          model: model,
+          messages: messages,
+          ...config
+        };
+      }
+
+      console.log('📤 请求地址:', url);
       console.log('📤 请求数据:', JSON.stringify(requestData, null, 2));
-      
+
       tt.request({
-        url: `${ENV_CONFIG.OPENAI_BASE_URL}/chat/completions`,
+        url: url,
         method: 'POST',
         header: {
           'Content-Type': 'application/json',
@@ -199,42 +204,76 @@ Page({
           console.log('📥 收到响应');
           console.log('📊 状态码:', res.statusCode);
           console.log('📄 完整响应:', JSON.stringify(res.data, null, 2));
-          
+
           if (res.statusCode === 200) {
-            if (res.data && res.data.choices && res.data.choices.length > 0) {
-              const message = res.data.choices[0].message;
-              const content = message.content;
-              console.log('📝 响应内容:', content);
-              console.log('📏 内容长度:', content ? content.length : 0);
-              console.log('🔍 内容是否为空:', !content || content.trim() === '');
-              
-              // 🔍 分析GPT-5特有的reasoning字段
-              if (message.reasoning) {
-                console.log('🧠 GPT-5 Reasoning:', message.reasoning);
-              }
-              if (message.reasoning_details) {
-                console.log('🧠 GPT-5 Reasoning Details:', message.reasoning_details.length, '个reasoning块');
-                message.reasoning_details.forEach((detail, index) => {
-                  console.log(`  🧠 Reasoning ${index + 1}:`, detail.type);
-                  if (detail.summary) {
-                    console.log(`    📝 摘要:`, detail.summary.substring(0, 200) + '...');
-                  }
+            // 处理图片生成响应
+            if (model === ENV_CONFIG.IMAGE_GEN_MODEL) {
+              if (res.data && res.data.data && res.data.data.length > 0) {
+                resolve({
+                  content: `Image URL: ${res.data.data[0].url}`,
+                  raw: res.data
                 });
-              }
-              
-              if (!content || content.trim() === '') {
-                console.warn('⚠️ GPT-5返回空内容，但有reasoning数据！这可能是GPT-5的特殊行为');
-                reject(new Error('API返回的内容为空'));
               } else {
+                reject(new Error('图片生成响应中没有data数据'));
+              }
+              return;
+            }
+
+            // 处理Vision/Text响应
+            if (res.data) {
+              let content = null;
+
+              // 1. 标准OpenAI格式
+              if (res.data.choices && res.data.choices.length > 0) {
+                content = res.data.choices[0].message.content;
+              }
+              // 2. Volcengine Vision格式 (output数组结构)
+              else if (res.data.output && Array.isArray(res.data.output)) {
+                console.log('🔍 检测到Volcengine Vision格式 (output数组)');
+                // 寻找 type: "message" 的项
+                const messageItem = res.data.output.find(item => item.type === 'message');
+                console.log('🔍 messageItem:', messageItem ? 'Found' : 'Not Found');
+
+                if (messageItem && messageItem.content && Array.isArray(messageItem.content)) {
+                  // 寻找 type: "output_text" 的项
+                  const textItem = messageItem.content.find(c => c.type === 'output_text');
+                  console.log('🔍 textItem:', textItem ? 'Found' : 'Not Found');
+
+                  if (textItem) {
+                    content = textItem.text;
+                  }
+                }
+                // 如果没找到message，尝试直接找text (兼容性)
+                if (!content && res.data.output.text) {
+                  content = res.data.output.text;
+                }
+              }
+              // 3. 其他可能格式
+              else if (res.data.data && res.data.data.text) {
+                content = res.data.data.text;
+              }
+
+              if (content) {
                 resolve({
                   content: content,
                   usage: res.data.usage,
                   model: res.data.model,
                   raw: res.data
                 });
+              } else {
+                // 某些模型可能返回空内容但有reasoning
+                if (res.data.choices && res.data.choices[0].message.reasoning) {
+                  resolve({
+                    content: `(Reasoning only)\n${res.data.choices[0].message.reasoning}`,
+                    raw: res.data
+                  });
+                } else {
+                  console.error('无法解析响应结构:', JSON.stringify(res.data));
+                  reject(new Error('无法解析API响应结构: ' + JSON.stringify(res.data)));
+                }
               }
             } else {
-              reject(new Error('响应中没有choices数据'));
+              reject(new Error('响应中没有data数据'));
             }
           } else {
             reject(new Error(`API请求失败: ${res.statusCode}`));
@@ -263,13 +302,13 @@ Page({
   // 运行所有测试
   async runAllTests() {
     this.clearResults();
-    
+
     for (const test of this.data.tests) {
       await this.runTest({ currentTarget: { dataset: { testId: test.id } } });
       // 每个测试之间间隔1秒
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    
+
     tt.showToast({
       title: '所有测试完成',
       icon: 'success'
@@ -280,9 +319,9 @@ Page({
   copyResult(e) {
     const index = e.currentTarget.dataset.index;
     const result = this.data.testResults[index];
-    
+
     const text = JSON.stringify(result, null, 2);
-    
+
     // 抖音小程序的复制功能
     tt.setClipboardData({
       data: text,

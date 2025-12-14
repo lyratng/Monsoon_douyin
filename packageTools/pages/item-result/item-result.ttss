@@ -59,6 +59,24 @@
   letter-spacing: 2rpx;
 }
 
+/* AI生成标识 - 页面底部 */
+.ai-disclaimer-section {
+  text-align: center;
+  padding: 40rpx 0 20rpx;
+  margin-top: 20rpx;
+}
+
+.ai-disclaimer {
+  display: inline-block;
+  font-size: 22rpx;
+  font-weight: 300;
+  color: #999;
+  letter-spacing: 0.5rpx;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 8rpx 20rpx;
+  border-radius: 8rpx;
+}
+
 /* 主内容区域 */
 .main-content {
   flex: 1;

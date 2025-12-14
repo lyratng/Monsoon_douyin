@@ -117,7 +117,7 @@ Page({
   /**
    * 发送消息
    */
-  sendMessage(e) {
+  async sendMessage(e) {
     const content = e?.detail?.content || this.data.inputText.trim();
     if (!content) {
       tt.showToast({
@@ -131,6 +131,37 @@ Page({
     if (content.length > 200) {
       tt.showToast({
         title: '消息不能超过200字',
+        icon: 'none'
+      });
+      return;
+    }
+
+    // 先进行内容安全检测
+    const { checkTextSafety } = require('../../utils/api');
+    
+    console.log('[用户输入安全检测] 开始检测:', content);
+    this.setData({ isLoading: true });
+    
+    try {
+      const safetyResult = await checkTextSafety(content);
+      console.log('[用户输入安全检测] 结果:', safetyResult);
+      
+      if (!safetyResult.safe) {
+        console.log('[用户输入安全检测] ❌ 拦截');
+        this.setData({ isLoading: false });
+        tt.showToast({
+          title: safetyResult.message || '您输入的内容包含敏感信息，请修改后重试',
+          icon: 'none',
+          duration: 3000
+        });
+        return;
+      }
+      console.log('[用户输入安全检测] ✅ 通过');
+    } catch (error) {
+      console.error('[用户输入安全检测] 异常:', error);
+      this.setData({ isLoading: false });
+      tt.showToast({
+        title: '安全检测服务异常，请稍后重试',
         icon: 'none'
       });
       return;
@@ -182,11 +213,28 @@ Page({
       // 调用AI回复API
       const aiResponse = await this.getAIChatResponse(prompt);
       
+      // 对AI返回内容进行安全检测
+      const { checkTextSafety } = require('../../utils/api');
+      let safeReply = aiResponse.reply;
+      
+      try {
+        const outputSafetyResult = await checkTextSafety(aiResponse.reply);
+        if (!outputSafetyResult.safe) {
+          console.log('[AI输出安全检测] ❌ AI回复包含敏感内容，已过滤');
+          safeReply = '抱歉，我无法回答这个问题。请换一个穿搭相关的问题吧~';
+        } else {
+          console.log('[AI输出安全检测] ✅ AI回复内容安全');
+        }
+      } catch (e) {
+        console.error('[AI输出安全检测] 检测异常:', e);
+        // 检测异常时使用原内容
+      }
+      
       // 添加AI回复消息
       const aiMessage = {
         id: Date.now() + 1,
         type: 'ai',
-        content: aiResponse.reply,
+        content: safeReply,
         timestamp: new Date().toLocaleTimeString()
       };
 

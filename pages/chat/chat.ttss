@@ -103,6 +103,23 @@
   font-weight: 300;
 }
 
+/* AI生成标识 */
+.ai-bubble-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.ai-generated-tag {
+  font-size: 20rpx;
+  color: #999;
+  font-weight: 300;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
 /* 加载状态 */
 .loading-message {
   display: flex;

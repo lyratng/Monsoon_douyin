@@ -223,6 +223,28 @@ Page({
     try {
       console.log('🎯 [DEBUG] 开始单品分析流程');
       
+      // 第〇步：图片安全检测
+      console.log('🔒 [DEBUG] 第〇步：图片安全检测');
+      
+      // 判断是否为样例图片（预设的安全图片可跳过检测）
+      const isSampleImage = this.data.selectedSample !== null && this.data.uploadedImage === null;
+      console.log('🔒 [DEBUG] 是否样例图片:', isSampleImage);
+      
+      const safetyResult = await api.checkImageSafetyFromFile(image.path, isSampleImage);
+      
+      if (!safetyResult.safe) {
+        console.log('[安全检测] ❌ 图片未通过安全检测:', safetyResult.message);
+        this.setData({ isAnalyzing: false });
+        this.stopBackgroundCarousel();
+        tt.showModal({
+          title: '图片检测未通过',
+          content: safetyResult.message || '您上传的图片未通过安全检测，请更换图片后重试',
+          showCancel: false
+        });
+        return;
+      }
+      console.log('[安全检测] ✅ 图片安全检测通过');
+      
       // 第一步：将图片转换为base64
       console.log('📷 [DEBUG] 第一步：开始转换图片为base64');
       console.log('📷 [DEBUG] 图片路径类型:', typeof image.path);
@@ -253,14 +275,18 @@ Page({
       console.log('🔍 第二层：适配度分析');
       const suitabilityResult = await api.analyzeSuitability(clothingInfo, userProfile);
       
-      // 第四步：保存分析结果到历史记录
-      await this.saveAnalysisResult(image, clothingInfo, suitabilityResult);
+      // 第四步：对AI输出内容进行安全过滤
+      console.log('🔒 [安全] 对AI输出内容进行安全检测');
+      const filteredResult = await this.filterAIOutput(suitabilityResult);
       
-      // 第五步：跳转到结果页面
+      // 第五步：保存分析结果到历史记录
+      await this.saveAnalysisResult(image, clothingInfo, filteredResult);
+      
+      // 第六步：跳转到结果页面
       const resultData = {
         image: image,
         clothingInfo: clothingInfo,
-        suitabilityResult: suitabilityResult,
+        suitabilityResult: filteredResult,
         timestamp: new Date().toISOString()
       };
       
@@ -481,6 +507,116 @@ Page({
         }
       });
     });
+  },
+
+  /**
+   * 对AI输出内容进行安全过滤
+   */
+  async filterAIOutput(result) {
+    const { checkTextSafety } = require('../../utils/api.js');
+    
+    // 本地敏感词列表
+    const SENSITIVE_WORDS = [
+      '法轮', '六四', '天安门', '达赖', '藏独', '疆独', '台独', '港独',
+      '习近平', '毛泽东', '反党', '反华', '颠覆', '政变', '游行', '示威',
+      '共产党', '国民党', '民进党', '轮子', '邪教',
+      '裸体', '色情', '嫖娼', '卖淫', '性交', '做爱', '约炮', '援交',
+      '黄片', '成人片', '一夜情', 'AV',
+      '杀人', '自杀', '炸弹', '恐怖', '枪支', '贩卖', '走私', '暗杀',
+      '绑架', '投毒', '爆炸', '行刺',
+      '赌博', '博彩', '毒品', '吸毒', '大麻', '冰毒', '海洛因', '可卡因',
+      '代孕', '器官买卖', '人口贩卖', '洗钱'
+    ];
+    
+    // 检查文本是否包含敏感词
+    const containsSensitive = (text) => {
+      if (!text || typeof text !== 'string') return false;
+      const lowerText = text.toLowerCase();
+      for (const word of SENSITIVE_WORDS) {
+        if (lowerText.includes(word.toLowerCase())) {
+          console.log('[AI输出过滤] ❌ 检测到敏感词:', word);
+          return true;
+        }
+      }
+      return false;
+    };
+    
+    // 安全替换文本
+    const safeText = (text, fallback) => {
+      if (!text) return fallback || '';
+      if (containsSensitive(text)) {
+        console.log('[AI输出过滤] ❌ 内容被过滤:', text.substring(0, 50));
+        return fallback || '内容已过滤';
+      }
+      return text;
+    };
+    
+    // 深拷贝结果对象
+    const filtered = JSON.parse(JSON.stringify(result));
+    
+    // 过滤总体评价
+    if (filtered.overall_evaluation) {
+      filtered.overall_evaluation.conclusion = safeText(
+        filtered.overall_evaluation.conclusion, 
+        '分析结果暂时无法显示'
+      );
+    }
+    
+    // 过滤各项分析
+    if (filtered.analysis) {
+      // 颜色分析
+      if (filtered.analysis.color) {
+        filtered.analysis.color.reason = safeText(
+          filtered.analysis.color.reason, 
+          '颜色分析结果'
+        );
+      }
+      // 材质分析
+      if (filtered.analysis.material) {
+        filtered.analysis.material.reason = safeText(
+          filtered.analysis.material.reason, 
+          '材质分析结果'
+        );
+      }
+      // 风格分析
+      if (filtered.analysis.style) {
+        filtered.analysis.style.reason = safeText(
+          filtered.analysis.style.reason, 
+          '风格分析结果'
+        );
+      }
+      // 搭配建议
+      if (filtered.analysis.pairing) {
+        filtered.analysis.pairing.reason = safeText(
+          filtered.analysis.pairing.reason, 
+          '搭配建议'
+        );
+        // 过滤搭配方案数组
+        if (filtered.analysis.pairing.clothing_suggestions) {
+          filtered.analysis.pairing.clothing_suggestions = 
+            filtered.analysis.pairing.clothing_suggestions.filter(item => !containsSensitive(item));
+        }
+      }
+    }
+    
+    // 过滤推荐内容
+    if (filtered.recommendations) {
+      if (filtered.recommendations.better_colors) {
+        filtered.recommendations.better_colors = 
+          filtered.recommendations.better_colors.filter(item => !containsSensitive(item));
+      }
+      if (filtered.recommendations.better_materials) {
+        filtered.recommendations.better_materials = 
+          filtered.recommendations.better_materials.filter(item => !containsSensitive(item));
+      }
+      if (filtered.recommendations.better_styles) {
+        filtered.recommendations.better_styles = 
+          filtered.recommendations.better_styles.filter(item => !containsSensitive(item));
+      }
+    }
+    
+    console.log('[AI输出过滤] ✅ 过滤完成');
+    return filtered;
   },
 
   /**

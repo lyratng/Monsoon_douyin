@@ -121,6 +121,23 @@
   overflow-x: hidden;
 }
 
+/* AI生成标识横幅 - 页面底部 */
+.ai-disclaimer-banner {
+  background: rgba(44, 44, 44, 0.03);
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin-top: 40rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.ai-disclaimer-text {
+  font-size: 22rpx;
+  font-weight: 300;
+  color: #999;
+  letter-spacing: 0.5rpx;
+}
+
 /* AI生成的专属形象图片区域 */
 .avatar-image-section {
   width: 100%;
@@ -129,12 +146,30 @@
   overflow: hidden;
   background: #FFFFFF;
   box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.08);
+  position: relative;
 }
 
 .avatar-image {
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* AI图片水印 */
+.avatar-watermark {
+  position: absolute;
+  bottom: 20rpx;
+  right: 20rpx;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.watermark-text {
+  font-size: 20rpx;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.5rpx;
 }
 
 /* 调试信息区域 - 临时 */

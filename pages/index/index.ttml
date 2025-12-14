@@ -23,7 +23,7 @@
     <view class="floating-content">
       <view class="simple-hero-first">
         <text class="simple-title" bindtap="handleTitleClick">衣索寓言</text>
-        <text class="simple-subtitle">每一件衣服，都是一则寓言。</text>
+        <text class="simple-subtitle">请先测试，以获得风格报告</text>
       </view>
       
       <view class="simple-actions">

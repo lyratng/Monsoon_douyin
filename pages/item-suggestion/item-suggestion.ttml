@@ -96,7 +96,7 @@
       />
       
       <view class="loading-content">
-        <text class="loading-text">AI正在分析单品匹配度...</text>
+        <text class="loading-text">AI正在智能分析单品匹配度...</text>
       </view>
     </view>
   </view>

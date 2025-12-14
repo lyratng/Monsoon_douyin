@@ -175,6 +175,11 @@
         </view>
       </view>
 
+      <!-- AI生成标识 - 放在页面最底部 -->
+      <view class="ai-disclaimer-section">
+        <text class="ai-disclaimer">分析结果由AI生成</text>
+      </view>
+
       <!-- 底部间距 -->
       <view class="bottom-spacing"></view>
     </scroll-view>

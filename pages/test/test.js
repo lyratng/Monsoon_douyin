@@ -4,7 +4,7 @@ Page({
     currentStep: 1,
     totalSteps: 16,
     isLoading: false,
-    loadingText: '正在生成您的专属风格报告...', // 加载文字
+    loadingText: 'AI正在为您智能生成专属风格报告...', // 加载文字
     stepAnimationClass: '', // 控制页面动画：'fade-in' | 'fade-out' | ''
     
     // 加载轮播相关
@@ -432,8 +432,28 @@ Page({
     
     const api = require('../../utils/api');
     
-    api.analyzeImage(imagePath, this.data.wristColor)
+    // 先进行内容安全检测
+    api.checkImageSafetyFromFile(imagePath)
+      .then(function(safetyResult) {
+        if (!safetyResult.safe) {
+          console.log('[安全检测] ❌ 照片未通过安全检测:', safetyResult.message);
+          // 清除已上传的图片
+          self.setData({
+            uploadedImage: ''
+          });
+          tt.showModal({
+            title: '图片检测未通过',
+            content: safetyResult.message || '您上传的图片未通过安全检测，请更换图片后重试',
+            showCancel: false
+          });
+          return Promise.reject(new Error('图片安全检测未通过'));
+        }
+        console.log('[安全检测] ✅ 照片安全检测通过');
+        // 安全检测通过后，继续进行AI分析
+        return api.analyzeImage(imagePath, self.data.wristColor);
+      })
       .then(function(result) {
+        if (!result) return; // 如果安全检测未通过，这里result为undefined
         // 静默保存分析结果，不显示Toast，不更改UI状态
         self.setData({
           colorAnalysisResult: result
@@ -714,7 +734,7 @@ Page({
     var self = this;
     this.setData({ 
       isLoading: true,
-      loadingText: '正在生成您的专属风格报告...'
+      loadingText: 'AI正在为您智能生成专属风格报告...'
     });
     
     // 开始背景轮播
@@ -725,15 +745,92 @@ Page({
     
     const api = require('../../utils/api');
     const app = getApp();
-    const userProfile = app.getUserProfile();
     
-    // 🔍 断点5：生成风格报告前的用户档案检查
-    console.log('🎯 【断点5 - 生成风格报告前】');
-    console.log('  获取到的完整用户档案:', JSON.stringify(userProfile, null, 2));
-    console.log('  color_analysis:', userProfile.color_analysis);
-    if (userProfile.color_analysis) {
-      console.log('  传入报告生成的季型 (season_12):', userProfile.color_analysis.season_12);
+    // 等待照片分析完成后再生成报告
+    this.waitForColorAnalysis(function() {
+      // 再次保存数据，确保 colorAnalysisResult 已保存
+      self.saveStepData();
+      
+      const userProfile = app.getUserProfile();
+      
+      // 🔍 断点5：生成风格报告前的用户档案检查
+      console.log('🎯 【断点5 - 生成风格报告前】');
+      console.log('  获取到的完整用户档案:', JSON.stringify(userProfile, null, 2));
+      console.log('  color_analysis:', userProfile.color_analysis);
+      if (userProfile.color_analysis) {
+        console.log('  传入报告生成的季型 (season_12):', userProfile.color_analysis.season_12);
+      }
+      
+      self.doGenerateStyleReport(api, app, userProfile);
+    });
+  },
+  
+  // 等待照片分析完成
+  waitForColorAnalysis: function(callback) {
+    var self = this;
+    var maxWaitTime = 30000; // 最多等待30秒
+    var checkInterval = 500; // 每500ms检查一次
+    var waitedTime = 0;
+    
+    function check() {
+      // 先检查本地 data
+      if (self.data.colorAnalysisResult) {
+        console.log('✅ 照片分析已完成（来自本地data）');
+        callback();
+        return;
+      }
+      
+      // 再检查本地存储
+      try {
+        var savedResult = tt.getStorageSync('colorAnalysisResult');
+        if (savedResult) {
+          console.log('✅ 照片分析已完成（来自本地存储）');
+          self.setData({ colorAnalysisResult: savedResult });
+          callback();
+          return;
+        }
+      } catch (e) {
+        console.error('检查本地存储失败:', e);
+      }
+      
+      waitedTime += checkInterval;
+      
+      if (waitedTime >= maxWaitTime) {
+        console.warn('⚠️ 等待照片分析超时，使用模拟数据');
+        // 超时后使用模拟数据
+        var mockResult = {
+          season_12: "Cool Summer",
+          season_4: "Summer",
+          confidence: 0.75,
+          characteristics: {
+            best: ["s", "m", "c"],
+            avoid: ["v", "s", "b"]
+          }
+        };
+        self.setData({ colorAnalysisResult: mockResult });
+        tt.setStorageSync('colorAnalysisResult', mockResult);
+        callback();
+        return;
+      }
+      
+      // 更新等待提示
+      self.setData({ 
+        loadingText: 'AI正在分析您的照片...' 
+      });
+      
+      setTimeout(check, checkInterval);
     }
+    
+    check();
+  },
+  
+  // 执行风格报告生成
+  doGenerateStyleReport: function(api, app, userProfile) {
+    var self = this;
+    
+    this.setData({ 
+      loadingText: 'AI正在为您智能生成专属风格报告...'
+    });
     
     api.generateStyleReport(userProfile)
       .then(function(styleReport) {
@@ -742,9 +839,13 @@ Page({
         console.log('  生成的报告季型名称:', styleReport['季型名称']);
         console.log('  完整生成的报告:', JSON.stringify(styleReport, null, 2));
         
-        // 保存生成的报告到用户档案
+        // 对AI生成的报告内容进行安全过滤
+        const filteredReport = self.filterReportContent(styleReport);
+        console.log('🔒 [安全] 报告内容已过滤');
+        
+        // 保存过滤后的报告到用户档案
         app.updateUserProfile({
-          style_report: styleReport
+          style_report: filteredReport
         });
         
         // 🔍 断点11：报告保存后的最终验证
@@ -756,11 +857,11 @@ Page({
         // 阶段2：生成专属形象图片
         console.log('🎨 开始生成专属形象...');
         self.setData({ 
-          loadingText: '正在生成您的专属形象...'
+          loadingText: 'AI正在为您生成专属形象...'
         });
         
-        // 生成Avatar图片
-        return api.generateAvatar(userProfile, styleReport)
+        // 生成Avatar图片（使用过滤后的报告）
+        return api.generateAvatar(userProfile, filteredReport)
           .then(function(avatarBase64) {
             console.log('🎨 Avatar生成成功，base64长度:', avatarBase64 ? avatarBase64.length : 0);
             
@@ -872,6 +973,72 @@ Page({
         currentBgIndex: nextIndex
       });
     }, 2000); // 每2秒切换一次
+  },
+
+  /**
+   * 对AI生成的报告内容进行安全过滤
+   */
+  filterReportContent: function(report) {
+    if (!report) return report;
+    
+    // 本地敏感词列表
+    const SENSITIVE_WORDS = [
+      '法轮', '六四', '天安门', '达赖', '藏独', '疆独', '台独', '港独',
+      '习近平', '毛泽东', '反党', '反华', '颠覆', '政变', '游行', '示威',
+      '共产党', '国民党', '民进党', '轮子', '邪教',
+      '裸体', '色情', '嫖娼', '卖淫', '性交', '做爱', '约炮', '援交',
+      '黄片', '成人片', '一夜情', 'AV',
+      '杀人', '自杀', '炸弹', '恐怖', '枪支', '贩卖', '走私', '暗杀',
+      '绑架', '投毒', '爆炸', '行刺',
+      '赌博', '博彩', '毒品', '吸毒', '大麻', '冰毒', '海洛因', '可卡因',
+      '代孕', '器官买卖', '人口贩卖', '洗钱'
+    ];
+    
+    // 检查文本是否包含敏感词
+    const containsSensitive = function(text) {
+      if (!text || typeof text !== 'string') return false;
+      const lowerText = text.toLowerCase();
+      for (var i = 0; i < SENSITIVE_WORDS.length; i++) {
+        if (lowerText.includes(SENSITIVE_WORDS[i].toLowerCase())) {
+          console.log('[报告安全过滤] ❌ 检测到敏感词:', SENSITIVE_WORDS[i]);
+          return true;
+        }
+      }
+      return false;
+    };
+    
+    // 安全替换文本
+    const safeText = function(text, fallback) {
+      if (!text) return fallback || '';
+      if (containsSensitive(text)) {
+        return fallback || '内容已过滤';
+      }
+      return text;
+    };
+    
+    // 深拷贝
+    const filtered = JSON.parse(JSON.stringify(report));
+    
+    // 过滤文字描述字段
+    if (filtered['适合颜色的简短描述']) {
+      filtered['适合颜色的简短描述'] = safeText(filtered['适合颜色的简短描述'], '适合您的颜色');
+    }
+    if (filtered['能量匹配的风格简短描述']) {
+      filtered['能量匹配的风格简短描述'] = safeText(filtered['能量匹配的风格简短描述'], '适合您的风格');
+    }
+    
+    // 过滤场合推荐中的文字
+    if (filtered['场合推荐'] && Array.isArray(filtered['场合推荐'])) {
+      filtered['场合推荐'] = filtered['场合推荐'].map(function(occasion) {
+        if (occasion.notes) {
+          occasion.notes = safeText(occasion.notes, '搭配建议');
+        }
+        return occasion;
+      });
+    }
+    
+    console.log('[报告安全过滤] ✅ 过滤完成');
+    return filtered;
   },
 
   /**
