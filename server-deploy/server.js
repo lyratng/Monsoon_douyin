@@ -16,7 +16,7 @@ const OPENAI_BASE_URL = 'https://openrouter.ai/api/v1';
 const DOUYIN_CONFIG = {
   APP_ID: 'tt6a791cc4f57bed5d01',
   APP_SECRET: '9489b0068583a5b61b6d1ea29c7b054178d75cef',
-  TOKEN_URL: 'https://open.douyin.com/oauth/client_token/',
+  TOKEN_URL: 'https://developer.toutiao.com/api/apps/v2/token',
   TEXT_CHECK_URL: 'https://developer.toutiao.com/api/v2/tags/text/antidirt',
   IMAGE_CHECK_URL: 'https://developer.toutiao.com/api/apps/censor/image'
 };
@@ -41,8 +41,8 @@ async function getDouyinAccessToken() {
   
   try {
     const response = await axios.post(DOUYIN_CONFIG.TOKEN_URL, {
-      client_key: DOUYIN_CONFIG.APP_ID,
-      client_secret: DOUYIN_CONFIG.APP_SECRET,
+      appid: DOUYIN_CONFIG.APP_ID,
+      secret: DOUYIN_CONFIG.APP_SECRET,
       grant_type: 'client_credential'
     }, {
       headers: { 'Content-Type': 'application/json' },
@@ -51,7 +51,7 @@ async function getDouyinAccessToken() {
     
     console.log('[Content Security] Token API 响应:', JSON.stringify(response.data));
     
-    if (response.data && response.data.data && response.data.data.access_token) {
+    if (response.data && response.data.err_no === 0 && response.data.data && response.data.data.access_token) {
       const data = response.data.data;
       tokenCache.accessToken = data.access_token;
       tokenCache.expiresAt = now + (data.expires_in * 1000);
@@ -270,4 +270,5 @@ app.listen(PORT, () => {
   console.log(`服务运行在 http://localhost:${PORT}`);
   console.log('内容安全检测服务已启用');
 });
+
 

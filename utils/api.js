@@ -1285,21 +1285,22 @@ function localSensitiveCheck(text) {
 }
 
 /**
- * 文本内容安全检测
+ * 文本内容安全检测（严格模式：必须通过抖音官方API检测）
  * @param {string} text - 待检测的文本
  * @returns {Promise<{safe: boolean, message: string}>}
  */
 async function checkTextSafety(text) {
-  console.log('========================================');
-  console.log('[文本安全检测] 🔍 开始检测');
+  console.log('=====================================================');
+  console.log('[文本安全检测] 🔍 checkTextSafety 被调用');
   console.log('[文本安全检测] 📝 文本内容:', text);
-  console.log('========================================');
+  console.log('[文本安全检测] 📝 文本长度:', text ? text.length : 0);
+  console.log('=====================================================');
   
   if (!text || text.trim() === '') {
     return { safe: true, message: '空文本' };
   }
   
-  // 第一步：本地敏感词检测（必须通过）
+  // 第一步：本地敏感词检测（快速拦截明显违规内容）
   console.log('[文本安全检测] 🔒 第一步：本地敏感词检测');
   const localResult = localSensitiveCheck(text);
   if (!localResult.safe) {
@@ -1308,8 +1309,9 @@ async function checkTextSafety(text) {
   }
   console.log('[文本安全检测] ✅ 本地检测通过');
   
-  // 第二步：调用后端API检测
-  console.log('[文本安全检测] 🌐 第二步：调用后端API');
+  // 第二步：必须调用后端API（抖音官方安全检测）
+  console.log('[文本安全检测] 🌐 第二步：调用后端API（抖音官方检测）');
+  console.log('[文本安全检测] 🌐 请求URL:', `${SECURITY_API_BASE}/text`);
   
   return new Promise((resolve, reject) => {
     tt.request({
@@ -1319,45 +1321,47 @@ async function checkTextSafety(text) {
       data: { text: text },
       timeout: 15000,
       success: (res) => {
-        console.log('[文本安全检测] 📥 API响应:', JSON.stringify(res.data));
+        console.log('[文本安全检测] 📥 statusCode:', res.statusCode);
+        console.log('[文本安全检测] 📥 响应数据:', JSON.stringify(res.data));
         
         if (res.statusCode === 200 && res.data) {
           if (res.data.safe === true) {
-            console.log('[文本安全检测] ✅ API检测通过');
+            console.log('[文本安全检测] ✅ 抖音API检测通过');
             resolve({ safe: true, message: '检测通过' });
           } else {
-            console.log('[文本安全检测] ❌ API检测拦截');
-            resolve({ safe: false, message: '您输入的内容可能包含敏感信息，请修改后重试' });
+            console.log('[文本安全检测] ❌ 抖音API检测拦截');
+            resolve({ safe: false, message: res.data.message || '您输入的内容可能包含敏感信息，请修改后重试' });
           }
         } else {
-          // 服务异常时，由于本地检测已通过，可以放行
-          console.log('[文本安全检测] ⚠️ API异常，本地已通过，放行');
-          resolve({ safe: true, message: '检测通过' });
+          // 【严格模式】服务异常时必须拒绝，确保安全合规
+          console.log('[文本安全检测] ❌ API响应异常，严格模式拒绝');
+          resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试' });
         }
       },
       fail: (error) => {
-        console.error('[文本安全检测] ❌ 网络错误:', error);
-        // 网络错误时，由于本地检测已通过，可以放行
-        resolve({ safe: true, message: '检测通过' });
+        console.error('[文本安全检测] ❌ 网络错误:', JSON.stringify(error));
+        // 【严格模式】网络错误时必须拒绝，确保安全合规
+        console.log('[文本安全检测] ❌ 网络异常，严格模式拒绝');
+        resolve({ safe: false, message: '网络异常，无法完成安全检测，请稍后重试' });
       }
     });
   });
 }
 
 /**
- * 图片内容安全检测
+ * 图片内容安全检测（严格模式：必须通过抖音官方API检测）
  * @param {string} imageData - 图片的base64数据（不含前缀）
  * @param {string} imageUrl - 图片URL（与imageData二选一）
  * @param {boolean} isSampleImage - 是否为预设样例图片（样例图片可跳过检测）
  * @returns {Promise<{safe: boolean, message: string}>}
  */
 async function checkImageSafety(imageData, imageUrl, isSampleImage = false) {
-  console.log('========================================');
-  console.log('[图片安全检测] 🔍 开始检测');
-  console.log('[图片安全检测] 📊 数据长度:', imageData ? imageData.length : 0);
-  console.log('[图片安全检测] 🔗 URL:', imageUrl || '无');
-  console.log('[图片安全检测] 📋 是否样例图片:', isSampleImage);
-  console.log('========================================');
+  console.log('=====================================================');
+  console.log('[图片安全检测] 🔍 checkImageSafety 被调用');
+  console.log('[图片安全检测] 📊 imageData长度:', imageData ? imageData.length : 0);
+  console.log('[图片安全检测] 🔗 imageUrl:', imageUrl || '无');
+  console.log('[图片安全检测] 📋 isSampleImage:', isSampleImage);
+  console.log('=====================================================');
   
   // 样例图片（预设的安全图片）可以跳过检测
   if (isSampleImage) {
@@ -1366,96 +1370,110 @@ async function checkImageSafety(imageData, imageUrl, isSampleImage = false) {
   }
   
   if (!imageData && !imageUrl) {
+    console.log('[图片安全检测] ❌ 没有提供任何图片数据');
     return { safe: false, message: '未提供图片数据' };
   }
+  
+  const requestUrl = `${SECURITY_API_BASE}/image`;
+  console.log('[图片安全检测] 🌐 请求URL:', requestUrl);
   
   return new Promise((resolve, reject) => {
     const requestData = {};
     if (imageUrl) {
       requestData.image_url = imageUrl;
+      console.log('[图片安全检测] 📤 使用URL模式');
     } else {
       requestData.image_data = imageData;
+      console.log('[图片安全检测] 📤 使用Base64模式，长度:', imageData.length);
     }
     
+    console.log('[图片安全检测] 📤 开始发送请求...');
+    
     tt.request({
-      url: `${SECURITY_API_BASE}/image`,
+      url: requestUrl,
       method: 'POST',
       header: { 'Content-Type': 'application/json' },
       data: requestData,
       timeout: 35000,
       success: (res) => {
-        console.log('[图片安全检测] 📥 API响应:', JSON.stringify(res.data));
+        console.log('=====================================================');
+        console.log('[图片安全检测] 📥 statusCode:', res.statusCode);
+        console.log('[图片安全检测] 📥 响应数据:', JSON.stringify(res.data));
+        console.log('=====================================================');
         
         if (res.statusCode === 200 && res.data) {
           if (res.data.safe === true) {
-            console.log('[图片安全检测] ✅ 检测通过');
+            console.log('[图片安全检测] ✅ 抖音API检测通过');
             resolve({ safe: true, message: '检测通过' });
-          } else if (res.data.safe === false) {
-            // 检查是否是真正的内容违规还是服务错误
-            const msg = (res.data.message || '').toLowerCase();
-            const isRealBlock = msg.includes('block') || msg.includes('porn') || 
-                               msg.includes('violence') || msg.includes('sensitive');
-            
-            if (isRealBlock) {
-              console.log('[图片安全检测] ❌ 内容违规，拦截');
-              resolve({ safe: false, message: '您上传的图片未通过安全检测，请更换图片后重试' });
-            } else {
-              // 服务错误导致的safe:false，对于用户上传的图片需要拒绝
-              console.log('[图片安全检测] ⚠️ 检测服务异常');
-              resolve({ safe: false, message: '图片安全检测服务暂时不可用，请稍后重试' });
-            }
           } else {
-            console.log('[图片安全检测] ⚠️ 响应格式异常');
-            resolve({ safe: false, message: '图片安全检测服务异常，请稍后重试' });
+            // 【严格模式】只要不是明确的safe:true，都拒绝
+            console.log('[图片安全检测] ❌ 抖音API检测拦截或异常');
+            resolve({ safe: false, message: res.data.message || '您上传的图片未通过安全检测，请更换图片后重试' });
           }
         } else {
-          console.error('[图片安全检测] ❌ 响应状态异常:', res.statusCode);
-          resolve({ safe: false, message: '图片安全检测服务异常，请稍后重试' });
+          // 【严格模式】服务异常时必须拒绝
+          console.log('[图片安全检测] ❌ API响应异常，严格模式拒绝');
+          resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试' });
         }
       },
       fail: (error) => {
-        console.error('[图片安全检测] ❌ 网络错误:', error);
-        resolve({ safe: false, message: '网络异常，无法完成图片安全检测，请稍后重试' });
+        console.error('[图片安全检测] ❌ 网络错误:', JSON.stringify(error));
+        // 【严格模式】网络错误时必须拒绝
+        console.log('[图片安全检测] ❌ 网络异常，严格模式拒绝');
+        resolve({ safe: false, message: '网络异常，无法完成安全检测，请稍后重试' });
       }
     });
   });
 }
 
 /**
- * 从文件路径读取图片并进行安全检测
+ * 从文件路径读取图片并进行安全检测（严格模式）
  * @param {string} filePath - 图片文件路径
  * @param {boolean} isSampleImage - 是否为预设样例图片
  * @returns {Promise<{safe: boolean, message: string}>}
  */
 async function checkImageSafetyFromFile(filePath, isSampleImage = false) {
-  console.log('[安全检测] 从文件路径检测图片:', filePath);
-  console.log('[安全检测] 是否样例图片:', isSampleImage);
+  console.log('=====================================================');
+  console.log('[图片安全检测-文件] 🔍 checkImageSafetyFromFile 被调用');
+  console.log('[图片安全检测-文件] 📁 filePath:', filePath);
+  console.log('[图片安全检测-文件] 📋 isSampleImage:', isSampleImage);
+  console.log('=====================================================');
   
   // 样例图片跳过检测
   if (isSampleImage) {
-    console.log('[安全检测] ✅ 样例图片，跳过检测');
+    console.log('[图片安全检测-文件] ✅ 样例图片，跳过检测');
+    return { safe: true, message: '样例图片，无需检测' };
+  }
+  
+  // 检查是否包含sample-clothes路径（也是样例图片）
+  if (filePath && filePath.includes('sample-clothes')) {
+    console.log('[图片安全检测-文件] ✅ 检测到sample-clothes路径，跳过检测');
     return { safe: true, message: '样例图片，无需检测' };
   }
   
   // 如果是网络URL，直接使用URL检测
-  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+  if (filePath && (filePath.startsWith('http://') || filePath.startsWith('https://'))) {
+    console.log('[图片安全检测-文件] 🌐 网络URL，调用URL检测');
     return checkImageSafety(null, filePath, false);
   }
   
   // 本地文件，读取为base64
+  console.log('[图片安全检测-文件] 📁 本地文件，读取base64...');
+  
   return new Promise((resolve, reject) => {
     const fs = tt.getFileSystemManager();
     fs.readFile({
       filePath: filePath,
       encoding: 'base64',
       success: (res) => {
-        console.log('[安全检测] 图片读取成功，开始检测');
+        console.log('[图片安全检测-文件] ✅ 读取成功，长度:', res.data ? res.data.length : 0);
         checkImageSafety(res.data, null, false).then(resolve).catch(reject);
       },
       fail: (error) => {
-        console.error('[安全检测] 读取图片文件失败:', error);
-        // 读取失败时拒绝（严格模式）
-        resolve({ safe: false, message: '图片读取失败，无法完成安全检测' });
+        console.error('[图片安全检测-文件] ❌ 读取失败:', JSON.stringify(error));
+        // 【严格模式】读取失败时必须拒绝
+        console.log('[图片安全检测-文件] ❌ 严格模式拒绝');
+        resolve({ safe: false, message: '图片读取失败，请重新选择图片' });
       }
     });
   });
