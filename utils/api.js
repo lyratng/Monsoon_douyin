@@ -1459,23 +1459,47 @@ async function checkImageSafetyFromFile(filePath, isSampleImage = false) {
   
   // 本地文件，读取为base64
   console.log('[图片安全检测-文件] 📁 本地文件，读取base64...');
+  console.log('[图片安全检测-文件] 📁 完整路径:', filePath);
   
   return new Promise((resolve, reject) => {
-    const fs = tt.getFileSystemManager();
-    fs.readFile({
-      filePath: filePath,
-      encoding: 'base64',
-      success: (res) => {
-        console.log('[图片安全检测-文件] ✅ 读取成功，长度:', res.data ? res.data.length : 0);
-        checkImageSafety(res.data, null, false).then(resolve).catch(reject);
-      },
-      fail: (error) => {
-        console.error('[图片安全检测-文件] ❌ 读取失败:', JSON.stringify(error));
-        // 【严格模式】读取失败时必须拒绝
-        console.log('[图片安全检测-文件] ❌ 严格模式拒绝');
-        resolve({ safe: false, message: '图片读取失败，请重新选择图片' });
-      }
-    });
+    try {
+      const fs = tt.getFileSystemManager();
+      console.log('[图片安全检测-文件] 📁 FileSystemManager获取成功');
+      
+      fs.readFile({
+        filePath: filePath,
+        encoding: 'base64',
+        success: (res) => {
+          console.log('[图片安全检测-文件] ✅ 文件读取成功');
+          console.log('[图片安全检测-文件] ✅ base64长度:', res.data ? res.data.length : 0);
+          console.log('[图片安全检测-文件] ✅ base64前50字符:', res.data ? res.data.substring(0, 50) : 'null');
+          
+          if (!res.data || res.data.length === 0) {
+            console.log('[图片安全检测-文件] ❌ base64数据为空');
+            resolve({ safe: false, message: '图片数据读取失败' });
+            return;
+          }
+          
+          checkImageSafety(res.data, null, false)
+            .then((result) => {
+              console.log('[图片安全检测-文件] ✅ 检测完成:', JSON.stringify(result));
+              resolve(result);
+            })
+            .catch((err) => {
+              console.error('[图片安全检测-文件] ❌ 检测异常:', err);
+              resolve({ safe: false, message: '检测过程异常' });
+            });
+        },
+        fail: (error) => {
+          console.error('[图片安全检测-文件] ❌ readFile失败');
+          console.error('[图片安全检测-文件] ❌ 错误码:', error.errMsg || error.message || JSON.stringify(error));
+          resolve({ safe: false, message: '图片读取失败，请重新选择图片' });
+        }
+      });
+    } catch (e) {
+      console.error('[图片安全检测-文件] ❌ 异常:', e.message);
+      resolve({ safe: false, message: '图片处理异常' });
+    }
   });
 }
 
