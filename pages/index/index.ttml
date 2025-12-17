@@ -22,8 +22,8 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero-first">
-        <text class="simple-title" bindtap="handleTitleClick">衣索寓言</text>
-        <text class="simple-subtitle">请先测试，以获得风格报告</text>
+        <text class="simple-title title-lowered" bindtap="handleTitleClick">衣索寓言</text>
+        <!-- 暂时隐藏：<text class="simple-subtitle">请先测试，以获得风格报告</text> -->
       </view>
       
       <view class="simple-actions">
@@ -43,9 +43,9 @@
     <!-- 浮动内容区域 -->
     <view class="floating-content">
       <view class="simple-hero">
-        <text class="simple-title" bindtap="handleTitleClick">衣索寓言</text>
-        <text class="simple-subtitle">「衣有语，织为言」</text>
-        <text class="simple-description">你的专属风格报告已生成</text>
+        <text class="simple-title title-lowered" bindtap="handleTitleClick">衣索寓言</text>
+        <!-- 暂时隐藏：<text class="simple-subtitle">「衣有语，织为言」</text> -->
+        <!-- 暂时隐藏：<text class="simple-description">你的专属风格报告已生成</text> -->
       </view>
       
       <view class="simple-actions">

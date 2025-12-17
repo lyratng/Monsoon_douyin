@@ -96,7 +96,7 @@ Page({
     const welcomeMessage = {
       id: Date.now(),
       type: 'ai',
-      content: `你好！我是衣索寓言AI助手 EISO\n\n基于你的个人风格报告，你是${styleReport.季型名称}，主要特质是${styleReport.能量类型名称}。\n\n我可以为你提供专业的穿搭建议、色彩搭配、造型指导等。请随时向我提问，或者选择下方的推荐问题开始对话！`,
+      content: `你好！我是衣索寓言AI助手\n\n基于你的个人风格报告，你是${styleReport.季型名称}，主要特质是${styleReport.能量类型名称}。\n\n我可以为你提供专业的穿搭建议、色彩搭配、造型指导等。请随时向我提问，或者选择下方的推荐问题开始对话！`,
       timestamp: new Date().toLocaleTimeString()
     };
 
@@ -178,8 +178,7 @@ Page({
     this.setData({
       messages: [...this.data.messages, userMessage],
       inputText: '',
-      isLoading: true,
-      showRecommended: false
+      isLoading: true
     });
 
     // 滚动到新消息
@@ -313,7 +312,7 @@ personality_test_scores: ${JSON.stringify(userProfile.personality_test.scores)}
 
 请根据用户的个人风格报告和一切档案信息，对用户的问题做出回答。
 规则：
-1. （硬性规则！）判断用户问题是否与"穿搭"或者"时尚"有关，如果无关，请回复"你的问题似乎非穿搭问题呢，很抱歉EISO帮不了你:("
+1. （硬性规则！）判断用户问题是否与"穿搭"或者"时尚"有关，如果无关，请回复"你的问题似乎非穿搭问题呢，很抱歉我帮不了你:("
 2. 字数不超过200字。当问题不复杂时，可以简短回答。
 3. 输出的答案（穿搭推荐/单品建议/品牌推荐等）要符合审美，要具体。
 4. 如果用户的回答中出现偏好性/态度性观点，请提取浓缩信息，作为记忆，存储到用户档案里的"自然语言记忆"部分，要有条理，清晰明白，让大模型下次调用用户档案的时候易读易懂。

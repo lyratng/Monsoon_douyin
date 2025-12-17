@@ -88,27 +88,27 @@
   position: relative;
 }
 
-/* 上半部分：照片区域 - 完全覆盖屏幕顶部 */
+/* 全屏背景图片 - 置底层，完整显示 */
 .photo-background {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   width: 100vw;
-  height: 65vh;
   z-index: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .main-photo {
   width: 100vw;
   display: block;
+  /* 图片从顶部开始，完整显示 */
 }
 
 /* 浮动内容区域 */
 .floating-content {
   position: fixed;
-  top: calc(65vh - 130rpx - 0.2cm);
+  top: calc(65vh - 130rpx - 0.2cm + 1.2cm);
   left: 0;
   right: 0;
   height: auto;
@@ -145,6 +145,12 @@
   display: block;
   animation: fadeIn 1s ease-out;
   text-shadow: 0 2rpx 8rpx rgba(255, 255, 255, 0.8), 0 0 20rpx rgba(255, 255, 255, 0.6); /* 白色阴影增强可读性 */
+}
+
+/* 标题下移样式 - 使用position:relative + top，只移动标题不影响按钮位置 */
+.simple-title.title-lowered {
+  position: relative;
+  top: 0.5cm;
 }
 
 .simple-subtitle {

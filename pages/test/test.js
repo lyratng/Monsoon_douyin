@@ -4,7 +4,7 @@ Page({
     currentStep: 1,
     totalSteps: 16,
     isLoading: false,
-    loadingText: 'AI正在为您智能生成专属风格报告...', // 加载文字
+    loadingText: 'AI正在为您生成专属风格报告...', // 加载文字
     stepAnimationClass: '', // 控制页面动画：'fade-in' | 'fade-out' | ''
     
     // 加载轮播相关
@@ -734,7 +734,7 @@ Page({
     var self = this;
     this.setData({ 
       isLoading: true,
-      loadingText: 'AI正在为您智能生成专属风格报告...'
+      loadingText: 'AI正在为您生成专属风格报告...'
     });
     
     // 开始背景轮播
@@ -824,20 +824,21 @@ Page({
     check();
   },
   
-  // 执行风格报告生成
+  // 执行风格报告生成（并行生成报告和专属形象）
   doGenerateStyleReport: function(api, app, userProfile) {
     var self = this;
     
     this.setData({ 
-      loadingText: 'AI正在为您智能生成专属风格报告...'
+      loadingText: 'AI正在为您生成专属风格报告...'
     });
     
-    api.generateStyleReport(userProfile)
+    console.log('🚀 开始并行生成：报告 + 专属形象');
+    
+    // 任务1：生成风格报告
+    var reportPromise = api.generateStyleReport(userProfile)
       .then(function(styleReport) {
-        // 🔍 断点10：风格报告生成完成
         console.log('🎯 【断点10 - 风格报告生成完成】');
         console.log('  生成的报告季型名称:', styleReport['季型名称']);
-        console.log('  完整生成的报告:', JSON.stringify(styleReport, null, 2));
         
         // 对AI生成的报告内容进行安全过滤
         const filteredReport = self.filterReportContent(styleReport);
@@ -848,76 +849,73 @@ Page({
           style_report: filteredReport
         });
         
-        // 🔍 断点11：报告保存后的最终验证
-        const finalProfile = app.getUserProfile();
-        console.log('🎯 【断点11 - 报告保存后最终验证】');
-        console.log('  最终档案中的季型名称:', finalProfile.style_report ? finalProfile.style_report['季型名称'] : '无');
-        console.log('  最终档案中的color_analysis季型:', finalProfile.color_analysis ? finalProfile.color_analysis.season_12 : '无');
-        
-        // 阶段2：生成专属形象图片
-        console.log('🎨 开始生成专属形象...');
-        self.setData({ 
-          loadingText: 'AI正在为您生成专属形象...'
-        });
-        
-        // 生成Avatar图片（使用过滤后的报告）
-        return api.generateAvatar(userProfile, filteredReport)
-          .then(function(avatarBase64) {
-            console.log('🎨 Avatar生成成功，base64长度:', avatarBase64 ? avatarBase64.length : 0);
-            
-            // 直接保存base64 data URI到userProfile（不需要文件系统权限）
-            const dataUri = `data:image/png;base64,${avatarBase64}`;
-            
-            console.log('🎨 保存data URI到userProfile，长度:', dataUri.length);
-            
-            // 保存data URI到userProfile
-            app.updateUserProfile({
-              avatar_image: dataUri
-            });
-            
-            console.log('✅ Avatar data URI已保存到userProfile');
-            
-            return Promise.resolve();
-          })
-          .catch(function(error) {
-            console.error('❌ Avatar生成失败，继续显示报告（不包含图片）:', error);
-            console.error('   错误详情:', JSON.stringify(error));
-            // 失败时不阻塞流程，继续跳转
-            return Promise.resolve();
-          });
-      })
-      .then(function() {
-        // 停止背景轮播
-        self.stopBackgroundCarousel();
-        self.setData({ isLoading: false });
-        
-        tt.redirectTo({
-          url: '/packageReport/pages/report/report?generate=true'
-        });
+        console.log('✅ 风格报告已保存');
+        return { success: true, report: filteredReport };
       })
       .catch(function(error) {
-        console.error('报告生成失败:', error);
+        console.error('❌ 报告生成失败:', error);
+        return { success: false, error: error };
+      });
+    
+    // 任务2：生成专属形象（不再依赖 styleReport，可并行）
+    var avatarPromise = api.generateAvatar(userProfile)
+      .then(function(avatarBase64) {
+        console.log('🎨 Avatar生成成功，base64长度:', avatarBase64 ? avatarBase64.length : 0);
+        
+        // 直接保存base64 data URI到userProfile
+        const dataUri = 'data:image/png;base64,' + avatarBase64;
+        
+        app.updateUserProfile({
+          avatar_image: dataUri
+        });
+        
+        console.log('✅ Avatar已保存到userProfile');
+        return { success: true };
+      })
+      .catch(function(error) {
+        console.error('❌ Avatar生成失败:', error);
+        return { success: false, error: error };
+      });
+    
+    // 等待两个任务都完成
+    Promise.all([reportPromise, avatarPromise])
+      .then(function(results) {
+        var reportResult = results[0];
+        var avatarResult = results[1];
+        
+        console.log('📊 并行任务完成:', {
+          reportSuccess: reportResult.success,
+          avatarSuccess: avatarResult.success
+        });
         
         // 停止背景轮播
         self.stopBackgroundCarousel();
         self.setData({ isLoading: false });
         
-        tt.showModal({
-          title: '报告生成失败',
-          content: 'API调用失败，是否继续查看模拟报告？',
-          success: function(res) {
-            if (res.confirm) {
-              // 生成模拟报告并跳转
-              const mockReport = self.generateMockReport(userProfile);
-              app.updateUserProfile({
-                style_report: mockReport
-              });
-              
-              tt.redirectTo({
-                url: '/packageReport/pages/report/report?generate=true'
-              });
+        // 报告失败时使用模拟报告
+        if (!reportResult.success) {
+          tt.showModal({
+            title: '报告生成失败',
+            content: 'API调用失败，是否继续查看模拟报告？',
+            success: function(res) {
+              if (res.confirm) {
+                const mockReport = self.generateMockReport(userProfile);
+                app.updateUserProfile({
+                  style_report: mockReport
+                });
+                
+                tt.redirectTo({
+                  url: '/packageReport/pages/report/report?generate=true'
+                });
+              }
             }
-          }
+          });
+          return;
+        }
+        
+        // 报告成功，跳转到报告页（形象失败时不显示形象，已在报告页处理）
+        tt.redirectTo({
+          url: '/packageReport/pages/report/report?generate=true'
         });
       });
   },

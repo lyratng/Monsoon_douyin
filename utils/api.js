@@ -893,6 +893,33 @@ function getSeasonChineseName(season) {
   return names[season] || '冷夏型';
 }
 
+/**
+ * 根据人格类型最高分获取穿衣风格描述（用于图像生成）
+ * @param {Object} scores - 人格分数 {a, b, c, d}
+ * @returns {string} 适合图像生成的穿衣风格英文描述
+ */
+function getPersonalityStyleDescription(scores) {
+  // 调试日志：查看传入的分数
+  console.log('🔍 [Personality] 传入的 scores:', JSON.stringify(scores));
+  
+  // 找出最高分的类型
+  const sortedTypes = Object.entries(scores).sort((x, y) => y[1] - x[1]);
+  console.log('🔍 [Personality] 排序后:', JSON.stringify(sortedTypes));
+  
+  const topType = sortedTypes[0][0]; // 'a', 'b', 'c', 'd'
+  console.log('🔍 [Personality] 最高分类型:', topType);
+  
+  // 精简版穿衣风格描述（强调具体服装类型，避免抽象词被误解）
+  const styleDescriptions = {
+    'a': 'Playful casual style: flowy blouse or dress with subtle prints, delicate details like small bows, fresh and youthful look.',
+    'b': 'Soft relaxed style: cozy knit sweater or soft cotton pieces, loose comfortable silhouette, gentle and approachable look.',
+    'c': 'Modern edgy style: structured leather jacket or denim, clean utilitarian pieces, confident and bold look.',
+    'd': 'Refined minimal style: tailored blazer or crisp shirt, clean lines, polished professional look.'
+  };
+  
+  return styleDescriptions[topType] || styleDescriptions['b'];
+}
+
 function getOccasionName(occasion) {
   const names = {
     'work': '通勤工作',
@@ -1136,12 +1163,40 @@ ${JSON.stringify(clothingInfo, null, 2)}
 }
 
 /**
+ * 根据季型获取配色原则（用于图像生成）
+ * @param {string} season_12 - 12季型英文名
+ * @returns {string} 配色原则描述
+ */
+function getSeasonColorPalette(season_12) {
+  const palettes = {
+    // Spring 春季型
+    'Bright Spring': 'ivory, coral, peach, warm yellow, turquoise',
+    'Light Spring': 'cream, soft coral, light aqua, peach, warm white',
+    'Warm Spring': 'golden beige, coral, warm orange, turquoise, ivory',
+    // Summer 夏季型
+    'Light Summer': 'powder blue, lavender, dusty rose, soft mint, light grey',
+    'Cool Summer': 'dusty blue, soft grey, periwinkle, dusty rose, navy',
+    'Soft Summer': 'dove grey, mauve, sage green, dusty blue, taupe',
+    // Autumn 秋季型
+    'Soft Autumn': 'soft camel, muted olive, dusty coral, ivory, warm grey',
+    'Warm Autumn': 'rust, olive green, camel, cream, warm brown',
+    'Deep Autumn': 'burgundy, forest green, dark brown, cream, burnt orange',
+    // Winter 冬季型
+    'Bright Winter': 'pure white, black, royal blue, hot pink, emerald',
+    'Cool Winter': 'pure white, black, fuchsia, sapphire blue, icy pink',
+    'Deep Winter': 'black, burgundy, deep purple, pure white, forest green'
+  };
+  
+  return palettes[season_12] || palettes['Cool Summer'];
+}
+
+/**
  * Generate avatar image using Volcengine Image Gen
- * @param {Object} userProfile - User profile data
- * @param {Object} styleReport - Generated style report
+ * 改为只依赖 userProfile，不再需要 styleReport（支持并行生成）
+ * @param {Object} userProfile - User profile data (包含 basic_info, color_analysis, personality_test)
  * @returns {Promise<string>} Base64 PNG image data
  */
-async function generateAvatar(userProfile, styleReport) {
+async function generateAvatar(userProfile) {
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error('API Key未配置');
@@ -1149,34 +1204,55 @@ async function generateAvatar(userProfile, styleReport) {
 
   // Build the English prompt
   const gender = userProfile.basic_info.gender === 'male' ? 'male' : 'female';
-  const age = userProfile.basic_info.age || 25;
-  const height = userProfile.basic_info.height || 165;
-  const weight = userProfile.basic_info.weight || 60;
+  // 以下变量暂时注释，未来可能需要用于更精细的人物生成
+  // const age = userProfile.basic_info.age || 25;
+  // const height = userProfile.basic_info.height || 165;
+  // const weight = userProfile.basic_info.weight || 60;
 
-  // Extract season info with both English and Chinese
+  // Extract season info (不再依赖 styleReport)
   const season_12 = userProfile.color_analysis.season_12 || 'Cool Summer';
-  const seasonChinese = styleReport['季型名称'] || '冷夏型';
-  const seasonInfo = `${season_12} ${seasonChinese}`;
+  const seasonChinese = getSeasonChineseName(season_12);
+  const colorPalette = getSeasonColorPalette(season_12);
 
-  // Extract personality info
-  const personalityType = styleReport['能量类型名称'] || '自洽自律型';
-  const personalityDesc = styleReport['能量匹配的风格简短描述'] || '';
+  // Extract personality style description based on highest score (只考虑最高一项)
+  const personalityScores = userProfile.personality_test.scores || { a: 0, b: 0, c: 0, d: 0 };
+  const personalityStyleDesc = getPersonalityStyleDescription(personalityScores);
 
-  const prompt = `Generate a 768x1024px vertical image of a ${gender} figurine (age ${age}, ${height}cm, ${weight}kg) on a PURE WHITE BACKGROUND.
+  const prompt = `Create a 768x1024 vertical image.
 
-BACKGROUND: 纯白色背景，无杂质!!!!!
-Solid white #FFFFFF, completely flat, no gradients, no shadows, no effects. Just plain white.
+[SCENE]
+- Pure white background (#FFFFFF), no shadows, no gradients
+- ONE person only, full body, standing naturally
 
-SUBJECT:
-- Full body standing pose, natural and relaxed 在纯白色背景中
-- Realistic figurine/desk toy style with 3D look（手办的画风，人物有立体感和光滑感，但不要卡通，要真实的人物比例和画风；穿衣也符合现实中真实的衣服穿搭，不要过度死板和不真实）
-- Season: ${seasonInfo} → Spring=warm fresh colors, Summer=cool flowing colors, Autumn=khaki earth tones, Winter=high contrast cool colors
-- Personality: ${personalityType} (${personalityDesc}) → Clothing fit matches personality (relaxed=loose soft, sharp=structured angular)
+[PERSON]
+- ${gender}, realistic adult proportions
+- 3D rendered, smooth polished surface, high-quality character art style
+- NOT chibi, NOT cartoon, NOT clay/doll-like
 
-Keep file under 800KB.`;
+[FASHION STYLE]
+${personalityStyleDesc}
+
+[COLOR PALETTE - ${seasonChinese}]
+Choose 2-3 colors from: ${colorPalette}
+Each clothing piece should be ONE solid color.
+
+[RULES]
+- Exactly ONE person
+- Real everyday street fashion
+- Each garment is a single solid color
+- Adult body proportions
+
+[AVOID]
+- Multiple people
+- Text or labels
+- Patchwork or color-blocking on single garment
+- Fantasy/costume elements
+- Cartoon proportions`;
 
   console.log('🎨 [Avatar Generation] Starting avatar generation...');
   console.log('🎨 [Avatar Generation] Gender:', gender);
+  console.log('🎨 [Avatar Generation] Season:', season_12, seasonChinese);
+  console.log('🎨 [Avatar Generation] Style:', personalityStyleDesc);
 
   try {
     const res = await apiRequestWithRetry({

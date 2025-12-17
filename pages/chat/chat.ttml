@@ -2,23 +2,10 @@
 <view class="chat-container">
 
   <!-- 浮动清除按钮 - 只在有聊天记录时显示 -->
-  <text wx:if="{{!showRecommended}}" class="floating-clear-btn" bindtap="clearChatHistory">清除记录</text>
+  <text wx:if="{{messages.length > 0}}" class="floating-clear-btn" bindtap="clearChatHistory">清除记录</text>
 
   <!-- 消息列表 -->
   <scroll-view class="message-list" scroll-y="true" scroll-top="{{scrollTop}}" scroll-into-view="{{scrollToView}}">
-    <!-- 推荐问题 -->
-    <view wx:if="{{showRecommended}}" class="recommended-questions">
-      <view class="recommended-header">
-        <text class="recommended-title">推荐问题</text>
-        <text class="clear-btn" bindtap="clearChatHistory">清除记录</text>
-      </view>
-      <view class="question-grid">
-        <view wx:for="{{recommendedQuestions}}" wx:key="index" class="question-item" bindtap="onRecommendedQuestionTap" data-question="{{item}}">
-          <text class="question-text">{{item}}</text>
-        </view>
-      </view>
-    </view>
-
     <!-- 消息项 -->
     <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.type === 'user' ? 'user-message' : 'ai-message'}}" id="msg-{{item.id}}">
       <!-- AI消息 -->
@@ -26,7 +13,7 @@
         <view class="ai-bubble">
           <text class="message-text">{{item.content}}</text>
           <view class="ai-bubble-footer">
-            <text class="ai-generated-tag">内容由AI生成</text>
+            <!-- 暂时隐藏：<text class="ai-generated-tag">内容由AI生成</text> -->
             <text class="message-time">{{item.timestamp}}</text>
           </view>
         </view>
@@ -50,6 +37,18 @@
           <view class="dot"></view>
         </view>
         <text class="loading-text">思考中...</text>
+      </view>
+    </view>
+
+    <!-- 推荐问题 - 始终显示在消息列表底部（加载时隐藏） -->
+    <view wx:if="{{!isLoading}}" class="recommended-questions" id="recommended-section">
+      <view class="recommended-header">
+        <text class="recommended-title">推荐问题</text>
+      </view>
+      <view class="question-grid">
+        <view wx:for="{{recommendedQuestions}}" wx:key="index" class="question-item" bindtap="onRecommendedQuestionTap" data-question="{{item}}">
+          <text class="question-text">{{item}}</text>
+        </view>
       </view>
     </view>
   </scroll-view>
