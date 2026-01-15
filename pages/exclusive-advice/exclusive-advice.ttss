@@ -1,0 +1,126 @@
+/* 页面包装器 */
+.page-wrapper {
+  position: relative;
+  min-height: 100vh;
+  background: #F5F5F0;
+}
+
+/* 背景图片 */
+.bg-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 0;
+}
+
+/* 内容容器 */
+.container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding: 80rpx 40rpx 80rpx;
+  box-sizing: border-box;
+}
+
+/* 标题区域 */
+.header {
+  text-align: center;
+  margin-bottom: 200rpx;
+}
+
+.title {
+  display: block;
+  font-size: 56rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 300;
+  color: #999;
+  letter-spacing: 2rpx;
+}
+
+/* 功能卡片区域 */
+.feature-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 40rpx;
+  align-items: center;
+}
+
+/* 卡片 */
+.feature-card {
+  width: 50%;
+  background: #FFFFFF;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 24rpx;
+  padding: 40rpx 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.feature-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.15);
+}
+
+/* 卡片主内容 */
+.card-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.card-title {
+  font-size: 36rpx;
+  font-weight: 500;
+  color: #2C2C2C;
+  letter-spacing: 2rpx;
+}
+
+.card-desc {
+  font-size: 24rpx;
+  font-weight: 300;
+  color: #666;
+  letter-spacing: 1rpx;
+  line-height: 1.5;
+}
+
+/* 箭头圆圈 */
+.card-arrow-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  background: #2C2C2C;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 32rpx;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.feature-card:active .card-arrow-wrap {
+  transform: scale(1.05);
+}
+
+.card-arrow {
+  font-size: 32rpx;
+  font-weight: 300;
+  color: #FFFFFF;
+}
+
+/* 第二个卡片额外下移 */
+.card-second {
+  margin-top: 60rpx;
+}

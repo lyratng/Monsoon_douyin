@@ -3,6 +3,7 @@ const app = getApp();
 const api = require('../../utils/api.js');
 const cdnConfig = require('../../config/cdn.js');
 const simpleImageLoader = require('../../utils/simpleImageLoader.js');
+const userUtils = require('../../utils/user.js');
 
 Page({
   /**
@@ -212,6 +213,87 @@ Page({
       });
       return;
     }
+
+    // ========== 寓言币消费逻辑 ==========
+    // 检查是否登录
+    if (!userUtils.isLoggedIn()) {
+      tt.showModal({
+        title: '需要登录',
+        content: '使用单品建议功能需要先登录，是否前往登录？',
+        confirmText: '去登录',
+        cancelText: '稍后',
+        success: (res) => {
+          if (res.confirm) {
+            tt.switchTab({
+              url: '/pages/index/index'
+            });
+          }
+        }
+      });
+      return;
+    }
+    
+    // 消费寓言币
+    const consumeResult = await userUtils.consumeCoins(1, '单品建议');
+    console.log('💰 寓言币消费结果:', consumeResult);
+    
+    if (!consumeResult.success) {
+      if (consumeResult.needLogin) {
+        tt.showModal({
+          title: '需要登录',
+          content: '请先登录后再使用此功能',
+          confirmText: '去登录',
+          cancelText: '稍后',
+          success: (res) => {
+            if (res.confirm) {
+              tt.switchTab({
+                url: '/pages/index/index'
+              });
+            }
+          }
+        });
+        return;
+      }
+      
+      if (consumeResult.needRecharge) {
+        // 余额不足，跳转到首页显示充值卡片
+        tt.showModal({
+          title: '寓言币不足',
+          content: '您的寓言币余额不足，是否前往充值？',
+          confirmText: '去充值',
+          cancelText: '稍后',
+          success: (res) => {
+            if (res.confirm) {
+              // 跳转到首页并触发充值弹窗
+              tt.switchTab({
+                url: '/pages/index/index',
+                success: () => {
+                  // 通过全局数据通知首页打开充值卡片
+                  const appInstance = getApp();
+                  appInstance.globalData.showRechargeOnIndex = true;
+                }
+              });
+            }
+          }
+        });
+        return;
+      }
+      
+      // 其他错误
+      tt.showToast({
+        title: consumeResult.message || '消费失败',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    // 消费成功，显示提示
+    tt.showToast({
+      title: consumeResult.message,
+      icon: 'none',
+      duration: 2000
+    });
+    // ========== 寓言币消费逻辑结束 ==========
 
     this.setData({
       isAnalyzing: true

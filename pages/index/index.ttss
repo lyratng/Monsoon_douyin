@@ -14,6 +14,37 @@
   overflow-x: hidden;
 }
 
+/* 侧边栏入口按钮 */
+.menu-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 24rpx);
+  left: 32rpx;
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  z-index: 100;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.menu-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 1);
+}
+
+.menu-line {
+  width: 28rpx;
+  height: 3rpx;
+  background: #2C2C2C;
+  border-radius: 2rpx;
+}
+
 /* 极简初始页面 */
 .initial-container {
   display: flex;

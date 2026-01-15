@@ -1,0 +1,309 @@
+/* 穿搭优化报告页面样式 */
+.container {
+  min-height: 100vh;
+  background: #F5F5F0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-content {
+  flex: 1;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+/* 图片对比区域 */
+.image-comparison {
+  background: #FFFFFF;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.comparison-header {
+  margin-bottom: 32rpx;
+}
+
+.comparison-title {
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  letter-spacing: 2rpx;
+}
+
+.image-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.image-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0; /* 防止flex子项溢出 */
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.image-box:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.image-label {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 300;
+  margin-bottom: 16rpx;
+  letter-spacing: 1rpx;
+}
+
+.compare-image {
+  width: 100%;
+  height: 360rpx;
+  border-radius: 16rpx;
+  background: #F5F5F0;
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 360rpx;
+  border-radius: 16rpx;
+  background: #F5F5F0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1rpx dashed #E8E8E3;
+}
+
+.placeholder-text {
+  font-size: 26rpx;
+  color: #999;
+  font-weight: 300;
+  margin-bottom: 8rpx;
+}
+
+.placeholder-hint {
+  font-size: 22rpx;
+  color: #CCCCCC;
+  font-weight: 300;
+}
+
+/* 保存按钮区域 */
+.save-actions {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+  padding-top: 32rpx;
+  border-top: 1rpx solid #F5F5F0;
+}
+
+.save-btn {
+  flex: 1;
+  height: 72rpx;
+  background: #F5F5F0;
+  border-radius: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.save-btn:active {
+  background: #E8E8E3;
+  transform: scale(0.98);
+}
+
+.save-btn.disabled {
+  opacity: 0.5;
+}
+
+.save-btn.disabled:active {
+  transform: none;
+  background: #F5F5F0;
+}
+
+.save-text {
+  font-size: 24rpx;
+  color: #2C2C2C;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+}
+
+/* 报告卡片 */
+.report-card {
+  background: #FFFFFF;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  margin-bottom: 40rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+}
+
+.card-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  letter-spacing: 2rpx;
+  margin-bottom: 32rpx;
+  text-align: center;
+}
+
+/* 配饰列表 */
+.accessory-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+.accessory-item {
+  padding: 32rpx;
+  background: #FAFAFA;
+  border-radius: 16rpx;
+  border-left: 4rpx solid #2C2C2C;
+}
+
+.accessory-header {
+  margin-bottom: 12rpx;
+}
+
+.accessory-category {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 400;
+  letter-spacing: 1rpx;
+}
+
+.accessory-recommendation {
+  display: block;
+  font-size: 28rpx;
+  color: #2C2C2C;
+  font-weight: 400;
+  line-height: 1.6;
+  margin-bottom: 12rpx;
+}
+
+.accessory-reason {
+  display: block;
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+/* 穿搭技巧列表 */
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28rpx;
+}
+
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24rpx;
+}
+
+.tip-number {
+  width: 48rpx;
+  height: 48rpx;
+  background: #2C2C2C;
+  color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.tip-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.tip-text {
+  font-size: 28rpx;
+  color: #2C2C2C;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.tip-effect {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+/* AI声明 */
+.ai-disclaimer {
+  text-align: center;
+  padding: 32rpx 0;
+}
+
+.disclaimer-text {
+  font-size: 22rpx;
+  color: #CCCCCC;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+}
+
+/* 底部操作栏 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+  border-top: 1rpx solid #E8E8E3;
+  box-sizing: border-box;
+}
+
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  font-weight: 400;
+  letter-spacing: 1rpx;
+  border: none !important;
+  outline: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.action-btn::after {
+  border: none !important;
+}
+
+.secondary-btn {
+  background: #F5F5F0;
+  color: #2C2C2C;
+}
+
+.primary-btn {
+  background: #2C2C2C;
+  color: #FFFFFF;
+}
+
+.action-btn:active {
+  opacity: 0.8;
+  transform: scale(0.98);
+}

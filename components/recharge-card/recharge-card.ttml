@@ -1,0 +1,88 @@
+<!-- 充值卡片组件 -->
+<view class="recharge-container" tt:if="{{show}}">
+  <!-- 遮罩层 -->
+  <view class="mask {{animationClass}}" bindtap="handleMaskClick"></view>
+  
+  <!-- 卡片内容 -->
+  <view class="card-content {{animationClass}}" catchtap="handleContentClick">
+    <!-- 关闭按钮 -->
+    <view class="close-btn" bindtap="close" tt:if="{{!isPayLoading}}">
+      <text class="close-icon">×</text>
+    </view>
+    
+    <!-- 标题 -->
+    <view class="card-header">
+      <text class="card-title">获取更多寓言币</text>
+      <text class="card-subtitle">当前余额：{{currentBalance}} 枚</text>
+    </view>
+    
+    <!-- 首充提示 -->
+    <view class="first-charge-banner" tt:if="{{isFirstCharge}}">
+      <text class="banner-icon">🎁</text>
+      <text class="banner-text">首次充值额外赠送 5 枚寓言币！</text>
+    </view>
+    
+    <!-- 充值选项 -->
+    <view class="plans-container">
+      <view 
+        class="plan-item {{selectedPlan === item.id ? 'selected' : ''}} {{item.tag ? 'has-tag' : ''}}"
+        tt:for="{{rechargePlans}}"
+        tt:key="id"
+        data-id="{{item.id}}"
+        bindtap="selectPlan"
+      >
+        <!-- 标签 -->
+        <view class="plan-tag" tt:if="{{item.tag}}">
+          <text>{{item.tag}}</text>
+        </view>
+        
+        <!-- 价格 -->
+        <view class="plan-price">
+          <text class="price-symbol">¥</text>
+          <text class="price-value">{{item.price}}</text>
+        </view>
+        
+        <!-- 寓言币数量 -->
+        <view class="plan-coins">
+          <text class="coins-value">{{item.coins}}</text>
+          <text class="coins-unit">枚</text>
+        </view>
+        
+        <!-- 首充奖励提示 -->
+        <view class="first-bonus" tt:if="{{isFirstCharge}}">
+          <text>+5枚</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 充值按钮 -->
+    <button 
+      class="recharge-btn {{isPayLoading ? 'loading' : ''}}"
+      bindtap="handleRecharge"
+      disabled="{{isPayLoading}}"
+    >
+      <text tt:if="{{!isPayLoading}}">立即充值 ¥{{rechargePlans[selectedPlan].price}}</text>
+      <text tt:else>支付中...</text>
+    </button>
+    
+    <!-- 分割线 -->
+    <view class="divider">
+      <view class="divider-line"></view>
+      <text class="divider-text">或者</text>
+      <view class="divider-line"></view>
+    </view>
+    
+    <!-- 邀请好友 -->
+    <button class="invite-section" open-type="share">
+      <view class="invite-content">
+        <text class="invite-icon">👥</text>
+        <view class="invite-text">
+          <text class="invite-title">邀请好友</text>
+          <text class="invite-desc">双方各得 10 枚寓言币</text>
+        </view>
+      </view>
+      <text class="invite-arrow">›</text>
+    </button>
+  </view>
+</view>
+

@@ -1,0 +1,330 @@
+/* 侧边栏样式 - 极简美学 */
+
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+}
+
+/* 遮罩层 */
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mask.show {
+  opacity: 1;
+}
+
+/* 侧边栏内容 */
+.sidebar-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70%;
+  max-width: 560rpx;
+  height: 100%;
+  background: #F5F5F0;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+}
+
+.sidebar-content.show {
+  transform: translateX(0);
+}
+
+/* 未登录提示 */
+.login-prompt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60rpx 40rpx;
+}
+
+.login-icon {
+  font-size: 80rpx;
+  margin-bottom: 24rpx;
+}
+
+.login-text {
+  font-size: 28rpx;
+  font-weight: 300;
+  color: #666;
+  margin-bottom: 32rpx;
+}
+
+.login-btn-small {
+  width: 200rpx;
+  height: 72rpx;
+  background: #2C2C2C;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-btn-small::after {
+  border: none;
+}
+
+/* 用户区域 */
+.user-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 用户信息 */
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 48rpx 32rpx;
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #E8E8E3;
+}
+
+.avatar-wrapper {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  overflow: hidden;
+  margin-right: 24rpx;
+  border: 2rpx solid #E8E8E3;
+}
+
+.avatar {
+  width: 100%;
+  height: 100%;
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nickname {
+  font-size: 32rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  margin-bottom: 8rpx;
+}
+
+.phone {
+  font-size: 24rpx;
+  font-weight: 300;
+  color: #999;
+}
+
+/* 寓言币区域 */
+.coin-section {
+  padding: 32rpx;
+  background: #FFFFFF;
+  margin: 24rpx 0;
+}
+
+.coin-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.coin-label {
+  font-size: 28rpx;
+  font-weight: 300;
+  color: #666;
+}
+
+.coin-value-wrapper {
+  display: flex;
+  align-items: baseline;
+}
+
+.coin-value {
+  font-size: 56rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+}
+
+.coin-unit {
+  font-size: 24rpx;
+  font-weight: 300;
+  color: #999;
+  margin-left: 8rpx;
+}
+
+.coin-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.action-btn {
+  flex: 1;
+  height: 72rpx;
+  border-radius: 36rpx;
+  font-size: 26rpx;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  position: relative;
+}
+
+.action-btn::after {
+  border: none;
+}
+
+.action-btn.primary {
+  background: #2C2C2C;
+  color: #FFFFFF;
+}
+
+.action-btn.secondary {
+  background: #E8E8E3;
+  color: #666;
+}
+
+.first-charge-tag {
+  position: absolute;
+  top: -12rpx;
+  right: -8rpx;
+  background: #FF6B6B;
+  color: #FFFFFF;
+  font-size: 18rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 16rpx;
+}
+
+/* 消费记录 */
+.transactions-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 24rpx 32rpx;
+  border-bottom: 1rpx solid #E8E8E3;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+}
+
+.transactions-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 32rpx;
+}
+
+.transaction-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.trans-left {
+  display: flex;
+  align-items: center;
+}
+
+.trans-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.trans-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.trans-name {
+  font-size: 26rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  margin-bottom: 4rpx;
+}
+
+.trans-time {
+  font-size: 20rpx;
+  font-weight: 300;
+  color: #999;
+}
+
+.trans-right {
+  display: flex;
+  align-items: center;
+}
+
+.trans-amount {
+  font-size: 28rpx;
+  font-weight: 400;
+}
+
+.trans-amount.positive {
+  color: #4CAF50;
+}
+
+.trans-amount.negative {
+  color: #666;
+}
+
+.empty-transactions {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  font-weight: 300;
+  color: #999;
+}
+
+/* 底部版本 */
+.footer {
+  padding: 24rpx 32rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  text-align: center;
+  border-top: 1rpx solid #E8E8E3;
+  background: #FFFFFF;
+}
+
+.version {
+  font-size: 22rpx;
+  font-weight: 300;
+  color: #999;
+}
+

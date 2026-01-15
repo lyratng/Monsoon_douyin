@@ -1,0 +1,304 @@
+.container {
+  min-height: 100vh;
+  background: #F5F5F0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* 页面标题 */
+.header {
+  text-align: center;
+  padding: 40rpx 40rpx 0;
+}
+
+.title {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+}
+
+.subtitle {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 300;
+  color: #999;
+  letter-spacing: 1rpx;
+}
+
+/* 主内容区域 */
+.main-content {
+  flex: 1;
+  padding: 40rpx;
+  padding-bottom: 200rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* 上传区域 */
+.upload-section {
+  margin-bottom: 48rpx;
+}
+
+.upload-area {
+  width: 100%;
+  height: 600rpx;
+  background: #FFFFFF;
+  border: 2rpx dashed #E8E8E3;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.upload-area:active {
+  border-color: #2C2C2C;
+  background: #FAFAFA;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-icon {
+  font-size: 80rpx;
+  color: #CCCCCC;
+  font-weight: 200;
+  margin-bottom: 24rpx;
+}
+
+.upload-text {
+  font-size: 32rpx;
+  color: #666;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+  margin-bottom: 12rpx;
+}
+
+.upload-hint {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+}
+
+.change-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20rpx;
+  text-align: center;
+}
+
+.change-hint text {
+  font-size: 24rpx;
+  color: #FFFFFF;
+  font-weight: 300;
+}
+
+/* 提示说明 */
+.tips-section {
+  background: #FFFFFF;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 20rpx;
+  padding: 32rpx 40rpx;
+  box-sizing: border-box;
+}
+
+.tips-title {
+  display: block;
+  font-size: 28rpx;
+  color: #2C2C2C;
+  font-weight: 400;
+  margin-bottom: 20rpx;
+  letter-spacing: 1rpx;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.tip-item {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* 底部间距 */
+.bottom-spacing {
+  height: 40rpx;
+}
+
+/* 固定底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
+  background: #FFFFFF;
+  border-top: 1rpx solid #E8E8E3;
+  z-index: 100;
+}
+
+.secondary-button {
+  width: 180rpx;
+  height: 88rpx;
+  background: #F5F5F0;
+  border: 1rpx solid #E8E8E3 !important;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+  letter-spacing: 1rpx;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.secondary-button::after {
+  border: none !important;
+}
+
+.secondary-button:active {
+  background: #E8E8E3;
+}
+
+.analyze-btn {
+  flex: 1;
+  height: 88rpx;
+  background: #E8E8E3;
+  color: #999;
+  border: none !important;
+  border-radius: 44rpx;
+  font-size: 28rpx;
+  font-weight: 400;
+  letter-spacing: 2rpx;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.analyze-btn::after {
+  border: none !important;
+}
+
+.analyze-btn.active {
+  background: #2C2C2C;
+  color: #FFFFFF;
+}
+
+.analyze-btn.active:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.button-text {
+  font-size: 28rpx;
+  font-weight: 400;
+  letter-spacing: 1rpx;
+}
+
+/* 加载遮罩 */
+.analysis-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 3:4竖版比例的加载卡片 */
+.loading-modal {
+  width: 480rpx;
+  height: 640rpx;
+  background: #FFFFFF;
+  border-radius: 36rpx;
+  box-shadow: 0 24rpx 72rpx rgba(0, 0, 0, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 上半部分：图片区域（占75%高度） */
+.image-section {
+  width: 100%;
+  height: 75%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 轮播背景图片 */
+.carousel-bg-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  z-index: 1;
+  display: block;
+}
+
+/* 当前显示的图片 */
+.carousel-bg-loading.current {
+  opacity: 1;
+  z-index: 2;
+}
+
+/* 下半部分：文字区域（占25%高度） */
+.loading-content {
+  width: 100%;
+  height: 25%;
+  background: #F5F5F0;
+  border-radius: 0 0 36rpx 36rpx;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #2C2C2C;
+  font-weight: 400;
+  letter-spacing: 1rpx;
+  text-align: center;
+  line-height: 1.4;
+  padding: 0 20rpx;
+}

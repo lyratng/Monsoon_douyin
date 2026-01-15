@@ -1,13 +1,39 @@
 // 衣索寓言 - AI穿搭小程序
+const userUtils = require('./utils/user');
+
 App({
   onLaunch: function(options) {
     console.log('衣索寓言小程序启动', options);
     
-    // 初始化用户档案系统
+    // 初始化用户档案系统（本地）
     this.initUserProfile();
     
     // 检查是否首次使用
     this.checkFirstTimeUser();
+    
+    // 初始化服务端用户状态
+    userUtils.initUserState();
+    
+    // 处理分享参数（邀请人）
+    if (options && options.query && options.query.inviter) {
+      this.globalData.inviterOpenid = options.query.inviter;
+      console.log('检测到邀请人:', options.query.inviter);
+    }
+    
+    // 尝试静默登录
+    this.silentLogin();
+  },
+  
+  // 静默登录
+  silentLogin: function() {
+    userUtils.silentLogin().then(result => {
+      console.log('静默登录结果:', result);
+      this.globalData.serverUserInfo = result.user;
+      this.globalData.isServerLoggedIn = result.is_registered;
+      this.globalData.openid = result.openid;
+    }).catch(error => {
+      console.log('静默登录失败:', error.message);
+    });
   },
 
   onShow: function(options) {
@@ -89,7 +115,15 @@ App({
     isFirstTime: true,
     currentTestStep: 1,
     maxTestSteps: 16,
-    userProfile: null
+    userProfile: null,
+    // 服务端用户系统
+    openid: null,
+    serverUserInfo: null,
+    isServerLoggedIn: false,
+    inviterOpenid: null,
+    // 寓言币
+    coinBalance: 0,
+    isFirstCharge: true
   },
 
   // 获取用户档案

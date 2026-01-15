@@ -1,0 +1,312 @@
+/* 充值卡片样式 - 极简美学 */
+
+.recharge-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 遮罩层 */
+.mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mask.show {
+  opacity: 1;
+}
+
+/* 卡片内容 */
+.card-content {
+  position: relative;
+  width: 90%;
+  max-width: 640rpx;
+  background: #FFFFFF;
+  border-radius: 32rpx;
+  padding: 48rpx 40rpx;
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 16rpx 64rpx rgba(0, 0, 0, 0.15);
+}
+
+.card-content.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* 关闭按钮 */
+.close-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-icon {
+  font-size: 48rpx;
+  color: #999;
+  font-weight: 200;
+}
+
+/* 标题 */
+.card-header {
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+
+.card-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  margin-bottom: 12rpx;
+}
+
+.card-subtitle {
+  display: block;
+  font-size: 24rpx;
+  font-weight: 300;
+  color: #999;
+}
+
+/* 首充提示 */
+.first-charge-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%);
+  border-radius: 16rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.banner-icon {
+  font-size: 28rpx;
+  margin-right: 12rpx;
+}
+
+.banner-text {
+  font-size: 24rpx;
+  font-weight: 400;
+  color: #F57C00;
+}
+
+/* 充值选项 */
+.plans-container {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+.plan-item {
+  flex: 1;
+  background: #F5F5F0;
+  border: 2rpx solid #E8E8E3;
+  border-radius: 20rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.plan-item.selected {
+  background: #FFFFFF;
+  border-color: #2C2C2C;
+  box-shadow: 0 4rpx 16rpx rgba(44, 44, 44, 0.1);
+}
+
+.plan-item.has-tag {
+  padding-top: 36rpx;
+}
+
+/* 标签 */
+.plan-tag {
+  position: absolute;
+  top: -1rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2C2C2C;
+  color: #FFFFFF;
+  font-size: 18rpx;
+  font-weight: 300;
+  padding: 4rpx 16rpx;
+  border-radius: 0 0 12rpx 12rpx;
+}
+
+/* 价格 */
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 12rpx;
+}
+
+.price-symbol {
+  font-size: 24rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+}
+
+.price-value {
+  font-size: 48rpx;
+  font-weight: 300;
+  color: #2C2C2C;
+}
+
+/* 寓言币数量 */
+.plan-coins {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+}
+
+.coins-value {
+  font-size: 28rpx;
+  font-weight: 400;
+  color: #666;
+}
+
+.coins-unit {
+  font-size: 20rpx;
+  font-weight: 300;
+  color: #999;
+  margin-left: 4rpx;
+}
+
+/* 首充奖励 */
+.first-bonus {
+  margin-top: 8rpx;
+}
+
+.first-bonus text {
+  font-size: 20rpx;
+  font-weight: 400;
+  color: #FF6B6B;
+}
+
+/* 充值按钮 */
+.recharge-btn {
+  width: 100%;
+  height: 96rpx;
+  background: #2C2C2C;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  transition: all 0.3s ease;
+  box-shadow: 0 8rpx 32rpx rgba(44, 44, 44, 0.2);
+}
+
+.recharge-btn::after {
+  border: none;
+}
+
+.recharge-btn:active {
+  background: #1A1A1A;
+  transform: scale(0.98);
+}
+
+.recharge-btn.loading {
+  background: #666;
+  pointer-events: none;
+}
+
+/* 分割线 */
+.divider {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #E8E8E3;
+}
+
+.divider-text {
+  font-size: 22rpx;
+  font-weight: 300;
+  color: #999;
+  padding: 0 24rpx;
+}
+
+/* 邀请好友 - 使用 button 触发分享 */
+.invite-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F5F5F0;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  /* 重置 button 默认样式 */
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: normal;
+  font-size: inherit;
+}
+
+.invite-section::after {
+  border: none;
+}
+
+.invite-content {
+  display: flex;
+  align-items: center;
+}
+
+.invite-icon {
+  font-size: 40rpx;
+  margin-right: 16rpx;
+}
+
+.invite-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.invite-title {
+  font-size: 28rpx;
+  font-weight: 400;
+  color: #2C2C2C;
+  margin-bottom: 4rpx;
+}
+
+.invite-desc {
+  font-size: 22rpx;
+  font-weight: 300;
+  color: #999;
+}
+
+.invite-arrow {
+  font-size: 32rpx;
+  color: #999;
+}
+
+.invite-section:active {
+  background: #E8E8E3;
+}
+

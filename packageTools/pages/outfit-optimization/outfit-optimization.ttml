@@ -1,0 +1,81 @@
+<!-- 穿搭优化页面 -->
+<view class="container">
+  <!-- 页面标题 -->
+  <view class="header">
+    <text class="title">穿搭优化</text>
+    <text class="subtitle">上传一身穿搭，获取专属配饰推荐</text>
+  </view>
+
+  <!-- 主内容区域 -->
+  <scroll-view class="main-content" scroll-y="true">
+    <!-- 上传区域 -->
+    <view class="upload-section">
+      <view class="upload-area" bindtap="chooseImage">
+        <block wx:if="{{uploadedImage}}">
+          <image class="preview-image" src="{{uploadedImage}}" mode="aspectFill" />
+          <view class="change-hint">
+            <text>点击更换图片</text>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="upload-placeholder">
+            <text class="upload-icon">+</text>
+            <text class="upload-text">上传穿搭照片</text>
+            <text class="upload-hint">支持拍照或从相册选择</text>
+          </view>
+        </block>
+      </view>
+    </view>
+
+    <!-- 提示说明 -->
+    <view class="tips-section">
+      <text class="tips-title">拍照小贴士</text>
+      <view class="tips-list">
+        <text class="tip-item">• 确保照片包含完整的上半身和下半身穿搭</text>
+        <text class="tip-item">• 光线充足，服饰颜色清晰可辨</text>
+        <text class="tip-item">• 尽量保持站立姿势，展示整体效果</text>
+      </view>
+    </view>
+
+    <!-- 底部间距 -->
+    <view class="bottom-spacing"></view>
+  </scroll-view>
+
+  <!-- 固定底部操作栏 -->
+  <view class="bottom-bar">
+    <!-- 历史记录按钮 -->
+    <button class="secondary-button" bindtap="goToHistory">
+      <text class="button-text">历史</text>
+    </button>
+    
+    <!-- 分析按钮 -->
+    <button 
+      class="analyze-btn {{uploadedImage ? 'active' : ''}}" 
+      bindtap="startAnalysis"
+      disabled="{{!uploadedImage}}"
+    >
+      <text class="button-text">开始分析</text>
+    </button>
+  </view>
+
+  <!-- 加载遮罩 - 覆盖在原页面上 -->
+  <view wx:if="{{isLoading}}" class="analysis-loading">
+    <view class="loading-modal">
+      <!-- 上半部分：图片轮播 -->
+      <view class="image-section">
+        <image 
+          wx:for="{{backgroundImages}}" 
+          wx:key="*this"
+          class="carousel-bg-loading {{index === currentBgIndex ? 'current' : ''}}"
+          src="{{item}}"
+          mode="aspectFill"
+        />
+      </view>
+      
+      <!-- 下半部分：文字区域 -->
+      <view class="loading-content">
+        <text class="loading-text">{{loadingText}}</text>
+      </view>
+    </view>
+  </view>
+</view>

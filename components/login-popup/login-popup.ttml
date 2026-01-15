@@ -1,0 +1,58 @@
+<!-- 登录弹窗组件 -->
+<view class="login-popup-container" tt:if="{{show}}">
+  <!-- 遮罩层 -->
+  <view class="mask {{animationClass}}" bindtap="handleMaskClick"></view>
+  
+  <!-- 弹窗内容 -->
+  <view class="popup-content {{animationClass}}" catchtap="handleContentClick">
+    <!-- 关闭按钮 -->
+    <view class="close-btn" bindtap="handleLater">
+      <text class="close-icon">×</text>
+    </view>
+    
+    <!-- Logo 或图标 -->
+    <view class="logo-area">
+      <view class="logo-circle">
+        <text class="logo-text">衣</text>
+      </view>
+    </view>
+    
+    <!-- 标题 -->
+    <view class="title-area">
+      <text class="main-title">欢迎来到衣索寓言</text>
+      <text class="sub-title">授权登录，开启你的穿搭之旅</text>
+    </view>
+    
+    <!-- 抖音用户信息授权登录（主要方式） -->
+    <button 
+      class="login-btn primary {{isLoading ? 'loading' : ''}}"
+      bindtap="handleDouyinLogin"
+      disabled="{{isLoading}}"
+    >
+      <text tt:if="{{!isLoading}}">🎵 抖音授权登录</text>
+      <text tt:else>登录中...</text>
+    </button>
+    
+    <!-- 手机号快捷登录（上线后申请能力） -->
+    <button 
+      class="login-btn secondary"
+      open-type="getPhoneNumber"
+      bindgetphonenumber="handleGetPhoneNumber"
+      disabled="{{isLoading}}"
+      tt:if="{{enablePhoneLogin}}"
+    >
+      <text>📱 抖音手机号快捷登录</text>
+    </button>
+    
+    <!-- 提示文字 -->
+    <view class="tips-area">
+      <text class="tips-text">首次登录即赠送 10 枚寓言币</text>
+    </view>
+    
+    <!-- 稍后登录 -->
+    <view class="later-area" bindtap="handleLater">
+      <text class="later-text">稍后登录</text>
+    </view>
+  </view>
+</view>
+

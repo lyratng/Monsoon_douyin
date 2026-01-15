@@ -289,13 +289,13 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16rpx 40rpx 18rpx;
+  display: flex;
+  gap: 24rpx;
+  padding: 24rpx 40rpx;
+  padding-bottom: calc(24rpx + env(safe-area-inset-bottom));
   background: #FFFFFF;
   border-top: 1rpx solid #E8E8E3;
   z-index: 100;
-  display: flex;
-  align-items: flex-end;
-  gap: 16rpx;
 }
 
 .secondary-button {

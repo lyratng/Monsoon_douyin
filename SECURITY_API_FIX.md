@@ -1,4 +1,71 @@
-const express = require('express');
+# 安全检测API修复和部署指南
+
+## 🔍 问题诊断
+
+### 错误现象
+- 前端显示：`[图片安全检测] ❌ API响应异常`
+- HTTP状态码：`502 Bad Gateway`
+- 响应内容：`<html><head><title>502 Bad Gateway</title></head>...`
+
+### 问题原因
+502 Bad Gateway 错误表示：
+1. **Nginx可以接收请求**（说明域名和SSL配置正常）
+2. **但无法连接到后端Node.js服务**（localhost:3000）
+3. 可能的原因：
+   - Node.js服务没有运行
+   - Node.js服务崩溃了（可能因为之前的错误代码）
+   - 端口3000没有监听
+
+## ✅ 已修复的问题
+
+### 1. Token获取URL错误
+- ❌ 错误：`https://open.douyin.com/oauth/client_token/`
+- ✅ 正确：`https://developer.toutiao.com/api/apps/v2/token`
+
+### 2. Token请求参数格式错误
+- ❌ 错误：`client_key` 和 `client_secret`
+- ✅ 正确：`appid` 和 `secret`
+
+### 3. Token响应格式检查
+- ✅ 添加了 `err_no === 0` 检查
+- ✅ 改进了错误消息输出
+
+## 📋 部署步骤
+
+### 1. 连接到服务器
+```bash
+ssh root@8.209.210.83
+# 或使用配置的别名
+ssh monsoon-japan
+```
+
+### 2. 检查当前服务状态
+```bash
+# 检查PM2服务状态
+pm2 status
+
+# 查看服务日志（查看是否有错误）
+pm2 logs monsoon-api --lines 50
+
+# 检查端口3000是否在监听
+sudo ss -tlnp | grep 3000
+```
+
+### 3. 备份当前代码
+```bash
+cd /home/ecs-user/monsoon-api
+cp server.js server.js.backup.$(date +%Y%m%d_%H%M%S)
+```
+
+### 4. 部署修复后的代码
+
+**⚠️ 重要：使用Python heredoc方式写入文件，避免编码问题**
+
+```bash
+cd /home/ecs-user/monsoon-api
+
+python3 << 'PYEOF'
+code = '''const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
@@ -217,12 +284,193 @@ app.listen(PORT, function() {
   console.log('Server running on port ' + PORT);
   console.log('Content security enabled');
 });
+'''
+with open('/home/ecs-user/monsoon-api/server.js', 'w') as f:
+    f.write(code)
+print('✅ 代码已写入')
+PYEOF
+```
 
+### 5. 验证代码语法
+```bash
+node --check /home/ecs-user/monsoon-api/server.js
+```
 
+### 6. 启动服务（如果服务不存在）
+```bash
+# ⚠️ 重要：如果 pm2 restart monsoon-api 报错 "Process not found"
+# 说明服务从未启动过，需要先启动服务
 
+cd /home/ecs-user/monsoon-api
 
+# 启动服务
+pm2 start server.js --name monsoon-api
 
+# 设置开机自启
+pm2 startup
+pm2 save
 
+# 查看服务状态
+pm2 status
 
+# 查看实时日志
+pm2 logs monsoon-api --lines 20
+```
 
+### 7. 重启服务（如果服务已存在）
+```bash
+# 如果服务已存在，使用重启命令
+pm2 restart monsoon-api
+
+# 查看服务状态
+pm2 status
+
+# 查看实时日志
+pm2 logs monsoon-api --lines 20
+```
+
+### 8. 测试API
+```bash
+# 测试健康检查
+curl https://api.radiance.asia/health
+
+# 测试Token获取
+curl https://api.radiance.asia/api/content-security/token
+
+# 测试文本安全检测
+curl -X POST https://api.radiance.asia/api/content-security/text \
+  -H "Content-Type: application/json" \
+  -d '{"text":"测试文本"}'
+```
+
+### 9. 修复数据库模块错误（如果出现）
+
+**如果日志显示 `better-sqlite3` 模块版本不匹配错误**：
+
+```bash
+cd /home/ecs-user/monsoon-api
+
+# 重新编译 better-sqlite3 模块
+npm rebuild better-sqlite3
+
+# 或者重新安装
+npm install better-sqlite3 --build-from-source
+
+# 重启服务
+pm2 restart monsoon-api
+```
+
+**注意**：如果只需要安全检测API功能，可以暂时忽略数据库错误，因为安全检测API不依赖数据库。
+
+## 🚨 常见问题
+
+### 问题1：PM2中没有monsoon-api服务
+
+**现象**：
+```bash
+pm2 restart monsoon-api
+# [PM2][ERROR] Process or Namespace monsoon-api not found
+```
+
+**原因**：服务从未启动过，或者被删除了
+
+**解决方案**：
+```bash
+cd /home/ecs-user/monsoon-api
+pm2 start server.js --name monsoon-api
+pm2 save
+pm2 status
+```
+
+### 问题2：端口3000没有服务监听
+
+**检查方法**：
+```bash
+sudo ss -tlnp | grep 3000
+# 如果输出为空，说明没有服务在监听
+```
+
+**解决方案**：
+```bash
+# 检查PM2服务状态
+pm2 status
+
+# 如果monsoon-api不存在，启动它
+cd /home/ecs-user/monsoon-api
+pm2 start server.js --name monsoon-api
+
+# 确认端口监听
+sudo ss -tlnp | grep 3000
+# 应该看到类似：LISTEN 0 128 *:3000 *:* users:(("node",pid=xxx,fd=xx))
+```
+
+## 🔧 故障排查
+
+### 如果服务无法启动
+
+1. **检查代码语法**
+```bash
+node --check /home/ecs-user/monsoon-api/server.js
+```
+
+2. **手动运行查看错误**
+```bash
+cd /home/ecs-user/monsoon-api
+node server.js
+```
+
+3. **检查环境变量**
+```bash
+cat /home/ecs-user/monsoon-api/.env
+```
+
+4. **查看PM2日志**
+```bash
+pm2 logs monsoon-api --lines 100
+```
+
+5. **检查端口占用**
+```bash
+sudo ss -tlnp | grep 3000
+```
+
+### 如果仍然出现502错误
+
+1. **检查Nginx配置**
+```bash
+sudo nginx -t
+sudo tail -50 /var/log/nginx/error.log
+```
+
+2. **检查Nginx反向代理配置**
+```bash
+cat /etc/nginx/conf.d/radiance.conf
+```
+
+3. **重启Nginx**
+```bash
+sudo systemctl restart nginx
+```
+
+## 📝 修复总结
+
+### 修复内容
+1. ✅ Token获取URL：`https://developer.toutiao.com/api/apps/v2/token`
+2. ✅ Token请求参数：`appid` 和 `secret`（而不是 `client_key` 和 `client_secret`）
+3. ✅ Token响应检查：检查 `err_no === 0`
+4. ✅ 改进错误处理：更详细的错误消息
+
+### 预期结果
+- ✅ Token可以正常获取
+- ✅ 文本安全检测可以正常工作
+- ✅ 图片安全检测可以正常工作
+- ✅ 不再出现502错误
+
+## ⚠️ 注意事项
+
+1. **部署前务必备份**：`cp server.js server.js.backup`
+2. **使用Python heredoc方式**：避免编码问题
+3. **验证语法后再重启**：`node --check server.js`
+4. **查看日志确认**：`pm2 logs monsoon-api`
+5. **测试API功能**：确保所有端点正常工作
 

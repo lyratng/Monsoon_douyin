@@ -1,5 +1,6 @@
 // API配置和调用工具
 const ENV_CONFIG = require('../config/env');
+const { outfitKnowledge } = require('../config/outfitKnowledge');
 
 // 🔧 根据任务类型获取适合的模型
 function getModelForTask(taskType) {
@@ -1401,21 +1402,41 @@ async function checkTextSafety(text) {
         console.log('[文本安全检测] 📥 响应数据:', JSON.stringify(res.data));
         
         if (res.statusCode === 200 && res.data) {
+          // 检查后端返回的格式
           if (res.data.safe === true) {
             console.log('[文本安全检测] ✅ 抖音API检测通过');
             resolve({ safe: true, message: '检测通过' });
-          } else {
-            console.log('[文本安全检测] ❌ 抖音API检测拦截');
+          } else if (res.data.safe === false) {
+            // 后端明确返回safe:false，可能是内容违规或服务异常
+            console.log('[文本安全检测] ❌ 检测结果:', res.data.message || '未通过检测');
+            console.log('[文本安全检测] ❌ 详细信息:', res.data.details || '无');
             resolve({ safe: false, message: res.data.message || '您输入的内容可能包含敏感信息，请修改后重试' });
+          } else {
+            // 响应格式异常，缺少safe字段
+            console.error('[文本安全检测] ❌ API响应格式异常，缺少safe字段');
+            console.error('[文本安全检测] ❌ 完整响应:', JSON.stringify(res.data));
+            resolve({ safe: false, message: '安全检测服务响应异常，请稍后重试' });
           }
         } else {
           // 【严格模式】服务异常时必须拒绝，确保安全合规
-          console.log('[文本安全检测] ❌ API响应异常，严格模式拒绝');
-          resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试' });
+          console.error('[文本安全检测] ❌ API响应异常');
+          console.error('[文本安全检测] ❌ statusCode:', res.statusCode);
+          console.error('[文本安全检测] ❌ 响应数据:', JSON.stringify(res.data));
+          
+          // 特殊处理502错误（Bad Gateway - 后端服务未运行）
+          if (res.statusCode === 502) {
+            console.error('[文本安全检测] ❌ 502 Bad Gateway - 后端服务可能未运行或已崩溃');
+            resolve({ safe: false, message: '安全检测服务暂时不可用（服务器错误），请联系管理员', details: { statusCode: 502, error: 'Bad Gateway' } });
+          } else {
+            resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试', details: { statusCode: res.statusCode } });
+          }
         }
       },
       fail: (error) => {
-        console.error('[文本安全检测] ❌ 网络错误:', JSON.stringify(error));
+        console.error('[文本安全检测] ❌ 网络请求失败');
+        console.error('[文本安全检测] ❌ 错误对象:', JSON.stringify(error));
+        console.error('[文本安全检测] ❌ 错误信息:', error.errMsg || error.message || '未知错误');
+        console.error('[文本安全检测] ❌ 请求URL:', `${SECURITY_API_BASE}/text`);
         // 【严格模式】网络错误时必须拒绝，确保安全合规
         console.log('[文本安全检测] ❌ 网络异常，严格模式拒绝');
         resolve({ safe: false, message: '网络异常，无法完成安全检测，请稍后重试' });
@@ -1478,22 +1499,41 @@ async function checkImageSafety(imageData, imageUrl, isSampleImage = false) {
         console.log('=====================================================');
         
         if (res.statusCode === 200 && res.data) {
+          // 检查后端返回的格式
           if (res.data.safe === true) {
             console.log('[图片安全检测] ✅ 抖音API检测通过');
             resolve({ safe: true, message: '检测通过' });
-          } else {
-            // 【严格模式】只要不是明确的safe:true，都拒绝
-            console.log('[图片安全检测] ❌ 抖音API检测拦截或异常');
+          } else if (res.data.safe === false) {
+            // 后端明确返回safe:false，可能是内容违规或服务异常
+            console.log('[图片安全检测] ❌ 检测结果:', res.data.message || '未通过检测');
+            console.log('[图片安全检测] ❌ 详细信息:', res.data.details || '无');
             resolve({ safe: false, message: res.data.message || '您上传的图片未通过安全检测，请更换图片后重试' });
+          } else {
+            // 响应格式异常，缺少safe字段
+            console.error('[图片安全检测] ❌ API响应格式异常，缺少safe字段');
+            console.error('[图片安全检测] ❌ 完整响应:', JSON.stringify(res.data));
+            resolve({ safe: false, message: '安全检测服务响应异常，请稍后重试' });
           }
         } else {
           // 【严格模式】服务异常时必须拒绝
-          console.log('[图片安全检测] ❌ API响应异常，严格模式拒绝');
-          resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试' });
+          console.error('[图片安全检测] ❌ API响应异常');
+          console.error('[图片安全检测] ❌ statusCode:', res.statusCode);
+          console.error('[图片安全检测] ❌ 响应数据:', JSON.stringify(res.data));
+          
+          // 特殊处理502错误（Bad Gateway - 后端服务未运行）
+          if (res.statusCode === 502) {
+            console.error('[图片安全检测] ❌ 502 Bad Gateway - 后端服务可能未运行或已崩溃');
+            resolve({ safe: false, message: '安全检测服务暂时不可用（服务器错误），请联系管理员', details: { statusCode: 502, error: 'Bad Gateway' } });
+          } else {
+            resolve({ safe: false, message: '安全检测服务暂时不可用，请稍后重试', details: { statusCode: res.statusCode } });
+          }
         }
       },
       fail: (error) => {
-        console.error('[图片安全检测] ❌ 网络错误:', JSON.stringify(error));
+        console.error('[图片安全检测] ❌ 网络请求失败');
+        console.error('[图片安全检测] ❌ 错误对象:', JSON.stringify(error));
+        console.error('[图片安全检测] ❌ 错误信息:', error.errMsg || error.message || '未知错误');
+        console.error('[图片安全检测] ❌ 请求URL:', requestUrl);
         // 【严格模式】网络错误时必须拒绝
         console.log('[图片安全检测] ❌ 网络异常，严格模式拒绝');
         resolve({ safe: false, message: '网络异常，无法完成安全检测，请稍后重试' });
@@ -1579,6 +1619,273 @@ async function checkImageSafetyFromFile(filePath, isSampleImage = false) {
   });
 }
 
+// ==================== 穿搭优化功能 API ====================
+
+/**
+ * 分析穿搭图片，识别服饰和配饰
+ * @param {string} base64Image - base64编码的图片
+ * @returns {Promise<Object>} 穿搭分析结果
+ */
+async function analyzeOutfitImage(base64Image) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  const prompt = `你是一个专业的穿搭分析师。请仔细分析这张穿搭照片，识别出用户当前穿着的所有服饰和配饰。
+
+请严格按照以下JSON格式输出，不要输出任何其他内容：
+
+{
+  "outfit_analysis": {
+    "top": {
+      "type": "上衣类型（如：衬衫/T恤/毛衣/卫衣/西装外套等）",
+      "color": "颜色",
+      "material": "材质（如能识别）",
+      "fit": "版型（如：修身/宽松/oversize等）",
+      "features": ["特征1", "特征2"]
+    },
+    "bottom": {
+      "type": "下装类型（如：牛仔裤/西裤/裙子/短裤等）",
+      "color": "颜色",
+      "material": "材质",
+      "fit": "版型（如：直筒/阔腿/紧身/A字等）",
+      "features": ["特征1", "特征2"]
+    },
+    "shoes": {
+      "type": "鞋子类型",
+      "color": "颜色",
+      "style": "风格",
+      "detected": true或false
+    },
+    "accessories": {
+      "bag": { "type": "包的类型", "color": "颜色", "detected": true或false },
+      "belt": { "type": "腰带类型", "color": "颜色", "detected": true或false },
+      "necklace": { "type": "项链类型", "detected": true或false },
+      "earrings": { "type": "耳环类型", "detected": true或false },
+      "bracelet": { "type": "手链类型", "detected": true或false },
+      "watch": { "type": "手表类型", "detected": true或false },
+      "ring": { "type": "戒指类型", "detected": true或false },
+      "hat": { "type": "帽子类型", "detected": true或false },
+      "glasses": { "type": "眼镜类型", "detected": true或false },
+      "scarf": { "type": "围巾类型", "detected": true或false }
+    }
+  }
+}
+
+注意：
+1. 如果某个配饰未检测到，detected设为false，type设为null
+2. 重点关注top和bottom的详细特征，这是搭配的主体
+3. 尽可能准确描述颜色和材质
+4. 如果图片中没有检测到完整穿搭（如只有物品没有人），请在返回的JSON中添加 "error": "未检测到完整穿搭"`;
+
+  try {
+    console.log('🔍 [穿搭分析] 开始分析穿搭图片');
+    const result = await callVolcengineVisionAPI(base64Image, prompt, apiKey);
+    
+    // 检查是否有错误
+    if (result && result.error) {
+      console.log('🔍 [穿搭分析] 检测到错误:', result.error);
+      return { success: false, error: result.error };
+    }
+    
+    console.log('🔍 [穿搭分析] 分析完成');
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('🔍 [穿搭分析] 分析失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 生成配饰推荐
+ * @param {Object} outfitAnalysis - 穿搭分析结果
+ * @param {string} knowledgeBase - 知识库内容
+ * @returns {Promise<Object>} 配饰推荐结果
+ */
+async function generateAccessoryRecommendations(outfitAnalysis, knowledgeBase) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  const prompt = `你是一位资深时尚造型师，擅长穿搭配饰搭配和细节优化。
+
+## 用户当前穿搭
+${JSON.stringify(outfitAnalysis, null, 2)}
+
+## 搭配知识库
+${knowledgeBase}
+
+## 你的任务
+根据用户当前的穿搭，推荐5个配饰单品和3个穿搭优化技巧。
+
+## 匹配规则（按优先级）
+1. 优先匹配衣服的种类（如：衬衫、T恤、西装等）
+2. 其次匹配颜色
+3. 再其次匹配材质
+4. 最后考虑版型/廓形
+
+## 要求
+- 尽量从知识库中匹配推荐
+- 如果知识库中没有完全对应的规则，请根据你的时尚专业知识灵活推荐
+- 配饰推荐要具体到单品（如"棕色真皮腰带，金色方扣"而不是"腰带"）
+- 穿搭技巧要实用可操作
+- 保证整体搭配有品位、协调统一
+
+## 输出格式（严格JSON）
+{
+  "accessories": [
+    {
+      "category": "配饰类别（如：腰带/包/项链/耳环/手表/眼镜等）",
+      "recommendation": "具体推荐单品描述",
+      "reason": "推荐理由（简短）"
+    }
+  ],
+  "styling_tips": [
+    {
+      "tip": "具体操作技巧",
+      "effect": "能达到的效果"
+    }
+  ]
+}
+
+只输出JSON，不要有其他文字。`;
+
+  try {
+    console.log('💡 [配饰推荐] 开始生成配饰推荐');
+    
+    await rateLimit();
+    lastApiCallTime = Date.now();
+
+    const res = await apiRequestWithRetry({
+      url: `${CONFIG.OPENAI_BASE_URL}/chat/completions`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      timeout: CONFIG.TIMEOUT,
+      data: {
+        model: CONFIG.TEXT_MODEL,
+        messages: [
+          { role: 'user', content: prompt }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7
+      }
+    });
+
+    if (res.data && res.data.choices && res.data.choices.length > 0) {
+      let content = res.data.choices[0].message.content;
+      content = cleanMarkdownJSON(content);
+      
+      try {
+        const result = JSON.parse(content);
+        console.log('💡 [配饰推荐] 生成完成');
+        return { success: true, data: result };
+      } catch (parseError) {
+        console.error('💡 [配饰推荐] JSON解析失败:', parseError);
+        return { success: false, error: 'JSON解析失败' };
+      }
+    }
+    
+    return { success: false, error: 'API返回数据异常' };
+  } catch (error) {
+    console.error('💡 [配饰推荐] 生成失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 生成优化后的穿搭图片（图生图）
+ * @param {string} base64Image - 原图的base64编码
+ * @param {Array} accessories - 配饰推荐列表
+ * @param {Array} stylingTips - 穿搭技巧列表
+ * @returns {Promise<string>} 生成图片的URL
+ */
+async function generateOptimizedOutfitImage(base64Image, accessories, stylingTips) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    throw new Error('API Key未配置');
+  }
+
+  // 构建图生图的prompt
+  const accessoriesText = accessories.map(a => `- ${a.recommendation}`).join('\n');
+  const tipsText = stylingTips.map(t => `- ${t.tip}`).join('\n');
+  
+  const prompt = `基于这张穿搭照片，为模特添加以下配饰和造型调整：
+
+配饰：
+${accessoriesText}
+
+造型调整：
+${tipsText}
+
+要求：
+- 保持原图人物姿态和背景不变
+- 自然地添加配饰，不要突兀
+- 整体风格协调统一
+- 高质量时尚穿搭照片风格`;
+
+  try {
+    console.log('🎨 [图生图] 开始生成优化后的穿搭图片');
+    console.log('🎨 [图生图] Prompt:', prompt);
+    
+    await rateLimit();
+    lastApiCallTime = Date.now();
+
+    // 尝试使用data URI格式传递图片
+    const imageDataUri = `data:image/jpeg;base64,${base64Image}`;
+
+    const res = await apiRequestWithRetry({
+      url: `${CONFIG.OPENAI_BASE_URL}/images/generations`,
+      method: 'POST',
+      header: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      timeout: 120000, // 图片生成可能需要较长时间
+      data: {
+        model: CONFIG.IMAGE_GEN_MODEL,
+        prompt: prompt,
+        image: imageDataUri, // 使用data URI格式
+        sequential_image_generation: "disabled",
+        response_format: "url",
+        size: "2K", // 使用官方推荐的2K尺寸
+        stream: false,
+        watermark: true
+      }
+    });
+
+    console.log('🎨 [图生图] API响应:', JSON.stringify(res.data).substring(0, 500));
+
+    if (res.data && res.data.data && res.data.data.length > 0) {
+      const imageUrl = res.data.data[0].url;
+      console.log('🎨 [图生图] 生成成功，URL:', imageUrl);
+      return { success: true, imageUrl: imageUrl };
+    }
+    
+    return { success: false, error: 'API返回数据异常' };
+  } catch (error) {
+    console.error('🎨 [图生图] 生成失败:', error);
+    // 如果data URI方式失败，返回错误信息
+    return { success: false, error: error.message || '图片生成失败' };
+  }
+}
+
+/**
+ * 读取知识库
+ * 直接从JS模块导入，修改 config/outfitKnowledge.js 文件即可生效
+ * @returns {Promise<string>} 知识库内容
+ */
+function loadOutfitKnowledge() {
+  return new Promise((resolve) => {
+    console.log('📚 [知识库] 从JS模块加载成功');
+    resolve(outfitKnowledge);
+  });
+}
+
 module.exports = {
   analyzeImage,
   generateStyleReport,
@@ -1591,5 +1898,10 @@ module.exports = {
   // 内容安全检测
   checkTextSafety,
   checkImageSafety,
-  checkImageSafetyFromFile
+  checkImageSafetyFromFile,
+  // 穿搭优化功能
+  analyzeOutfitImage,
+  generateAccessoryRecommendations,
+  generateOptimizedOutfitImage,
+  loadOutfitKnowledge
 };

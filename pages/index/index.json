@@ -1,4 +1,9 @@
 {
   "navigationStyle": "default",
-  "enablePullDownRefresh": false
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "login-popup": "/components/login-popup/login-popup",
+    "sidebar": "/components/sidebar/sidebar",
+    "recharge-card": "/components/recharge-card/recharge-card"
+  }
 }

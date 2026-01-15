@@ -4,7 +4,7 @@ Page({
     currentStep: 1,
     totalSteps: 16,
     isLoading: false,
-    loadingText: 'AI正在为您生成专属风格报告...', // 加载文字
+    loadingText: 'AI正在为您生成专属风格报告', // 加载文字
     stepAnimationClass: '', // 控制页面动画：'fade-in' | 'fade-out' | ''
     
     // 加载轮播相关
@@ -376,42 +376,27 @@ Page({
         
         console.log('📸 原始图片路径:', imagePath);
         
-        // 进一步压缩图片以避免413错误
+        // 显示安全检测中的提示
+        tt.showLoading({
+          title: '正在检测图片...',
+          mask: true
+        });
+        
+        // 进一步压缩图片
         tt.compressImage({
           src: imagePath,
           quality: 60, // 压缩质量60%，大幅减小体积
           success: function(compressRes) {
             const compressedPath = compressRes.tempFilePath;
             console.log('✅ 图片压缩成功');
-            console.log('   压缩后路径:', compressedPath);
             
-            self.setData({
-              uploadedImage: compressedPath
-            });
-            
-            // 立即显示上传成功，用户可以进入下一步
-            tt.showToast({
-              title: '照片上传成功',
-              icon: 'success'
-            });
-            
-            // 在后台开始分析（不阻塞用户操作）
-            self.analyzeImageInBackground(compressedPath);
+            // 【关键】先进行安全检测，通过后才显示图片
+            self.checkImageSafetyFirst(compressedPath);
           },
           fail: function(compressError) {
-            // 如果压缩失败，使用原图
+            // 如果压缩失败，使用原图进行安全检测
             console.warn('⚠️ 图片压缩失败，使用原图:', compressError);
-            
-            self.setData({
-              uploadedImage: imagePath
-            });
-            
-            tt.showToast({
-              title: '照片上传成功',
-              icon: 'success'
-            });
-            
-            self.analyzeImageInBackground(imagePath);
+            self.checkImageSafetyFirst(imagePath);
           }
         });
       },
@@ -425,35 +410,68 @@ Page({
     });
   },
 
-  // 后台分析图片（不阻塞用户操作，无前端动效）
-  analyzeImageInBackground: function(imagePath) {
+  // 【新增】先进行图片安全检测，通过后才允许展示
+  checkImageSafetyFirst: function(imagePath) {
     var self = this;
-    // 移除isLoading状态设置，不显示任何加载动效
-    
     const api = require('../../utils/api');
     
-    // 先进行内容安全检测
+    console.log('🔒 [安全检测] 开始检测图片...');
+    
     api.checkImageSafetyFromFile(imagePath)
       .then(function(safetyResult) {
+        tt.hideLoading();
+        
         if (!safetyResult.safe) {
           console.log('[安全检测] ❌ 照片未通过安全检测:', safetyResult.message);
-          // 清除已上传的图片
-          self.setData({
-            uploadedImage: ''
-          });
+          // 不展示图片，直接提示用户
           tt.showModal({
             title: '图片检测未通过',
             content: safetyResult.message || '您上传的图片未通过安全检测，请更换图片后重试',
             showCancel: false
           });
-          return Promise.reject(new Error('图片安全检测未通过'));
+          return;
         }
-        console.log('[安全检测] ✅ 照片安全检测通过');
-        // 安全检测通过后，继续进行AI分析
-        return api.analyzeImage(imagePath, self.data.wristColor);
+        
+        console.log('[安全检测] ✅ 照片安全检测通过，允许展示');
+        
+        // 安全检测通过，才设置图片并显示
+        self.setData({
+          uploadedImage: imagePath
+        });
+        
+        tt.showToast({
+          title: '照片上传成功',
+          icon: 'success'
+        });
+        
+        // 继续进行AI分析（不阻塞用户操作）
+        self.analyzeImageInBackground(imagePath);
       })
+      .catch(function(error) {
+        tt.hideLoading();
+        console.error('[安全检测] 检测失败:', error);
+        
+        // 检测失败时也不允许显示图片
+        tt.showModal({
+          title: '检测失败',
+          content: '图片安全检测失败，请重试',
+          showCancel: false
+        });
+      });
+  },
+
+  // 后台分析图片（不阻塞用户操作，无前端动效）
+  // 注意：安全检测已在 checkImageSafetyFirst 中完成，此处只做AI分析
+  analyzeImageInBackground: function(imagePath) {
+    var self = this;
+    const api = require('../../utils/api');
+    
+    console.log('🔍 [AI分析] 开始后台分析图片...');
+    
+    // 直接进行AI分析（安全检测已在上传时完成）
+    api.analyzeImage(imagePath, self.data.wristColor)
       .then(function(result) {
-        if (!result) return; // 如果安全检测未通过，这里result为undefined
+        if (!result) return;
         // 静默保存分析结果，不显示Toast，不更改UI状态
         self.setData({
           colorAnalysisResult: result
@@ -734,7 +752,7 @@ Page({
     var self = this;
     this.setData({ 
       isLoading: true,
-      loadingText: 'AI正在为您生成专属风格报告...'
+      loadingText: 'AI正在为您生成专属风格报告'
     });
     
     // 开始背景轮播
@@ -829,7 +847,7 @@ Page({
     var self = this;
     
     this.setData({ 
-      loadingText: 'AI正在为您生成专属风格报告...'
+      loadingText: 'AI正在为您生成专属风格报告'
     });
     
     console.log('🚀 开始并行生成：报告 + 专属形象');

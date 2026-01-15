@@ -2,7 +2,9 @@
   "pages": [
     "pages/index/index",
     "pages/chat/chat",
+    "pages/exclusive-advice/exclusive-advice",
     "pages/item-suggestion/item-suggestion",
+    "pages/item-history/item-history",
     "pages/guide/guide",
     "pages/test/test"
   ],
@@ -19,7 +21,9 @@
       "name": "tools",
       "pages": [
         "pages/item-result/item-result",
-        "pages/item-history/item-history"
+        "pages/outfit-optimization/outfit-optimization",
+        "pages/outfit-result/outfit-result",
+        "pages/outfit-history/outfit-history"
       ]
     },
     {
@@ -39,7 +43,7 @@
         "report"
       ]
     },
-    "pages/item-suggestion/item-suggestion": {
+    "pages/exclusive-advice/exclusive-advice": {
       "network": "all",
       "packages": [
         "tools"
@@ -74,8 +78,8 @@
         "selectedIconPath": "/assets/images/tabbar/chat-active.png"
       },
       {
-        "pagePath": "pages/item-suggestion/item-suggestion",
-        "text": "单品建议",
+        "pagePath": "pages/exclusive-advice/exclusive-advice",
+        "text": "专属建议",
         "iconPath": "/assets/images/tabbar/item-normal.png",
         "selectedIconPath": "/assets/images/tabbar/item-active.png"
       }

@@ -1,4 +1,6 @@
 // 主页 - 个人风格报告入口
+const userUtils = require('../../utils/user');
+
 Page({
   data: {
     hasReport: false,
@@ -11,14 +13,31 @@ Page({
     capsuleInfo: null,
     showGPT5Test: false, // 控制GPT5测试按钮显示
     titleClickCount: 0, // 标题点击次数
-    firstClickTime: 0 // 第一次点击的时间戳
+    firstClickTime: 0, // 第一次点击的时间戳
+    // 用户系统相关
+    showLoginPopup: false,
+    showSidebar: false,
+    showRechargeCard: false,
+    inviterOpenid: '',
+    coinBalance: 0,
+    isFirstCharge: true,
+    serverUserInfo: null
   },
 
   onLoad: function(options) {
-    console.log('个人风格报告页面加载');
+    console.log('个人风格报告页面加载', options);
     
     // 获取系统信息以处理状态栏和胶囊位置
     this.getSystemInfo();
+    
+    // 处理邀请参数
+    if (options && options.inviter) {
+      console.log('检测到邀请人:', options.inviter);
+      this.setData({ inviterOpenid: options.inviter });
+      // 保存到全局
+      const app = getApp();
+      app.globalData.inviterOpenid = options.inviter;
+    }
     
     // 检查是否需要显示极简初始页面
     if (options && options.showInitial === 'true') {
@@ -29,6 +48,9 @@ Page({
     } else {
       this.checkUserReport();
     }
+    
+    // 加载用户余额
+    this.loadUserBalance();
   },
 
   // 获取系统信息，用于全屏显示
@@ -81,6 +103,18 @@ Page({
     } else if (!this.data.showInitial) {
       this.checkUserReport();
     }
+    
+    // 检查是否需要显示充值卡片（从消费页面跳转过来）
+    if (app.globalData && app.globalData.showRechargeOnIndex) {
+      app.globalData.showRechargeOnIndex = false;
+      // 延迟显示，等待页面完全显示
+      setTimeout(() => {
+        this.setData({ showRechargeCard: true });
+      }, 300);
+    }
+    
+    // 刷新用户余额
+    this.loadUserBalance();
   },
 
   onHide: function() {
@@ -207,14 +241,6 @@ Page({
     });
   },
 
-  // 页面分享
-  onShareAppMessage: function() {
-    return {
-      title: '我发现了我的专属穿搭风格！',
-      path: '/pages/index/index'
-    };
-  },
-
   // 跳转到调试页面
   goToDebug: function() {
     tt.navigateTo({
@@ -276,6 +302,130 @@ Page({
     tt.navigateTo({
       url: '/packageDev/pages/gpt5-test/gpt5-test'
     });
+  },
+  
+  // ========== 用户系统相关方法 ==========
+  
+  // 加载用户余额
+  loadUserBalance: async function() {
+    // 检查是否已在服务器注册（不只是有 openid）
+    const app = getApp();
+    if (app.globalData.isServerLoggedIn || userUtils.isLoggedIn()) {
+      try {
+        const balanceData = await userUtils.getCoinBalance();
+        this.setData({
+          coinBalance: balanceData.balance,
+          isFirstCharge: balanceData.isFirstCharge
+        });
+      } catch (e) {
+        console.log('加载余额跳过（用户可能未注册）');
+      }
+    }
+  },
+  
+  // 打开侧边栏
+  openSidebar: function() {
+    this.setData({ showSidebar: true });
+  },
+  
+  // 关闭侧边栏
+  onSidebarClose: function() {
+    this.setData({ showSidebar: false });
+  },
+  
+  // 侧边栏点击登录
+  onSidebarLogin: function() {
+    this.setData({ 
+      showSidebar: false,
+      showLoginPopup: true 
+    });
+  },
+  
+  // 侧边栏点击充值
+  onSidebarRecharge: function() {
+    this.setData({ 
+      showSidebar: false,
+      showRechargeCard: true 
+    });
+  },
+  
+  // 登录成功回调
+  onLoginSuccess: function(e) {
+    console.log('登录成功:', e.detail);
+    const userData = e.detail;
+    this.setData({
+      serverUserInfo: userData,
+      coinBalance: userData.coins,
+      isFirstCharge: userData.is_first_charge
+    });
+    // 更新全局数据
+    const app = getApp();
+    app.globalData.serverUserInfo = userData;
+    app.globalData.isServerLoggedIn = true;
+    app.globalData.coinBalance = userData.coins;
+  },
+  
+  // 关闭登录弹窗
+  onLoginPopupClose: function() {
+    this.setData({ showLoginPopup: false });
+  },
+  
+  // 关闭充值卡片
+  onRechargeCardClose: function() {
+    this.setData({ showRechargeCard: false });
+  },
+  
+  // 充值成功回调
+  onRechargeSuccess: function(e) {
+    const { plan, result } = e.detail;
+    console.log('充值成功:', plan, result);
+    
+    // 刷新用户余额
+    this.loadUserBalance();
+    
+    // 关闭充值卡片
+    this.setData({ showRechargeCard: false });
+  },
+  
+  // 需要登录（从充值卡片触发）
+  onNeedLogin: function() {
+    this.setData({
+      showRechargeCard: false,
+      showLoginPopup: true
+    });
+  },
+  
+  // 邀请好友
+  onInviteFriends: function() {
+    const openid = userUtils.getOpenid();
+    if (!openid) {
+      // 未登录，先显示登录弹窗
+      this.setData({
+        showRechargeCard: false,
+        showSidebar: false,
+        showLoginPopup: true
+      });
+      return;
+    }
+    
+    // 触发分享
+    tt.showShareMenu({
+      withShareTicket: true,
+      menus: ['shareAppMessage']
+    });
+  },
+  
+  // 页面分享 - 带邀请参数
+  onShareAppMessage: function() {
+    const openid = userUtils.getOpenid();
+    let path = '/pages/index/index';
+    if (openid) {
+      path += '?inviter=' + openid;
+    }
+    return {
+      title: '发现你的专属穿搭风格！首次登录送10枚寓言币',
+      path: path
+    };
   }
 });
 

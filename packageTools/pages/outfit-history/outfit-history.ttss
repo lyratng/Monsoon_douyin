@@ -1,0 +1,120 @@
+.container {
+  min-height: 100vh;
+  background: #F5F5F0;
+  padding: 32rpx 40rpx;
+  box-sizing: border-box;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 240rpx;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #2C2C2C;
+  font-weight: 300;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+}
+
+/* 历史内容 */
+.history-content {
+  padding-bottom: 80rpx;
+}
+
+/* 历史列表 - 单列 */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+/* 历史卡片 - 横向布局 */
+.history-card {
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1rpx solid #E8E8E3;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  padding-right: 32rpx;
+}
+
+.history-card:active {
+  transform: scale(0.98);
+  background: #FAFAFA;
+}
+
+.card-image {
+  width: 160rpx;
+  height: 160rpx;
+  background: #F5F5F0;
+  flex-shrink: 0;
+}
+
+.card-body {
+  flex: 1;
+  padding: 24rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.card-date {
+  font-size: 26rpx;
+  color: #2C2C2C;
+  font-weight: 400;
+  letter-spacing: 0.5rpx;
+}
+
+.card-hint {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: 300;
+}
+
+.card-arrow {
+  font-size: 28rpx;
+  color: #CCCCCC;
+  font-weight: 300;
+  flex-shrink: 0;
+}
+
+/* 底部清空按钮 */
+.footer-action {
+  margin-top: 48rpx;
+  text-align: center;
+  padding: 24rpx;
+}
+
+.footer-text {
+  font-size: 24rpx;
+  color: #999;
+  font-weight: 300;
+  letter-spacing: 1rpx;
+}
+
+.footer-action:active .footer-text {
+  color: #2C2C2C;
+}

@@ -1,0 +1,90 @@
+<!-- 侧边栏组件 -->
+<view class="sidebar-container" tt:if="{{show}}">
+  <!-- 遮罩层 -->
+  <view class="mask {{animationClass}}" bindtap="handleMaskClick"></view>
+  
+  <!-- 侧边栏内容 -->
+  <view class="sidebar-content {{animationClass}}" catchtap="handleContentClick">
+    <!-- 未登录状态 -->
+    <view class="login-prompt" tt:if="{{!userInfo}}">
+      <view class="login-icon">👤</view>
+      <text class="login-text">登录后查看更多</text>
+      <button class="login-btn-small" bindtap="handleLogin">立即登录</button>
+    </view>
+    
+    <!-- 已登录状态 -->
+    <view class="user-section" tt:else>
+      <!-- 用户信息 -->
+      <view class="user-info">
+        <view class="avatar-wrapper">
+          <image 
+            class="avatar" 
+            src="{{userInfo.avatar || '/assets/images/default-avatar.png'}}" 
+            mode="aspectFill"
+          />
+        </view>
+        <view class="user-details">
+          <text class="nickname">{{userInfo.nickname || '寓言用户'}}</text>
+          <text class="phone" tt:if="{{userInfo.phone}}">{{userInfo.phone}}</text>
+        </view>
+      </view>
+      
+      <!-- 寓言币区域 -->
+      <view class="coin-section">
+        <view class="coin-display">
+          <text class="coin-label">寓言币</text>
+          <view class="coin-value-wrapper">
+            <text class="coin-value">{{coinBalance}}</text>
+            <text class="coin-unit">枚</text>
+          </view>
+        </view>
+        
+        <view class="coin-actions">
+          <button class="action-btn primary" bindtap="handleRecharge">
+            <text>充值</text>
+            <text class="first-charge-tag" tt:if="{{isFirstCharge}}">首充+5</text>
+          </button>
+          <button class="action-btn secondary" open-type="share">邀请好友得10币</button>
+        </view>
+      </view>
+      
+      <!-- 消费记录 -->
+      <view class="transactions-section">
+        <view class="section-header">
+          <text class="section-title">消费记录</text>
+        </view>
+        
+        <view class="transactions-list" tt:if="{{transactions.length > 0}}">
+          <view 
+            class="transaction-item" 
+            tt:for="{{transactions}}" 
+            tt:key="id"
+          >
+            <view class="trans-left">
+              <text class="trans-icon">{{item.type === 'consume' ? '💫' : item.type === 'recharge' ? '💰' : item.type === 'initial' ? '🎁' : item.type === 'first_bonus' ? '🎊' : item.type === 'invite_reward' ? '👥' : '🎉'}}</text>
+              <view class="trans-info">
+                <text class="trans-name">{{item.type_name}}</text>
+                <text class="trans-time">{{item.created_at}}</text>
+              </view>
+            </view>
+            <view class="trans-right">
+              <text class="trans-amount {{item.amount > 0 ? 'positive' : 'negative'}}">
+                {{item.amount > 0 ? '+' : ''}}{{item.amount}}
+              </text>
+            </view>
+          </view>
+        </view>
+        
+        <view class="empty-transactions" tt:else>
+          <text class="empty-text">暂无消费记录</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 底部版本信息 -->
+    <view class="footer">
+      <text class="version">衣索寓言 v2.0</text>
+    </view>
+  </view>
+</view>
+

@@ -1,0 +1,38 @@
+<view class="page-wrapper">
+  <!-- 背景图片层 -->
+  <image class="bg-image" src="/assets/images/exclusive-advice/bg.png" mode="widthFix" />
+
+  <!-- 内容层 -->
+  <view class="container">
+    <!-- 页面标题 -->
+    <view class="header">
+      <text class="title">专属建议</text>
+      <!-- <text class="subtitle">为你量身定制的穿搭方案</text> -->
+    </view>
+
+    <!-- 功能入口区域 -->
+    <view class="feature-grid">
+      <!-- 单品建议入口 -->
+      <view class="feature-card" bindtap="goToItemSuggestion">
+        <view class="card-main">
+          <text class="card-title">单品建议</text>
+          <text class="card-desc">上传衣服图片，智能分析和你的适配度</text>
+        </view>
+        <view class="card-arrow-wrap">
+          <text class="card-arrow">→</text>
+        </view>
+      </view>
+
+      <!-- 穿搭优化入口 -->
+      <view class="feature-card card-second" bindtap="goToOutfitOptimization">
+        <view class="card-main">
+          <text class="card-title">穿搭优化</text>
+          <text class="card-desc">智能推荐配饰 & 优化小技巧以增光添彩</text>
+        </view>
+        <view class="card-arrow-wrap">
+          <text class="card-arrow">→</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

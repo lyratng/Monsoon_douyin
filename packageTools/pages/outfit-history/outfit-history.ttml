@@ -1,0 +1,37 @@
+<!-- 穿搭优化历史页面 -->
+<view class="container">
+  <!-- 空状态 -->
+  <view wx:if="{{isEmpty}}" class="empty-state">
+    <view class="empty-content">
+      <text class="empty-text">暂无历史记录</text>
+      <text class="empty-hint">完成穿搭优化后，记录将显示在这里</text>
+    </view>
+  </view>
+
+  <!-- 历史列表 -->
+  <view wx:else class="history-content">
+    <!-- 历史卡片列表 - 单列横向布局 -->
+    <view class="history-list">
+      <view 
+        wx:for="{{historyList}}" 
+        wx:key="index" 
+        class="history-card"
+        bindtap="viewDetail" 
+        data-index="{{index}}"
+        bindlongpress="onLongPress"
+      >
+        <image class="card-image" src="{{item.originalImage}}" mode="aspectFill" />
+        <view class="card-body">
+          <text class="card-date">{{item.createTime || ''}}</text>
+          <text class="card-hint">点击查看详情</text>
+        </view>
+        <text class="card-arrow">→</text>
+      </view>
+    </view>
+
+    <!-- 底部清空按钮 -->
+    <view class="footer-action" bindtap="clearAll">
+      <text class="footer-text">清空全部记录</text>
+    </view>
+  </view>
+</view>

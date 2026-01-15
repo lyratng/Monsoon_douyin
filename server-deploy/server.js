@@ -3,6 +3,12 @@ const cors = require('cors');
 const axios = require('axios');
 require('dotenv').config();
 
+// 导入模块
+const { initDatabase, closeDB } = require('./database');
+const userRoutes = require('./routes/user');
+const coinsRoutes = require('./routes/coins');
+const paymentRoutes = require('./routes/payment');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -182,8 +188,21 @@ async function checkImageSafety(imageData, imageUrl = null) {
 
 // 健康检查
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    version: '2.1.0'
+  });
 });
+
+// 用户相关路由
+app.use('/api/user', userRoutes);
+
+// 寓言币相关路由
+app.use('/api/coins', coinsRoutes);
+
+// 支付相关路由
+app.use('/api/payment', paymentRoutes);
 
 // OpenAI/OpenRouter 代理
 app.post('/api/chat/completions', async (req, res) => {
@@ -265,10 +284,26 @@ app.get('/api/content-security/token', async (req, res) => {
   }
 });
 
-// 启动服务器
+// ========== 初始化数据库并启动服务器 ==========
+initDatabase();
+
 app.listen(PORT, () => {
-  console.log(`服务运行在 http://localhost:${PORT}`);
-  console.log('内容安全检测服务已启用');
+  console.log('='.repeat(50));
+  console.log('衣索寓言 API v2.1.0');
+  console.log('端口:', PORT);
+  console.log('功能: 内容安全、AI代理、用户系统、寓言币、支付');
+  console.log('='.repeat(50));
 });
 
+// 优雅关闭
+process.on('SIGINT', () => {
+  console.log('收到 SIGINT 信号，关闭数据库连接...');
+  closeDB();
+  process.exit(0);
+});
 
+process.on('SIGTERM', () => {
+  console.log('收到 SIGTERM 信号，关闭数据库连接...');
+  closeDB();
+  process.exit(0);
+});

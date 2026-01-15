@@ -1,0 +1,95 @@
+<!-- 穿搭优化结果页面 -->
+<view class="container">
+  <scroll-view class="scroll-content" scroll-y="true">
+    <!-- 图片对比区域 -->
+    <view class="image-comparison">
+      <view class="comparison-header">
+        <text class="comparison-title">穿搭对比</text>
+      </view>
+      <view class="image-row">
+        <!-- 原图 -->
+        <view class="image-box" bindtap="previewOriginal">
+          <text class="image-label">优化前</text>
+          <image class="compare-image" src="{{originalImage}}" mode="aspectFill" />
+        </view>
+        <!-- 优化后的图 -->
+        <view class="image-box" bindtap="previewOptimized">
+          <text class="image-label">优化后</text>
+          <block wx:if="{{hasOptimizedImage}}">
+            <image 
+              class="compare-image" 
+              src="{{optimizedImageUrl}}" 
+              mode="aspectFill" 
+              binderror="onOptimizedImageError"
+            />
+          </block>
+          <block wx:else>
+            <view class="no-image-placeholder">
+              <text class="placeholder-text">效果图生成中</text>
+              <text class="placeholder-hint">请参考下方文字建议</text>
+            </view>
+          </block>
+        </view>
+      </view>
+      <!-- 保存图片按钮 -->
+      <view class="save-actions">
+        <view class="save-btn" bindtap="saveOriginalImage">
+          <text class="save-text">保存原图</text>
+        </view>
+        <view class="save-btn {{hasOptimizedImage ? '' : 'disabled'}}" bindtap="saveOptimizedImage">
+          <text class="save-text">保存优化图</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 配饰推荐卡片 -->
+    <view class="report-card" wx:if="{{recommendations && recommendations.accessories}}">
+      <text class="card-title">配饰推荐</text>
+      <view class="accessory-list">
+        <view 
+          wx:for="{{recommendations.accessories}}" 
+          wx:key="index" 
+          class="accessory-item"
+        >
+          <view class="accessory-header">
+            <text class="accessory-category">{{item.category}}</text>
+          </view>
+          <text class="accessory-recommendation">{{item.recommendation}}</text>
+          <text class="accessory-reason">{{item.reason}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 穿搭技巧卡片 -->
+    <view class="report-card" wx:if="{{recommendations && recommendations.styling_tips}}">
+      <text class="card-title">穿搭技巧</text>
+      <view class="tips-list">
+        <view 
+          wx:for="{{recommendations.styling_tips}}" 
+          wx:key="index" 
+          class="tip-item"
+        >
+          <view class="tip-number">{{index + 1}}</view>
+          <view class="tip-content">
+            <text class="tip-text">{{item.tip}}</text>
+            <text class="tip-effect">{{item.effect}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI生成标识 -->
+    <view class="ai-disclaimer">
+      <text class="disclaimer-text">此报告由AI智能分析生成</text>
+    </view>
+
+    <!-- 底部空白 -->
+    <view style="height: 180rpx;"></view>
+  </scroll-view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <button class="action-btn secondary-btn" bindtap="retryAnalysis">重新分析</button>
+    <button class="action-btn primary-btn" bindtap="backToHome">返回主页</button>
+  </view>
+</view>
